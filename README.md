@@ -1,1 +1,1 @@
-# connector
+# Stock2Shop connectors
