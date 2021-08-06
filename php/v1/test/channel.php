@@ -20,7 +20,7 @@ if (!isset($options["channel_type"])) {
     exit();
 }
 
-// load channel via factory
+// Load channel factory
 $class = "\\stock2shop\\dal\\channels\\" . $options["channel_type"] . "\\Creator";
 $creator = new $class();
 $channel = $creator->getChannel();
