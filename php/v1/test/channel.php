@@ -2,15 +2,107 @@
 chdir(__DIR__);
 
 use \stock2shop\vo;
-use \stock2shop\dal\channel;
 use \stock2shop\dal\channels;
 
 // Autoload using composer
 $loader = require '../../vendor/autoload.php';
 $loader->add('stock2shop', __DIR__ . "/../");
 
-// check CLI input options
-$options    = getopt("", ["channel_type:"]);
+class Test {
+
+    function getChannel($type) {
+        $class   = "\\stock2shop\\dal\\channels\\" . $type . "\\Creator";
+        $creator = new $class();
+        return $creator->getChannel();
+    }
+
+    function loadChannelProducts() {
+        $json   = file_get_contents('data/syncChannelProducts.json');
+        $data   = json_decode($json, true);
+        $meta   = [
+            [
+                "key"   => "file.path",
+                "value" => __DIR__
+            ]
+        ];
+        return new vo\SyncChannelProducts(
+            [
+                "meta"             => $meta,
+                "channel_products" => $data,
+                "flag_map"         => []
+            ]
+        );
+    }
+
+    function verifySyncProductsResponse($channelProducts, $syncedProducts) {
+        print PHP_EOL;
+        if (count($channelProducts->channel_products) !== count($syncedProducts->channel_products)) {
+            throw new \Exception('failed to create');
+        }
+
+        /** @var vo\ChannelProduct $product */
+        foreach ($syncedProducts->channel_products as $key => $product) {
+            if (!$product->success) {
+                throw new \Exception('failed to set product->success');
+            }
+            if (!$product->synced) {
+                throw new \Exception('failed to set product->synced');
+            }
+            if (!vo\ChannelProduct::isValidSynced($product->synced)) {
+                throw new \Exception('Invalid product->synced date');
+            }
+            if (!$product->channel_product_code || $product->channel_product_code == "") {
+                throw new \Exception('failed to set product->channel_product_code');
+            }
+            print '-- product->channel_product_code ' . $product->channel_product_code  .PHP_EOL;
+            print '-- product->success ' . $product->success  .PHP_EOL;
+            print '-- product->synced ' . $product->synced  .PHP_EOL;
+            if(count($channelProducts->channel_products[$key]->variants) !== (count($product->variants))) {
+                throw new \Exception('incorrect variants');
+            }
+            foreach ($product->variants as $variant) {
+                if (!$variant->success) {
+                    throw new \Exception('failed to set variant->success');
+                }
+                if (!$variant->channel_variant_code || $variant->channel_variant_code == "") {
+                    throw new \Exception('failed to set variant->channel_variant_code');
+                }
+                print '---- variant->channel_variant_code ' . $variant->channel_variant_code  .PHP_EOL;
+                print '---- variant->success ' . $variant->success  .PHP_EOL;
+            }
+        }
+        print PHP_EOL . '--------------------------------------- '. PHP_EOL;
+    }
+
+    function verifyGetProductsByCodeResponse($channelProducts, $fetchedProducts) {
+        print PHP_EOL;
+        if (count($channelProducts->channel_products) !== count($fetchedProducts->channel_products)) {
+            throw new \Exception('failed to fetch');
+        }
+
+        /** @var vo\ChannelProduct $product */
+        foreach ($fetchedProducts->channel_products as $key => $product) {
+            if (!$product->channel_product_code || $product->channel_product_code == "") {
+                throw new \Exception('failed to set product->channel_product_code');
+            }
+            print '-- product->channel_product_code ' . $product->channel_product_code  .PHP_EOL;
+            if(count($channelProducts->channel_products[$key]->variants) !== (count($product->variants))) {
+                throw new \Exception('incorrect variants');
+            }
+            foreach ($product->variants as $variant) {
+                if (!$variant->channel_variant_code || $variant->channel_variant_code == "") {
+                    throw new \Exception('failed to set variant->channel_variant_code');
+                }
+                print '---- variant->channel_variant_code ' . $variant->channel_variant_code  .PHP_EOL;
+            }
+        }
+        print PHP_EOL . '--------------------------------------- '. PHP_EOL;
+    }
+}
+
+// Run tests
+// Check CLI input options
+$options = getopt("", ["channel_type:"]);
 if (!isset($options["channel_type"])) {
     print("Runs tests against specific channel type");
     print("" . PHP_EOL);
@@ -20,83 +112,34 @@ if (!isset($options["channel_type"])) {
     exit();
 }
 
-// Load channel factory
-$class = "\\stock2shop\\dal\\channels\\" . $options["channel_type"] . "\\Creator";
-$creator = new $class();
-$channel = $creator->getChannel();
+// Run tests
+$test = new Test();
+$channel = $test->getChannel('example');
 
-// Load test data
-$json   = file_get_contents('data/syncChannelProducts.json');
-$data   = json_decode($json, true);
-$meta   = [
-    [
-        "key"   => "file.path",
-        "value" => __DIR__
-    ]
-];
-$params = new vo\SyncChannelProducts(
-    [
-        "meta"             => $meta,
-        "channel_products" => $data,
-        "flag_map"         => []
-    ]
-);
+// SyncProducts to channel
+$channelProducts = $test->loadChannelProducts();
+$syncedProducts = $channel->syncProducts($channelProducts);
+$test->verifySyncProductsResponse($channelProducts, $syncedProducts);
 
-// sync products to channel
-$syncedProducts = $channel->syncProducts($params);
+// fetch products
+$channelProducts = $test->loadChannelProducts();
+$fetchedProducts = $channel->getProductsByCode($channelProducts);
+$test->verifyGetProductsByCodeResponse($channelProducts, $fetchedProducts);
 
-// fetch products from channel
-//$fetchedProducts = $connector->getProducts($params);
-//$fetchedProductsByCode = $connector->getProductsByCode($params);
-
-
-//// creates products
-//$p1 = new vo\ChannelProduct($data);
-//$syncedProducts = syncProducts(new channels\example\Creator(), [$p1], $metaItem);
-//$fetchedProducts = getProducts(new channels\example\Creator(), 1, 10, $metaItem);
-//$fetchedProductsByCode = getProductsByCode(new channels\example\Creator(), [$p1], $metaItem);
-
-if (count($syncedProducts->channel_products) !== 2) {
-    throw new \Exception('failed to create');
-} else {
-    print '2 products synced with channel' . PHP_EOL;
-}
-if (!$syncedProducts->channel_products[0]->success) {
-    throw new \Exception('failed to set success flag');
-} else {
-    print 'Success flags set' . PHP_EOL;
-}
-
-if ($syncedProducts->channel_products[0]->channel_product_code === "") {
-    throw new \Exception('failed to create');
-}
-if ($syncedProducts->channel_products[0]->synced === "") {
-    throw new \Exception('failed to create');
-}
-//if(count($fetchedProducts) !== 1) {
-//    throw new \Exception('failed to fetch');
-//}
-//if(count($fetchedProductsByCode) !== 1) {
-//    throw new \Exception('failed to fetch by code');
-//}
-
-//// delete products
-$params = new vo\SyncChannelProducts(
-    [
-        "meta"             => $meta,
-        "channel_products" => $data,
-        "flag_map"         => []
-    ]
-);
-foreach ($params->channel_products as $product) {
-    $product->delete = true;
-}
-$syncedProducts = $channel->syncProducts($params);
-if (count($syncedProducts->channel_products) !== 2) {
-    throw new \Exception('failed to delete');
-}
-foreach ($params->channel_products as $product) {
-    if (!$product->success) {
-        throw new \Exception('failed to create');
+// Change variant sku's to ensure old variants are removed and new ones created.
+$channelProducts = $test->loadChannelProducts();
+foreach ($channelProducts->channel_products as $product) {
+    foreach ($product->variants as $variant) {
+        $variant->sku .= "-1";
     }
 }
+$syncedProducts = $channel->syncProducts($channelProducts);
+$test->verifySyncProductsResponse($channelProducts, $syncedProducts);
+
+// Delete test products
+$channelProducts = $test->loadChannelProducts();
+foreach ($channelProducts->channel_products as $product) {
+    $product->delete = true;
+}
+$syncedProducts = $channel->syncProducts($channelProducts);
+$test->verifySyncProductsResponse($channelProducts, $syncedProducts);

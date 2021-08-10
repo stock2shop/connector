@@ -52,6 +52,18 @@ class ChannelProduct extends Product
     }
 
     /**
+     * @param string $date
+     * @return bool
+     */
+    static function isValidSynced(string $date): bool
+    {
+        $format   = 'Y-m-d H:i:s';
+        $d        = \DateTime::createFromFormat($format, $date);
+        $timezone = $d->getTimezone()->getName();
+        return $d && ($d->format($format) == $date) && ($timezone === 'UTC');
+    }
+
+    /**
      * Computes a hash of the ChannelProduct
      *
      * @return string

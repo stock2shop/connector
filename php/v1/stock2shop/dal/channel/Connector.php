@@ -21,10 +21,10 @@ interface Connector {
      * - channel_variant_code
      * - sku
      *
-     * @param array|ChannelProduct[] $channelProducts
-     * @return array|ChannelProduct[]
+     * @param SyncChannelProducts $syncChannelProducts
+     * @return SyncChannelProducts
      */
-    public function getProductsByCode(array $channelProducts): array;
+    public function getProductsByCode(SyncChannelProducts $SyncChannelProducts): SyncChannelProducts;
 
     /**
      *
