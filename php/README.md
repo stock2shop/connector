@@ -20,7 +20,7 @@ Clone repo
 git clone https://github.com/stock2shop/connector.git
 ```
 
-Project path
+Set project path
 
 ```bash
 export S2S_PHP_PATH=/your/path/to/stock2shop/connector/php/
@@ -35,13 +35,12 @@ You should see the output of the test results without any errors
 ### 3rd party / external libraries
 
 You may require the use of a 3rd party library.
-Load the library via composer.
+Load the library via composer and commit vendor files to your branch.
 
 We have certain libraries already loaded. 
 
 - GuzzleHTTP 6.2.3 Use this library for external API requests. 
 
-If you include additional libraries include the `vendor` files in the repos.
 Do not change the version of existing libraries.
 
 #### installing composer

@@ -4,6 +4,7 @@ namespace stock2shop\dal\channels\example;
 
 use stock2shop\dal\channel;
 use stock2shop\vo\ChannelProduct;
+use stock2shop\vo\ChannelProductGet;
 use stock2shop\vo\ChannelVariant;
 use stock2shop\vo\MetaItem;
 use stock2shop\vo\SyncChannelProducts;
@@ -11,7 +12,7 @@ use stock2shop\vo\SyncChannelProducts;
 class Connector implements channel\Connector
 {
 
-    const SEPARATOR = '~';
+    const DATA_PATH = __DIR__ . '/data';
 
     /**
      * Creates a file for each product and for each variant.
@@ -27,36 +28,37 @@ class Connector implements channel\Connector
      */
     public function syncProducts(SyncChannelProducts $params): SyncChannelProducts
     {
-        $map = MetaItem::getMap($params->meta);
-        $path = $map['file.path'];
-
+        // Example on how to load channel meta
+        // Separator is used when creating variant file names
+        $map  = MetaItem::getMap($params->meta);
+        $separator = $map['separator'];
         foreach ($params->channel_products as $product) {
-            $prefix = urlencode($product->source_product_code);
-            $productFileName =  $prefix . '.json';
+            $prefix          = urlencode($product->source_product_code);
+            $productFileName = $prefix . '.json';
 
             // create channel codes for product and variants
             $product->channel_product_code = $productFileName;
             foreach ($product->variants as $variant) {
-                $variant->channel_variant_code = $prefix . self::SEPARATOR . urlencode($variant->sku) . '.json';
+                $variant->channel_variant_code = $prefix . $separator . urlencode($variant->sku) . '.json';
             }
 
             // fetch current files for this prefix
-            $currentFiles = $this->getJSONFilesByPrefix($path, $prefix);
+            $currentFiles = $this->getJSONFilesByPrefix($prefix);
 
             // Remove product / variants if delete true
             if ($product->delete) {
                 foreach ($currentFiles as $currentFileName => $obj) {
-                    unlink($path . '/' . $currentFileName);
+                    unlink(self::DATA_PATH . '/' . $currentFileName);
                 }
             } else {
 
                 // create / update product
-                file_put_contents($path . '/' . $product->channel_product_code, json_encode($product));
+                file_put_contents(self::DATA_PATH . '/' . $product->channel_product_code, json_encode($product));
 
                 // Create / update variants
                 $variantsToKeep = [];
                 foreach ($product->variants as $variant) {
-                    $filePath = $path . '/' . $variant->channel_variant_code;
+                    $filePath = self::DATA_PATH . '/' . $variant->channel_variant_code;
                     if ($product->delete) {
                         unlink($filePath);
                     } else {
@@ -67,8 +69,8 @@ class Connector implements channel\Connector
 
                 // Remove old variants
                 foreach ($currentFiles as $fileName => $obj) {
-                    if(!in_array($fileName, $variantsToKeep) && strpos($fileName, self::SEPARATOR) !== false) {
-                        unlink($path . '/' . $fileName);
+                    if (!in_array($fileName, $variantsToKeep) && strpos($fileName, $separator) !== false) {
+                        unlink(self::DATA_PATH . '/' . $fileName);
                     }
                 }
             }
@@ -90,63 +92,76 @@ class Connector implements channel\Connector
      */
     public function getProductsByCode(SyncChannelProducts $params): SyncChannelProducts
     {
-        $map = MetaItem::getMap($params->meta);
-        $path = $map['file.path'];
         $channelProducts = [];
-        $channelVariants = [];
         foreach ($params->channel_products as $product) {
-            $prefix = urlencode($product->source_product_code);
-            $currentFiles = $this->getJSONFilesByPrefix($path, $prefix);
+            $prefix       = urlencode($product->source_product_code);
+            $currentFiles = $this->getJSONFilesByPrefix($prefix);
             foreach ($currentFiles as $fileName => $obj) {
-                if($fileName === $prefix . '.json') {
+                if ($fileName === $prefix . '.json') {
+
                     // This is a Product
-                    $channelProduct = new ChannelProduct([
+                    $channelProducts[] = new ChannelProduct([
                         "channel_product_code" => $obj->channel_product_code
                     ]);
                 } else {
 
                     // This is a Variant
-                    $channelVariants[] = new ChannelVariant(
+                    $channelProducts[count($channelProducts) -1]->variants[] = new ChannelVariant(
                         [
-                            "sku" => $obj->sku,
+                            "sku"                  => $obj->sku,
                             "channel_variant_code" => $obj->channel_variant_code
                         ]
                     );
                 }
             }
-            $channelProduct->variants = $channelVariants;
-            $channelProducts[] = $channelProduct;
         }
         $params->channel_products = $channelProducts;
         return $params;
     }
 
     /**
-     * @param int $page
+     * @param string $token
      * @param int $limit
-     * @return array|vo\ChannelProduct[]
+     * @param MetaItem[] $meta
+     * @return ChannelProductGet[]
      */
-    public function getProducts(int $page, int $limit): array
+    public function getProducts(string $token, int $limit, array $meta): array
     {
-        $path     = channel\Meta::get('file.path');
-        $files    = scandir($path);
-        $products = [];
-        foreach ($files as $file) {
-            if (substr($file, -5) === '.json') {
-                $contents       = file_get_contents($file);
-                $product        = json_decode($contents);
-                $channelProduct = new vo\ChannelProduct([
-                    'channel_product_code' => $product->channel_product_code
-                ]);
-                foreach ($product->variants as $variant) {
-                    $channelProduct->variants[] = new vo\ChannelVariant([
-                        'channel_variant_code' => $variant->channel_variant_code
+        $map  = MetaItem::getMap($meta);
+        $separator = $map['separator'];
+        $channelProducts = [];
+        $currentFiles = $this->getJSONFiles();
+
+        // Create paged results
+        $cnt = 1;
+        foreach ($currentFiles as $fileName => $obj) {
+            if(strcmp($token, $fileName) < 0) {
+                if(strpos($fileName, $separator) === false) {
+
+                    // This a product
+                    if($cnt > $limit) {
+                        break;
+                    }
+                    $channelProducts[] = new ChannelProductGet([
+                        "channel_product_code" => $obj->channel_product_code
                     ]);
+                    $cnt++;
+
+                } else {
+
+                    // This is a variant
+                    $channelProducts[count($channelProducts) - 1]->variants[] = new ChannelVariant(
+                        [
+                            "sku"                  => $obj->sku,
+                            "channel_variant_code" => $obj->channel_variant_code
+                        ]
+                    );
+                    $channelProducts[count($channelProducts) - 1]->token = $obj->channel_variant_code;
                 }
-                $products[] = $channelProduct;
+
             }
         }
-        return $products;
+        return $channelProducts;
     }
 
     public function getOrders(int $page, int $limit): array
@@ -165,13 +180,12 @@ class Connector implements channel\Connector
     }
 
     /**
-     * @param string $path
      * @param string $prefix
      * @return array
      */
-    private function getJSONFilesByPrefix(string $path, string $prefix): array
+    private function getJSONFilesByPrefix(string $prefix): array
     {
-        $files = $this->getJSONFiles($path);
+        $files = $this->getJSONFiles();
         $items = [];
         foreach ($files as $fileName => $obj) {
             if (strpos($fileName, $prefix) === 0) {
@@ -182,16 +196,16 @@ class Connector implements channel\Connector
     }
 
     /**
-     * @param string $path
      * @return array
      */
-    private function getJSONFiles(string $path): array
+    private function getJSONFiles(): array
     {
         $files     = [];
-        $fileNames = array_diff(scandir($path), array('..', '.'));
+        $fileNames = array_diff(scandir(self::DATA_PATH, SCANDIR_SORT_ASCENDING), array('..', '.'));
+        sort($fileNames);
         foreach ($fileNames as $file) {
             if (substr($file, -5) === '.json') {
-                $contents     = file_get_contents($file);
+                $contents     = file_get_contents(self::DATA_PATH . '/' . $file);
                 $files[$file] = json_decode($contents);
             }
         }
