@@ -3,6 +3,7 @@ namespace stock2shop\dal\channel;
 
 use stock2shop\vo\ChannelProduct;
 use stock2shop\vo\MetaItem;
+use stock2shop\vo\Order;
 use stock2shop\vo\SyncChannelProducts;
 use stock2shop\vo\GetChannelProduct;
 
@@ -78,11 +79,14 @@ interface Connector {
     public function getOrdersByCode(): array;
 
     /**
-     * TODO should return systemOrder VO
      *
-     * @param \stdClass $channelOrder
-     * @return mixed
+     * Transform should convert the order "webhook" sent by the
+     * channel into a "Order" object.
+     *
+     * @param \stdClass $webhookOrder
+     * @param MetaItem[] $meta
+     * @return Order
      */
-    public function transformOrder(\stdClass $channelOrder);
+    public function transformOrder(\stdClass $webhookOrder, array $meta): Order;
 }
 

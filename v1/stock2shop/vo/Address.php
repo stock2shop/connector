@@ -6,9 +6,6 @@ use stock2shop\base\ValueObject;
 
 class Address extends ValueObject
 {
-    /** @var int $customer_id */
-    public $customer_id;
-
     /** @var string $address1 */
     public $address1;
 
@@ -45,17 +42,8 @@ class Address extends ValueObject
     /** @var string $province_code */
     public $province_code;
 
-    /** @var int $client_id */
-    public $client_id;
-
-    /** @var string $address_code */
-    public $address_code;
-
     /** @var string $type */
     public $type;
-
-    /** @var bool $default */
-    public $default;
 
     /**
     * Creates the data object to spec.
@@ -66,7 +54,6 @@ class Address extends ValueObject
     */
     public function __construct(array $data)
     {
-        $this->customer_id = self::intFrom($data, 'customer_id');
         $this->address1 = self::stringFrom($data, 'address1');
         $this->address2 = self::stringFrom($data, 'address2');
         $this->city = self::stringFrom($data, 'city');
@@ -79,12 +66,7 @@ class Address extends ValueObject
         $this->zip = self::intFrom($data, 'zip');
         $this->country_code = self::stringFrom($data, 'country_code');
         $this->province_code = self::stringFrom($data, 'province_code');
-        $this->client_id = self::intFrom($data, 'province_code');
-        $this->address_code = self::stringFrom($data, 'address_code');
         $this->type = self::stringFrom($data, 'type');
-        $this->default = self::boolFrom($data, 'default');
-
-        return $this;
     }
 
     /**
@@ -96,11 +78,9 @@ class Address extends ValueObject
      */
     static function createArray(array $data): array {
         $returnable = [];
-
         foreach ($data as $item) {
             $returnable[] = new Address((array) $item);
         }
-
         return $returnable;
     }
 }

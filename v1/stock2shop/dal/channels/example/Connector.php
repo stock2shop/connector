@@ -7,6 +7,8 @@ use stock2shop\vo\ChannelProduct;
 use stock2shop\vo\ChannelProductGet;
 use stock2shop\vo\ChannelVariant;
 use stock2shop\vo\MetaItem;
+use stock2shop\vo\Order;
+use stock2shop\vo\OrderLineItem;
 use stock2shop\vo\SyncChannelProducts;
 
 class Connector implements channel\Connector
@@ -30,7 +32,7 @@ class Connector implements channel\Connector
     {
         // Example on how to load channel meta
         // Separator is used when creating variant file names
-        $map  = MetaItem::getMap($params->meta);
+        $map       = MetaItem::getMap($params->meta);
         $separator = $map['separator'];
         foreach ($params->channel_products as $product) {
             $prefix          = urlencode($product->source_product_code);
@@ -106,7 +108,7 @@ class Connector implements channel\Connector
                 } else {
 
                     // This is a Variant
-                    $channelProducts[count($channelProducts) -1]->variants[] = new ChannelVariant(
+                    $channelProducts[count($channelProducts) - 1]->variants[] = new ChannelVariant(
                         [
                             "sku"                  => $obj->sku,
                             "channel_variant_code" => $obj->channel_variant_code
@@ -127,19 +129,19 @@ class Connector implements channel\Connector
      */
     public function getProducts(string $token, int $limit, array $meta): array
     {
-        $map  = MetaItem::getMap($meta);
-        $separator = $map['separator'];
+        $map             = MetaItem::getMap($meta);
+        $separator       = $map['separator'];
         $channelProducts = [];
-        $currentFiles = $this->getJSONFiles();
+        $currentFiles    = $this->getJSONFiles();
 
         // Create paged results
         $cnt = 1;
         foreach ($currentFiles as $fileName => $obj) {
-            if(strcmp($token, $fileName) < 0) {
-                if(strpos($fileName, $separator) === false) {
+            if (strcmp($token, $fileName) < 0) {
+                if (strpos($fileName, $separator) === false) {
 
                     // This a product
-                    if($cnt > $limit) {
+                    if ($cnt > $limit) {
                         break;
                     }
                     $channelProducts[] = new ChannelProductGet([
@@ -156,7 +158,7 @@ class Connector implements channel\Connector
                             "channel_variant_code" => $obj->channel_variant_code
                         ]
                     );
-                    $channelProducts[count($channelProducts) - 1]->token = $obj->channel_variant_code;
+                    $channelProducts[count($channelProducts) - 1]->token      = $obj->channel_variant_code;
                 }
 
             }
@@ -174,9 +176,21 @@ class Connector implements channel\Connector
         // TODO: Implement getOrdersByCode() method.
     }
 
-    public function transformOrder(\stdClass $channelOrder)
+    public function transformOrder(\stdClass $webhookOrder, array $meta): Order
     {
-        // TODO: Implement transformOrder() method.
+        $order                       = new Order([]);
+        $order->notes                = $webhookOrder->instructions;
+        $order->channel_order_code   = $webhookOrder->order_number;
+        $order->customer->first_name = $webhookOrder->customer['name'];
+        $order->customer->email      = $webhookOrder->customer['email'];
+        foreach ($webhookOrder->items as $item) {
+            $order->line_items[] = new OrderLineItem([
+                'sku'   => $item['sku'],
+                'qty'   => $item['qty'],
+                'price' => $item['price']
+            ]);
+        }
+        return $order;
     }
 
     /**

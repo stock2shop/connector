@@ -4,8 +4,7 @@ namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
 
-// TODO This is incomplete
-class CustomerMetaItem extends ValueObject
+class OrderMetaItem extends ValueObject
 {
     /** @var string $key */
     public $key;
@@ -31,15 +30,13 @@ class CustomerMetaItem extends ValueObject
      *
      * @param array $data
      *
-     * @return CustomerMetaItem[]
+     * @return OrderMetaItem[]
      */
     static function createArray(array $data): array {
         $returnable = [];
-
         foreach ($data as $item) {
-            $returnable[] = new CustomerMetaItem((array) $item);
+            $returnable[] = new OrderMetaItem((array) $item);
         }
-
         return $returnable;
     }
 }

@@ -17,39 +17,39 @@ if (!isset($options["channel_type"])) {
 }
 
 // Get channel instance
-$test = new TestUtils();
+$test    = new TestUtils();
 $channel = $test->getChannel('example');
 
 // Sync products to channel
 $channelProducts = $test->loadChannelProducts();
-$syncedProducts = $channel->syncProducts($channelProducts);
+$syncedProducts  = $channel->syncProducts($channelProducts);
 $test->verifySyncProductsResponse($channelProducts, $syncedProducts);
 
 // Get products by codes
 $channelProducts = $test->loadChannelProducts();
-$allProducts = $channel->getProductsByCode($channelProducts);
+$allProducts     = $channel->getProductsByCode($channelProducts);
 $test->verifyGetProductsByCodeResponse($channelProducts, $allProducts);
 
 // Get products
 $channelProducts = $test->loadChannelProducts();
 $fetchedProducts = $channel->getProducts("", count($allProducts->channel_products), $channelProducts->meta);
 $test->verifyGetProductsResponse($fetchedProducts, "", count($allProducts->channel_products));
-if(count($fetchedProducts) !== count($allProducts->channel_products)) {
+if (count($fetchedProducts) !== count($allProducts->channel_products)) {
     throw new \Exception('products not fetched');
 }
 
 // Get products using paging (one at a time)
-$token = "";
-$cnt = 0;
+$token           = "";
+$cnt             = 0;
 $fetchedProducts = [];
-for($i=0; $i < count($allProducts->channel_products); $i++) {
+for ($i = 0; $i < count($allProducts->channel_products); $i++) {
     $products = $channel->getProducts($token, 1, $channelProducts->meta);
     $test->verifyGetProductsResponse($products, $token, 1);
     $fetchedProducts[] = $products[0];
-    $cnt += count($products);
-    $token = $products[0]->token;
+    $cnt               += count($products);
+    $token             = $products[0]->token;
 }
-if($cnt !== count($allProducts->channel_products)) {
+if ($cnt !== count($allProducts->channel_products)) {
     throw new \Exception('product paging incorrect');
 }
 
@@ -71,6 +71,12 @@ foreach ($channelProducts->channel_products as $product) {
 $syncedProducts = $channel->syncProducts($channelProducts);
 $test->verifySyncProductsResponse($channelProducts, $syncedProducts);
 $fetchedProducts = $channel->getProducts("", count($channelProducts->channel_products), $channelProducts->meta);
-if(count($fetchedProducts) !== 0) {
+if (count($fetchedProducts) !== 0) {
     throw new \Exception('products not removed');
 }
+
+
+// Run order transform
+$webhook = $test->loadOrder();
+$order   = $channel->transformOrder((object)$webhook, $test->loadMeta());
+$test->verifyTransformOrderResponse($order);

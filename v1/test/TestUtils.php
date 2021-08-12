@@ -1,39 +1,51 @@
 <?php
 
-
-
 use \stock2shop\dal\channels;
 use \stock2shop\vo;
 
+class TestUtils
+{
 
+    private $meta = [
+        [
+            "key"   => "separator",
+            "value" => '~'
+        ]
+    ];
 
-class TestUtils {
-
-    function getChannel($type) {
+    function getChannel($type)
+    {
         $class   = "\\stock2shop\\dal\\channels\\" . $type . "\\Creator";
         $creator = new $class();
         return $creator->getChannel();
     }
 
-    function loadChannelProducts() {
-        $json   = file_get_contents('data/syncChannelProducts.json');
-        $data   = json_decode($json, true);
-        $meta   = [
-            [
-                "key"   => "separator",
-                "value" => '~'
-            ]
-        ];
+    function loadMeta() {
+        return vo\MetaItem::createArray($this->meta);
+    }
+
+    function loadChannelProducts()
+    {
+        $json = file_get_contents('data/syncChannelProducts.json');
+        $data = json_decode($json, true);
+
         return new vo\SyncChannelProducts(
             [
-                "meta"             => $meta,
+                "meta"             => $this->meta,
                 "channel_products" => $data,
                 "flag_map"         => []
             ]
         );
     }
 
-    function verifySyncProductsResponse($channelProducts, $syncedProducts) {
+    function loadOrder()
+    {
+        $json = file_get_contents('data/orderTransform.json');
+        return json_decode($json, true);
+    }
+
+    function verifySyncProductsResponse($channelProducts, $syncedProducts)
+    {
         $this->printHead("Sync Products");
         if (count($channelProducts->channel_products) !== count($syncedProducts->channel_products)) {
             throw new \Exception('failed to create');
@@ -56,7 +68,7 @@ class TestUtils {
             $this->printPad("product->channel_product_code", $product->channel_product_code);
             $this->printPad("product->success", $product->success);
             $this->printPad("product->synced", $product->synced);
-            if(count($channelProducts->channel_products[$key]->variants) !== (count($product->variants))) {
+            if (count($channelProducts->channel_products[$key]->variants) !== (count($product->variants))) {
                 throw new \Exception('incorrect variants');
             }
             foreach ($product->variants as $variant) {
@@ -72,7 +84,8 @@ class TestUtils {
         }
     }
 
-    function verifyGetProductsByCodeResponse($channelProducts, $fetchedProducts) {
+    function verifyGetProductsByCodeResponse($channelProducts, $fetchedProducts)
+    {
         $this->printHead("Get Products By Code");
         if (count($channelProducts->channel_products) !== count($fetchedProducts->channel_products)) {
             throw new \Exception('failed to fetch');
@@ -84,7 +97,7 @@ class TestUtils {
                 throw new \Exception('failed to set product->channel_product_code');
             }
             $this->printPad("product->channel_product_code", $product->channel_product_code);
-            if(count($channelProducts->channel_products[$key]->variants) !== (count($product->variants))) {
+            if (count($channelProducts->channel_products[$key]->variants) !== (count($product->variants))) {
                 throw new \Exception('incorrect variants');
             }
             foreach ($product->variants as $variant) {
@@ -96,18 +109,19 @@ class TestUtils {
         }
     }
 
-    function verifyGetProductsResponse($fetchedProducts, $token, $limit) {
+    function verifyGetProductsResponse($fetchedProducts, $token, $limit)
+    {
         $this->printHead("Get Products");
-        if(count($fetchedProducts) > $limit) {
+        if (count($fetchedProducts) > $limit) {
             throw new \Exception('too many products returned');
         }
 
         /** @var vo\ChannelProductGet $product */
         foreach ($fetchedProducts as $key => $product) {
-            if(strcmp($token, $product->token) >= 0) {
+            if (strcmp($token, $product->token) >= 0) {
                 throw new \Exception('invalid token');
             }
-            if(!$product instanceof vo\ChannelProduct ) {
+            if (!$product instanceof vo\ChannelProduct) {
                 throw new \Exception('invalid ChannelProductGet returned');
             }
             if (!$product->channel_product_code || $product->channel_product_code == "") {
@@ -127,11 +141,29 @@ class TestUtils {
         }
     }
 
-    function printPad($key, $value) {
+
+    function verifyTransformOrderResponse($order)
+    {
+        $this->printHead("Transform Order");
+
+        if (!$order instanceof vo\Order) {
+            throw new \Exception('invalid Order returned');
+        }
+        if (!$order->channel_order_code || $order->channel_order_code == "") {
+            throw new \Exception('failed to set order->channel_order_code');
+        }
+        $this->printPad("order->channel_order_code", $order->channel_order_code);
+
+        // TODO check line items and other properties
+    }
+
+    function printPad($key, $value)
+    {
         print str_pad($key, 50) . ' = ' . $value . PHP_EOL;
     }
 
-    function printHead($heading) {
+    function printHead($heading)
+    {
         print PHP_EOL;
         print str_pad("", 100, "-") . PHP_EOL;
         print str_pad($heading, 100, "-", STR_PAD_BOTH) . PHP_EOL;
