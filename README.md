@@ -19,10 +19,10 @@ export S2S_PATH=/your/path/for/stock2shop
 git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 ```
 
-### Running channel example test
+### Running tests
 
 ```bash
-php ${S2S_PATH}/connector/v1/test/channel.php --channel_type=example
+php ${S2S_PATH}/connector/www/v1/test/channel.php --channel_type=example
 ```
 
 You should see the output of the test results without any errors

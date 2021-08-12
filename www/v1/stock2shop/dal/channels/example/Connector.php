@@ -117,8 +117,9 @@ class Connector implements channel\Connector
                 }
             }
         }
-        $params->channel_products = $channelProducts;
-        return $params;
+        $response                   = new SyncChannelProducts([]);
+        $response->channel_products = $channelProducts;
+        return $response;
     }
 
     /**
