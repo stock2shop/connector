@@ -2,9 +2,8 @@
 namespace stock2shop\dal\channel;
 
 use stock2shop\vo\ChannelOrder;
-use stock2shop\vo\ChannelProduct;
 use stock2shop\vo\MetaItem;
-use stock2shop\vo\Order;
+use stock2shop\vo\ChannelFulfillmentsSync;
 use stock2shop\vo\SyncChannelProducts;
 use stock2shop\vo\GetChannelProduct;
 
@@ -83,5 +82,23 @@ interface Connector {
      * @return ChannelOrder
      */
     public function transformOrder($webhookOrder, array $meta): ChannelOrder;
+
+    /**
+     * Syncs fulfillments from S2S to channel
+     *
+     * @param ChannelFulfillmentsSync $ChannelFulfillmentsSync
+     * @return ChannelFulfillmentsSync
+     */
+    public function syncFulfillments(ChannelFulfillmentsSync $ChannelFulfillmentsSync): ChannelFulfillmentsSync;
+
+    /**
+     *
+     * The following properties must be set:-
+     * - channel_fulfillment_code
+     *
+     * @param ChannelFulfillmentsSync $ChannelFulfillmentsSync
+     * @return ChannelFulfillments[]
+     */
+    public function getFulfillmentsByOrderCode(ChannelFulfillmentsSync $ChannelFulfillmentsSync): array;
 }
 

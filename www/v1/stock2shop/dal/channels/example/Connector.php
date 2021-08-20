@@ -3,6 +3,8 @@
 namespace stock2shop\dal\channels\example;
 
 use stock2shop\dal\channel;
+use stock2shop\vo\ChannelFulfillment;
+use stock2shop\vo\ChannelFulfillmentsSync;
 use stock2shop\vo\ChannelOrder;
 use stock2shop\vo\ChannelProduct;
 use stock2shop\vo\ChannelProductGet;
@@ -228,6 +230,34 @@ class Connector implements channel\Connector
             ]);
         }
         return $order;
+    }
+
+    public function syncFulfillments(ChannelFulfillmentsSync $params): ChannelFulfillmentsSync
+    {
+        foreach ($params->channel_fulfillments as $f) {
+            $channel_fulfillment_code    = rand() . '.json';
+            $date                        = new \DateTime();
+            $f->channel_fulfillment_code = $channel_fulfillment_code;
+            $f->channel_synced           = $date->format('Y-m-d H:i:s');
+            file_put_contents(self::DATA_PATH . '/fulfillments/' . $channel_fulfillment_code, json_encode($f));
+        }
+        return $params;
+    }
+
+    public function getFulfillmentsByOrderCode(ChannelFulfillmentsSync $CFS): array
+    {
+        $currentFiles        = data\Helper::getJSONFiles("fulfillments");
+        $channelFulfillments = [];
+        foreach ($CFS->channel_fulfillments as $f) {
+            $fileName = $f->channel_fulfillment_code;
+            if (array_key_exists($fileName, $currentFiles)) {
+                $JSON                            = json_encode($currentFiles[$fileName]);
+                $obj                             = json_decode($JSON, true);
+                $obj["channel_fulfillment_code"] = $f->channel_fulfillment_code;
+                $channelFulfillments[]           = new ChannelFulfillment($obj);
+            }
+        }
+        return $channelFulfillments;
     }
 
 }

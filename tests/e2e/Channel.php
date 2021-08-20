@@ -4,6 +4,8 @@ namespace tests\e2e;
 
 use PHPUnit\Framework;
 use stock2shop\dal\channels;
+use stock2shop\vo\ChannelFulfillment;
+use stock2shop\vo\ChannelFulfillmentsSync;
 use stock2shop\vo\ChannelProduct;
 use stock2shop\vo\ChannelProductGet;
 use stock2shop\vo\MetaItem;
@@ -21,6 +23,7 @@ final class ChannelTest extends Framework\TestCase
     static $creator;
     static $channel;
     static $channelTypes;
+    static $channelFulfillmentsData;
     static $channelProductsData;
     static $channelMetaData;
     static $channelOrderData;
@@ -144,7 +147,8 @@ final class ChannelTest extends Framework\TestCase
         }
     }
 
-    function testGetOrders() {
+    function testGetOrders()
+    {
         foreach (self::$channelTypes as $type) {
 
             // load test data and set channel
@@ -160,7 +164,8 @@ final class ChannelTest extends Framework\TestCase
         }
     }
 
-    function testGetOrdersByCode() {
+    function testGetOrdersByCode()
+    {
         foreach (self::$channelTypes as $type) {
 
             // load test data and set channel
@@ -179,6 +184,27 @@ final class ChannelTest extends Framework\TestCase
                 $this->verifyTransformOrder($order);
             }
         }
+    }
+
+    function testSyncFulfillments()
+    {
+        foreach (self::$channelTypes as $type) {
+
+            // load test data and set channel
+            self::loadTestData($type);
+            self::setChannel($type);
+
+            // sync all fulfillments
+            $request  = new ChannelFulfillmentsSync(
+                [
+                    "meta"             => self::$channelMetaData,
+                    "channel_fulfillments" => self::$channelFulfillmentsData
+                ]
+            );
+            $response = self::$channel->syncFulfillments($request);
+            self::verifyFulfillmentSync($request, $response);
+        }
+
     }
 
     /**
@@ -278,14 +304,36 @@ final class ChannelTest extends Framework\TestCase
         }
     }
 
+    function verifyFulfillmentSync(ChannelFulfillmentsSync $request, ChannelFulfillmentsSync $response)
+    {
+        $codes = [];
+        $this->assertInstanceOf("stock2shop\\vo\\ChannelFulfillmentsSync", $response);
+        $this->assertEquals(count($request->channel_fulfillments), count($response->channel_fulfillments));
+        foreach ($response->channel_fulfillments as $f) {
+            $this->assertInstanceOf("stock2shop\\vo\\ChannelFulfillment", $f);
+            $this->assertNotEmpty($f->channel_fulfillment_code);
+            $this->assertNotEmpty($f->channel_synced);
+            $this->assertTrue(ChannelFulfillment::isValidChannelSynced($f->channel_synced));
+            $codes[$f->channel_fulfillment_code] = $f->channel_fulfillment_code;
+        }
+        $current = self::$channel->getFulfillmentsByOrderCode($response);
+        $this->assertEquals(count($request->channel_fulfillments), count($current));
+        foreach ($current as $f) {
+            $this->assertInstanceOf("stock2shop\\vo\\ChannelFulfillment", $f);
+            $this->assertArrayHasKey($f->channel_fulfillment_code, $codes);
+        }
+    }
+
     function loadTestData($type)
     {
-        $channelProductsJSON       = file_get_contents(__DIR__ . '/data/syncChannelProducts.json');
-        $channelMetaJSON           = file_get_contents(__DIR__ . '/data/syncChannelProductsMeta.json');
-        $channelOrderJSON          = file_get_contents(__DIR__ . '/data/channels/' . $type . '/orderTransform.json');
-        self::$channelProductsData = json_decode($channelProductsJSON, true);
-        self::$channelMetaData     = json_decode($channelMetaJSON, true);
-        self::$channelOrderData    = json_decode($channelOrderJSON, true);
+        $channelFulfillmentsJSON       = file_get_contents(__DIR__ . '/data/syncChannelFulfillments.json');
+        $channelProductsJSON           = file_get_contents(__DIR__ . '/data/syncChannelProducts.json');
+        $channelMetaJSON               = file_get_contents(__DIR__ . '/data/channelMeta.json');
+        $channelOrderJSON              = file_get_contents(__DIR__ . '/data/channels/' . $type . '/orderTransform.json');
+        self::$channelFulfillmentsData = json_decode($channelFulfillmentsJSON, true);
+        self::$channelProductsData     = json_decode($channelProductsJSON, true);
+        self::$channelMetaData         = json_decode($channelMetaJSON, true);
+        self::$channelOrderData        = json_decode($channelOrderJSON, true);
     }
 
     /**
