@@ -1,6 +1,7 @@
 <?php
 namespace stock2shop\dal\channel;
 
+use stock2shop\vo\ChannelOrder;
 use stock2shop\vo\ChannelProduct;
 use stock2shop\vo\MetaItem;
 use stock2shop\vo\Order;
@@ -18,11 +19,10 @@ interface Connector {
     public function syncProducts(SyncChannelProducts $syncChannelProducts): SyncChannelProducts;
 
     /**
-     * This must return ChannelProduct with:-
-     * - channel_product_code
-     * and corresponding ChannelVariant's with:-
-     * - channel_variant_code
-     * - sku
+     * The following properties must be set:-
+     * - product.channel_product_code
+     * - product.variant[].channel_variant_code
+     * - product.variant[].sku
      *
      * @param SyncChannelProducts $syncChannelProducts
      * @return SyncChannelProducts
@@ -31,7 +31,7 @@ interface Connector {
 
     /**
      *
-     * This must return ChannelProductGet with the following properties set:-
+     * The following properties must be set:-
      * - product.channel_product_code
      * - product.variant[].channel_variant_code
      * - product.variant[].sku
@@ -52,41 +52,36 @@ interface Connector {
 
     /**
      *
-     * This must return ChannelProduct with:-
-     * - channel_product_code
-     * and corresponding ChannelVariant's with:-
-     * - channel_variant_code
-     * - sku
+     * The following properties must be set:-
+     * - channel_order_code
      *
-     * @param int $page
+     * @param string $token
      * @param int $limit
-     * @return array|ChannelProduct[]
+     * @param MetaItem[] $meta
+     * @return ChannelOrder[]
      */
-    public function getOrders(int $page, int $limit): array;
+    public function getOrders(string $token, int $limit, array $meta): array;
 
     /**
      *
-     * This must return ChannelProduct with:-
-     * - channel_product_code
-     * and corresponding ChannelVariant's with:-
-     * - channel_variant_code
-     * - sku
+     * The following properties must be set:-
+     * - channel_order_code
      *
-     * TODO define input VO
-     *
-     * @return array|ChannelProduct[]
+     * @param ChannelOrder[] $orders
+     * @param MetaItem[] $meta
+     * @return ChannelOrder[]
      */
-    public function getOrdersByCode(): array;
+    public function getOrdersByCode(array $orders, array $meta): array;
 
     /**
      *
      * Transform should convert the order "webhook" sent by the
-     * channel into a "Order" object.
+     * channel into a "ChannelOrder" object.
      *
-     * @param \stdClass $webhookOrder
+     * @param mixed $webhookOrder
      * @param MetaItem[] $meta
-     * @return Order
+     * @return ChannelOrder
      */
-    public function transformOrder(\stdClass $webhookOrder, array $meta): Order;
+    public function transformOrder($webhookOrder, array $meta): ChannelOrder;
 }
 

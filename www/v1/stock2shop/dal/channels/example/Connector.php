@@ -3,6 +3,7 @@
 namespace stock2shop\dal\channels\example;
 
 use stock2shop\dal\channel;
+use stock2shop\vo\ChannelOrder;
 use stock2shop\vo\ChannelProduct;
 use stock2shop\vo\ChannelProductGet;
 use stock2shop\vo\ChannelVariant;
@@ -21,8 +22,8 @@ class Connector implements channel\Connector
      * This illustrates possible cleanup operations required for
      * e-commerce channels
      *
-     * The channel_product_code is the file name for the product
-     * The channel_variant_code is the file name for the variant
+     * product.id is the file name for the product
+     * product.variant[].channel_variant_code is the file name for the variant
      *
      * @param SyncChannelProducts $params
      * @return SyncChannelProducts
@@ -35,7 +36,7 @@ class Connector implements channel\Connector
         $map       = MetaItem::getMap($params->meta);
         $separator = $map['separator'];
         foreach ($params->channel_products as $product) {
-            $prefix          = urlencode($product->source_product_code);
+            $prefix          = urlencode($product->id);
             $productFileName = $prefix . '.json';
 
             // create channel codes for product and variants
@@ -45,22 +46,22 @@ class Connector implements channel\Connector
             }
 
             // fetch current files for this prefix
-            $currentFiles = $this->getJSONFilesByPrefix($prefix);
+            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, "products");
 
             // Remove product / variants if delete true
             if ($product->delete) {
                 foreach ($currentFiles as $currentFileName => $obj) {
-                    unlink(self::DATA_PATH . '/' . $currentFileName);
+                    unlink(self::DATA_PATH . '/products/' . $currentFileName);
                 }
             } else {
 
                 // create / update product
-                file_put_contents(self::DATA_PATH . '/' . $product->channel_product_code, json_encode($product));
+                file_put_contents(self::DATA_PATH . '/products/' . $product->channel_product_code, json_encode($product));
 
                 // Create / update variants
                 $variantsToKeep = [];
                 foreach ($product->variants as $variant) {
-                    $filePath = self::DATA_PATH . '/' . $variant->channel_variant_code;
+                    $filePath = self::DATA_PATH . '/products/' . $variant->channel_variant_code;
                     if ($product->delete) {
                         unlink($filePath);
                     } else {
@@ -72,7 +73,7 @@ class Connector implements channel\Connector
                 // Remove old variants
                 foreach ($currentFiles as $fileName => $obj) {
                     if (!in_array($fileName, $variantsToKeep) && strpos($fileName, $separator) !== false) {
-                        unlink(self::DATA_PATH . '/' . $fileName);
+                        unlink(self::DATA_PATH . '/products/' . $fileName);
                     }
                 }
             }
@@ -96,8 +97,8 @@ class Connector implements channel\Connector
     {
         $channelProducts = [];
         foreach ($params->channel_products as $product) {
-            $prefix       = urlencode($product->source_product_code);
-            $currentFiles = $this->getJSONFilesByPrefix($prefix);
+            $prefix       = urlencode($product->id);
+            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, "products");
             foreach ($currentFiles as $fileName => $obj) {
                 if ($fileName === $prefix . '.json') {
 
@@ -133,7 +134,7 @@ class Connector implements channel\Connector
         $map             = MetaItem::getMap($meta);
         $separator       = $map['separator'];
         $channelProducts = [];
-        $currentFiles    = $this->getJSONFiles();
+        $currentFiles    = data\Helper::getJSONFiles("products");
 
         // Create paged results
         $cnt = 1;
@@ -167,64 +168,66 @@ class Connector implements channel\Connector
         return $channelProducts;
     }
 
-    public function getOrders(int $page, int $limit): array
+    public function getOrders(string $token, int $limit, array $meta): array
     {
-        // TODO: Implement getOrders() method.
+        $currentFiles  = data\Helper::getJSONFiles("orders");
+        $channelOrders = [];
+        $cnt           = 1;
+        foreach ($currentFiles as $fileName => $obj) {
+            if (strcmp($token, $fileName) < 0) {
+                if ($cnt > $limit) {
+                    break;
+                }
+                $orderJSON       = json_encode($obj);
+                $order           = json_decode($orderJSON, true);
+                $channelOrders[] = $this->transformOrder($order, $meta);
+                $cnt++;
+            }
+        }
+        return $channelOrders;
     }
 
-    public function getOrdersByCode(): array
+    /**
+     * @param ChannelOrder[] $orders
+     * @param array $meta
+     * @return array
+     */
+    public function getOrdersByCode(array $orders, array $meta): array
     {
-        // TODO: Implement getOrdersByCode() method.
+        $currentFiles  = data\Helper::getJSONFiles("orders");
+        $channelOrders = [];
+        foreach ($orders as $order) {
+            $fileName = $order->channel_order_code . ".json";
+            if (array_key_exists($fileName, $currentFiles)) {
+                $orderJSON       = json_encode($currentFiles[$fileName]);
+                $order           = json_decode($orderJSON, true);
+                $channelOrders[] = $this->transformOrder($order, $meta);
+            }
+        }
+        return $channelOrders;
     }
 
-    public function transformOrder(\stdClass $webhookOrder, array $meta): Order
+    /**
+     * @param mixed $webhookOrder
+     * @param array $meta
+     * @return ChannelOrder
+     */
+    public function transformOrder($webhookOrder, array $meta): ChannelOrder
     {
-        $order                       = new Order([]);
-        $order->notes                = $webhookOrder->instructions;
-        $order->channel_order_code   = $webhookOrder->order_number;
-        $order->customer->first_name = $webhookOrder->customer['name'];
-        $order->customer->email      = $webhookOrder->customer['email'];
-        foreach ($webhookOrder->items as $item) {
+        $order                       = new ChannelOrder([]);
+        $order->notes                = $webhookOrder['instructions'];
+        $order->channel_order_code   = $webhookOrder['order_number'];
+        $order->customer->first_name = $webhookOrder['customer']['name'];
+        $order->customer->email      = $webhookOrder['customer']['email'];
+        foreach ($webhookOrder['items'] as $item) {
             $order->line_items[] = new OrderLineItem([
-                'sku'   => $item['sku'],
-                'qty'   => $item['qty'],
-                'price' => $item['price']
+                'sku'                  => $item['sku'],
+                'qty'                  => $item['qty'],
+                'price'                => $item['price'],
+                'channel_variant_code' => $item['sku']
             ]);
         }
         return $order;
-    }
-
-    /**
-     * @param string $prefix
-     * @return array
-     */
-    private function getJSONFilesByPrefix(string $prefix): array
-    {
-        $files = $this->getJSONFiles();
-        $items = [];
-        foreach ($files as $fileName => $obj) {
-            if (strpos($fileName, $prefix) === 0) {
-                $items[$fileName] = $obj;
-            }
-        }
-        return $items;
-    }
-
-    /**
-     * @return array
-     */
-    private function getJSONFiles(): array
-    {
-        $files     = [];
-        $fileNames = array_diff(scandir(self::DATA_PATH, SCANDIR_SORT_ASCENDING), array('..', '.'));
-        sort($fileNames);
-        foreach ($fileNames as $file) {
-            if (substr($file, -5) === '.json') {
-                $contents     = file_get_contents(self::DATA_PATH . '/' . $file);
-                $files[$file] = json_decode($contents);
-            }
-        }
-        return $files;
     }
 
 }

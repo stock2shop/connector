@@ -1,0 +1,31 @@
+{
+  "order_number": "2",
+  "instructions": "deliver asap",
+  "customer": {
+    "name": "bob",
+    "email": "bob@example.com",
+    "tel": "123"
+  },
+  "postal_address": {
+    "street": "1 milky way",
+    "country": "USA",
+    "zip": "1234"
+  },
+  "delivery_address": {
+    "street": "1 milky way",
+    "country": "USA",
+    "zip": "1234"
+  },
+  "items": [
+    {
+      "sku": "a",
+      "qty": 1,
+      "price": 100.00
+    },
+    {
+      "sku": "b",
+      "qty": 1,
+      "price": 100.00
+    }
+  ]
+}

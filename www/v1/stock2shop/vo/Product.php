@@ -23,9 +23,6 @@ class Product extends ValueObject
     /** @var string $productType */
     public $product_type;
 
-    /** @var string $source_product_code */
-    public $source_product_code;
-
     /** @var string $tags */
     public $tags;
 
@@ -48,7 +45,6 @@ class Product extends ValueObject
         $this->body_html = self::stringFrom($data, "body_html");
         $this->collection = self::stringFrom($data, "collection");
         $this->product_type = self::stringFrom($data, "product_type");
-        $this->source_product_code = self::stringFrom($data, "source_product_code");
         $this->tags = self::stringFrom($data, "tags");
         $this->vendor = self::stringFrom($data, "vendor");
         $this->options =
@@ -65,7 +61,7 @@ class Product extends ValueObject
     }
 
     /**
-     * Computes a hash of the system product excluding the variants and images.
+     * Computes a hash of the system product excluding the variants.
      *
      * @return string
      */
