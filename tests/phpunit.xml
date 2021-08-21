@@ -3,5 +3,4 @@ The XML Configuration File
 https://phpunit.de/manual/current/en/appendixes.configuration.html
 -->
 <phpunit colors="true" bootstrap="autoload.php">
-
 </phpunit>
