@@ -4,7 +4,7 @@ namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
 
-class SyncChannelProducts extends ValueObject
+class ChannelProductsSync extends ValueObject
 {
     /** @var MetaItem[] $meta */
     public $meta;

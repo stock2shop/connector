@@ -4,18 +4,18 @@ namespace stock2shop\dal\channel;
 use stock2shop\vo\ChannelOrder;
 use stock2shop\vo\MetaItem;
 use stock2shop\vo\ChannelFulfillmentsSync;
-use stock2shop\vo\SyncChannelProducts;
-use stock2shop\vo\GetChannelProduct;
+use stock2shop\vo\ChannelProductsSync;
+use stock2shop\vo\ChannelProductGet;
 
 interface Connector {
 
     /**
      * Syncs products from S2S to channel
      *
-     * @param SyncChannelProducts $syncChannelProducts
-     * @return SyncChannelProducts
+     * @param ChannelProductsSync $channelProductsSync
+     * @return ChannelProductsSync
      */
-    public function syncProducts(SyncChannelProducts $syncChannelProducts): SyncChannelProducts;
+    public function syncProducts(ChannelProductsSync $channelProductsSync): ChannelProductsSync;
 
     /**
      * The following properties must be set:-
@@ -23,10 +23,10 @@ interface Connector {
      * - product.variant[].channel_variant_code
      * - product.variant[].sku
      *
-     * @param SyncChannelProducts $syncChannelProducts
-     * @return SyncChannelProducts
+     * @param ChannelProductsSync $channelProductsSync
+     * @return ChannelProductsSync
      */
-    public function getProductsByCode(SyncChannelProducts $SyncChannelProducts): SyncChannelProducts;
+    public function getProductsByCode(ChannelProductsSync $channelProductsSync): ChannelProductsSync;
 
     /**
      *

@@ -10,9 +10,8 @@ use stock2shop\vo\ChannelProduct;
 use stock2shop\vo\ChannelProductGet;
 use stock2shop\vo\ChannelVariant;
 use stock2shop\vo\MetaItem;
-use stock2shop\vo\Order;
 use stock2shop\vo\OrderLineItem;
-use stock2shop\vo\SyncChannelProducts;
+use stock2shop\vo\ChannelProductsSync;
 
 class Connector implements channel\Connector
 {
@@ -27,11 +26,11 @@ class Connector implements channel\Connector
      * product.id is the file name for the product
      * product.variant[].channel_variant_code is the file name for the variant
      *
-     * @param SyncChannelProducts $params
-     * @return SyncChannelProducts
+     * @param ChannelProductsSync $params
+     * @return ChannelProductsSync
      * @throws \Exception
      */
-    public function syncProducts(SyncChannelProducts $params): SyncChannelProducts
+    public function syncProducts(ChannelProductsSync $params): ChannelProductsSync
     {
         // Example on how to load channel meta
         // Separator is used when creating variant file names
@@ -92,10 +91,10 @@ class Connector implements channel\Connector
     }
 
     /**
-     * @param SyncChannelProducts $params
-     * @return SyncChannelProducts
+     * @param ChannelProductsSync $params
+     * @return ChannelProductsSync
      */
-    public function getProductsByCode(SyncChannelProducts $params): SyncChannelProducts
+    public function getProductsByCode(ChannelProductsSync $params): ChannelProductsSync
     {
         $channelProducts = [];
         foreach ($params->channel_products as $product) {
@@ -120,7 +119,7 @@ class Connector implements channel\Connector
                 }
             }
         }
-        $response                   = new SyncChannelProducts([]);
+        $response                   = new ChannelProductsSync([]);
         $response->channel_products = $channelProducts;
         return $response;
     }

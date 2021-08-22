@@ -43,6 +43,20 @@ The purpose of the Value Object classes is to define the data we pass around.
 
 You cannot edit anything in this directory.
 
+To output all the data structures in a JSON format via the command line, run this:
+
+```bash
+php ${S2S_PATH}/connector/www/v1/stock2shop/scripts/stock2shop/VOJSON.php
+```
+
+If you want to view a specific VO, use this.
+
+```bash
+php ${S2S_PATH}/connector/www/v1/stock2shop/scripts/stock2shop/VOJSON.php --class=Variant
+```
+
+This is useful for quickly viewing classes which may extend multiple parents.
+
 ### /www/v1/stock2shop/dal
 
 DAL stands for "Data Access Layer".

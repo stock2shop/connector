@@ -79,15 +79,15 @@ class Segment extends ValueObject
         $this->owner     = self::stringFrom($data, "owner");
 
         // validate
-        if(!self::isValidType($this->type)) {
-            throw new exceptions\Validation("Invalid segment type " . $this->type);
-        };
-        if(!self::isValidOperator($this->operator)) {
-            throw new exceptions\Validation("Invalid segment operator " . $this->operator);
-        }
-        if(!self::isValidOwner($this->owner)) {
-            throw new exceptions\Validation("Invalid segment owner " . $this->owner);
-        }
+//        if(!self::isValidType($this->type)) {
+//            throw new exceptions\Validation("Invalid segment type " . $this->type);
+//        };
+//        if(!self::isValidOperator($this->operator)) {
+//            throw new exceptions\Validation("Invalid segment operator " . $this->operator);
+//        }
+//        if(!self::isValidOwner($this->owner)) {
+//            throw new exceptions\Validation("Invalid segment owner " . $this->owner);
+//        }
     }
 
     /**

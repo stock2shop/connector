@@ -9,7 +9,7 @@ use stock2shop\vo\ChannelFulfillmentsSync;
 use stock2shop\vo\ChannelProduct;
 use stock2shop\vo\ChannelProductGet;
 use stock2shop\vo\MetaItem;
-use stock2shop\vo\SyncChannelProducts;
+use stock2shop\vo\ChannelProductsSync;
 
 /**
  *
@@ -42,7 +42,7 @@ final class ChannelTest extends Framework\TestCase
             self::setChannel($type);
 
             // sync all products
-            $request  = new SyncChannelProducts(
+            $request  = new ChannelProductsSync(
                 [
                     "meta"             => self::$channelMetaData,
                     "channel_products" => self::$channelProductsData,
@@ -54,7 +54,7 @@ final class ChannelTest extends Framework\TestCase
 
             // Delete variant
             unset(self::$channelProductsData[1]['variants'][1]);
-            $request  = new SyncChannelProducts(
+            $request  = new ChannelProductsSync(
                 [
                     "meta"             => self::$channelMetaData,
                     "channel_products" => self::$channelProductsData,
@@ -68,7 +68,7 @@ final class ChannelTest extends Framework\TestCase
             foreach (self::$channelProductsData as $key => $product) {
                 self::$channelProductsData[$key]['delete'] = true;
             }
-            $request  = new SyncChannelProducts(
+            $request  = new ChannelProductsSync(
                 [
                     "meta"             => self::$channelMetaData,
                     "channel_products" => self::$channelProductsData,
@@ -79,7 +79,7 @@ final class ChannelTest extends Framework\TestCase
             self::verifyProductSync($request, $response);
 
             // send empty payload
-            $request  = new SyncChannelProducts(
+            $request  = new ChannelProductsSync(
                 [
                     "meta"             => self::$channelMetaData,
                     "channel_products" => [],
@@ -102,7 +102,7 @@ final class ChannelTest extends Framework\TestCase
             self::setChannel($type);
 
             // sync all test data
-            $request  = new SyncChannelProducts(
+            $request  = new ChannelProductsSync(
                 [
                     "meta"             => self::$channelMetaData,
                     "channel_products" => self::$channelProductsData,
@@ -251,10 +251,10 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
-     * @param SyncChannelProducts $request
-     * @param SyncChannelProducts $response
+     * @param ChannelProductsSync $request
+     * @param ChannelProductsSync $response
      */
-    function verifyProductSync(SyncChannelProducts $request, SyncChannelProducts $response)
+    function verifyProductSync(ChannelProductsSync $request, ChannelProductsSync $response)
     {
         // Check against existing products on channel by fetching them first
         $existingProducts   = self::$channel->getProductsByCode($request);
