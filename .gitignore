@@ -1,3 +1,9 @@
 www/composer.phar
 .idea
 
+www/v1/stock2shop/dal/channels/example/data/fulfillments
+www/v1/stock2shop/dal/channels/example/data/orders
+www/v1/stock2shop/dal/channels/example/data/products
+!www/v1/stock2shop/dal/channels/example/data/fulfillments/readme.md
+!www/v1/stock2shop/dal/channels/example/data/orders/readme.md
+!www/v1/stock2shop/dal/channels/example/data/products/readme.md
