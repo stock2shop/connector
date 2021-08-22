@@ -45,7 +45,7 @@ You cannot edit anything in this directory.
 
 ### /www/v1/stock2shop/dal
 
-dal stands for Data Access Layer.
+DAL stands for "Data Access Layer".
 The purpose of this directory is to separate logic related 
 to different systems.
 

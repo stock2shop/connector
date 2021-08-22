@@ -24,8 +24,8 @@ git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 
 ### Testing
 
-Test use phpunit.
-Ensure your tests work with:
+Tests use the [phpunit](https://phpunit.readthedocs.io/en/9.5/installation.html).
+Ensure your tests are working with:
 
 ```bash
 cd ${S2S_PATH}/connector/tests
@@ -41,3 +41,4 @@ Creating a new channel means adding a directory to:
 Once you hav added this directory, the E2E tests will automatically
 call the appropriate methods with test data.
 
+See [architecture](architecture.md) about the channel interface.
