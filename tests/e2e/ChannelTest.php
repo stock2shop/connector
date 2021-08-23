@@ -226,7 +226,7 @@ final class ChannelTest extends Framework\TestCase
     {
 
         // only return up to limit
-        $this->assertLessThanOrEqual($limit, count($limit));
+        $this->assertLessThanOrEqual($limit, count($fetchedProducts));
         $currentToken = $token;
         foreach ($fetchedProducts as $product) {
 
