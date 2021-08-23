@@ -97,7 +97,7 @@ interface Connector {
      * - channel_fulfillment_code
      *
      * @param ChannelFulfillmentsSync $ChannelFulfillmentsSync
-     * @return ChannelFulfillments[]
+     * @return ChannelFulfillment[]
      */
     public function getFulfillmentsByOrderCode(ChannelFulfillmentsSync $ChannelFulfillmentsSync): array;
 }

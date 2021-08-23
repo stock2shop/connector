@@ -70,7 +70,7 @@ Think of channel as in "sales channel".
 If you have been commissioned to integrate code into a specific
 shopping cart, then you will create a directory here.
 
-Each channel must have at least 2 classes:-
+Each channel must have these classes:-
 
 - Connector.php
 - Creator.php
