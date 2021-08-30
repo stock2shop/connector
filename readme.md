@@ -1,5 +1,15 @@
 # PHP connectors
 
+Stock2Shop connectors connect ERP accounting systems with sales channels, 
+such as ecommerce shopping carts, market places and our B2B trade store.
+
+The purpose of this repository is to allow 3rd party developers to contribute 
+connectors to our ecosystem.
+
+This repository is a bare bones interface to guide you on what we require.
+It includes an example channel connector, to illustrate data structures 
+and our workflow.  
+
 ## Submission Guidelines
 
 ### PHP version
