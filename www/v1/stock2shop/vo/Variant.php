@@ -2,10 +2,10 @@
 
 namespace stock2shop\vo;
 
-use stock2shop\vo\MetaItem;
+use stock2shop\vo\Meta;
+use stock2shop\vo\QtyAvailability;
 use stock2shop\vo\PriceTier;
 use stock2shop\base\ValueObject;
-use stock2shop\vo\QtyAvailabilityItem;
 
 class Variant extends ValueObject
 {
@@ -21,7 +21,7 @@ class Variant extends ValueObject
     /** @var int $qty */
     public $qty;
 
-    /** @var QtyAvailabilityItem[] $qty_availability */
+    /** @var QtyAvailability $qty_availability */
     public $qty_availability;
 
     /** @var float $price */
@@ -61,8 +61,11 @@ class Variant extends ValueObject
         $this->sku = self::stringFrom($data, "sku");
         $this->active = self::boolFrom($data, "active");
         $this->qty = self::intFrom($data, "qty");
+
+        // TODO: Replace this without another object.
+        // TODO: Ask Chris.
         $this->qty_availability =
-            QtyAvailabilityItem::createArray(self::arrayFrom($data, "qty_availability"));
+            QtyAvailability::createArray(self::arrayFrom($data, "qty_availability"));
         $this->price = self::floatFrom($data, "price");
         $this->price_tiers =
             PriceTier::createArray(self::arrayFrom($data, "price_tiers"));
@@ -72,7 +75,9 @@ class Variant extends ValueObject
         $this->option1 = self::stringFrom($data, "option1");
         $this->option2 = self::stringFrom($data, "option2");
         $this->option3 = self::stringFrom($data, "option3");
-        $this->meta = MetaItem::createArray(self::arrayFrom($data, "meta"));
+
+        // TODO: Replace with Params?
+        $this->meta = Meta::createArray(self::arrayFrom($data, "meta"));
     }
 
     /**

@@ -8,7 +8,7 @@ $loader->add('stock2shop', __DIR__ . "/../../../../v1");
 
 function main($className = "") {
     $voDir = __DIR__ . '/../../vo';
-    $fileNames = array_diff(scandir($voDir, SCANDIR_SORT_ASCENDING), array('..', '.'));
+    $fileNames = array_diff(scandir($voDir, SCANDIR_SORT_ASCENDING), array('..', '.', 'README.md'));
     $output = new \stdClass();
     foreach ($fileNames as $fileName) {
         $vo = str_replace(".php", "", $fileName);

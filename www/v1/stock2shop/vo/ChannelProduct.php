@@ -4,6 +4,7 @@ namespace stock2shop\vo;
 
 use stock2shop\vo\Product;
 use stock2shop\vo\ChannelVariant;
+use stock2shop\vo\ChannelImage;
 
 class ChannelProduct extends Product
 {
@@ -16,7 +17,7 @@ class ChannelProduct extends Product
     /** @var string $channel_product_code */
     public $channel_product_code;
 
-    /** @var Image[] $images */
+    /** @var ChannelImage[] $images */
     public $images;
 
     /** @var ChannelVariant[] $variants */
@@ -35,20 +36,21 @@ class ChannelProduct extends Product
      * Creates the data object to spec.
      *
      * @param array $data
-     *
      * @return void
      */
     public function __construct(array $data) {
+
         parent::__construct($data);
 
         $this->id = self::intFrom($data, 'id');
         $this->channel_id = self::intFrom($data, 'channel_id');
         $this->channel_product_code = self::stringFrom($data, 'channel_product_code');
-        $this->images = Image::createArray(self::arrayFrom($data, 'images'));
+        $this->images = ChannelImage::createArray(self::arrayFrom($data, 'images'));
         $this->variants = ChannelVariant::createArray(self::arrayFrom($data, 'variants'));
         $this->delete = self::boolFrom($data, 'delete');
         $this->success = self::boolFrom($data, 'success');
         $this->synced = self::stringFrom($data, 'synced');
+
     }
 
     /**

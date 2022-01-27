@@ -2,7 +2,7 @@
 
 namespace stock2shop\vo;
 
-use stock2shop\vo\MetaItem;
+use stock2shop\vo\Meta;
 use stock2shop\vo\ProductOption;
 use stock2shop\base\ValueObject;
 
@@ -47,9 +47,8 @@ class Product extends ValueObject
         $this->product_type = self::stringFrom($data, "product_type");
         $this->tags = self::stringFrom($data, "tags");
         $this->vendor = self::stringFrom($data, "vendor");
-        $this->options =
-            ProductOption::createArray(self::arrayFrom($data, "options"));
-        $this->meta = MetaItem::createArray(self::arrayFrom($data, "meta"));
+        $this->options = ProductOption::createArray(self::arrayFrom($data, "options"));
+        $this->meta = Meta::createArray(self::arrayFrom($data, "meta"));
     }
 
     /**
