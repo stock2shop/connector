@@ -8,34 +8,36 @@ use stock2shop\base\ValueObject;
 
 class SystemProduct extends Product
 {
-    /** @var int $id */
+    /** @var int|null $id */
     public $id;
 
-    /** @var string $source_product_code */
+    /** @var string|null $source_product_code */
     public $source_product_code;
 
     /** @var SystemVariant[] $variants */
     public $variants;
 
+    /** @var SystemImage[] $images */
+    public $images;
+
     /**
-     * Creates the data object to spec.
-     *
+     * SystemProduct constructor.
      * @param array $data
-     *
-     * @return void
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public function __construct(array $data) {
+    public function __construct(array $data)
+    {
         parent::__construct($data);
 
-        $this->id = static::intFrom($data, 'id');
+        $this->id                  = static::intFrom($data, 'id');
         $this->source_product_code = static::stringFrom($data, 'source_product_code');
-        $this->variants = SystemVariant::createArray(static::arrayFrom($data, 'variants'));
+        $this->variants            = SystemVariant::createArray(static::arrayFrom($data, 'variants'));
+        $this->images              = SystemImage::createArray(static::arrayFrom($data, 'images'));
     }
 
     /**
-     * Computes a hash of the SystemProduct
-     *
      * @return string
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function computeHash(): string
     {
