@@ -56,28 +56,24 @@ class Variant extends ValueObject
      * @param array $data
      */
     function __construct(array $data) {
-        $this->source_variant_code =
-            self::stringFrom($data, "source_variant_code");
+        $this->source_variant_code = self::stringFrom($data, "source_variant_code");
         $this->sku = self::stringFrom($data, "sku");
         $this->active = self::boolFrom($data, "active");
         $this->qty = self::intFrom($data, "qty");
 
         // TODO: Replace this without another object.
         // TODO: Ask Chris.
-        $this->qty_availability =
-            QtyAvailability::createArray(self::arrayFrom($data, "qty_availability"));
+        $this->qty_availability = QtyAvailability::createArray(self::arrayFrom($data, "qty_availability"));
         $this->price = self::floatFrom($data, "price");
-        $this->price_tiers =
-            PriceTier::createArray(self::arrayFrom($data, "price_tiers"));
+        $this->price_tiers = PriceTier::createArray(self::arrayFrom($data, "price_tiers"));
         $this->barcode = self::stringFrom($data, "barcode");
         $this->inventory_management = self::boolFrom($data, "inventory_management");
         $this->grams = self::intFrom($data, "grams");
         $this->option1 = self::stringFrom($data, "option1");
         $this->option2 = self::stringFrom($data, "option2");
         $this->option3 = self::stringFrom($data, "option3");
-
-        // TODO: Replace with Params?
         $this->meta = Meta::createArray(self::arrayFrom($data, "meta"));
+
     }
 
     /**

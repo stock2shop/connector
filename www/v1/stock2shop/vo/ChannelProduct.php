@@ -33,7 +33,7 @@ class ChannelProduct extends Product
     public $synced;
 
     /**
-     * Creates the data object to spec.
+     * Class Constructor
      *
      * @param array $data
      * @return void

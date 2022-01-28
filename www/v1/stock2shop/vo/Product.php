@@ -2,12 +2,16 @@
 
 namespace stock2shop\vo;
 
+use stock2shop\base\ValueObject;
 use stock2shop\vo\Meta;
 use stock2shop\vo\ProductOption;
-use stock2shop\base\ValueObject;
 
+/**
+ * Product
+ */
 class Product extends ValueObject
 {
+
     /** @var bool $active */
     public $active;
 
@@ -32,14 +36,16 @@ class Product extends ValueObject
     /** @var ProductOption[] $options */
     public $options;
 
-    /** @var MetaItem[] $meta */
+    /** @var Meta[] $meta */
     public $meta;
 
     /**
-     * Product constructor.
+     * Class Constructor
+     *
      * @param array $data
+     * @return void
      */
-    function __construct(array $data) {
+    public function __construct(array $data) {
         $this->active = self::boolFrom($data, "active");
         $this->title = self::stringFrom($data, "title");
         $this->body_html = self::stringFrom($data, "body_html");

@@ -4,6 +4,9 @@ namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
 
+/**
+ * Address
+ */
 class Address extends ValueObject
 {
 
@@ -59,10 +62,11 @@ class Address extends ValueObject
     public $default;
 
     /**
-     * Creates the data object to spec.
+     * Class Constructor
      *
      * @param array $data
      * @return void
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function __construct(array $data)
     {
@@ -76,7 +80,7 @@ class Address extends ValueObject
         $this->last_name        = self::stringFrom($data, 'last_name');
         $this->phone            = self::stringFrom($data, 'phone');
         $this->province         = self::stringFrom($data, 'province');
-        $this->zip              = self::intFrom($data, 'zip');
+        $this->zip              = self::stringFrom($data, 'zip');
         $this->country_code     = self::stringFrom($data, 'country_code');
         $this->province_code    = self::stringFrom($data, 'province_code');
         $this->address_code     = self::stringFrom($data, 'address_code');
@@ -86,10 +90,11 @@ class Address extends ValueObject
     }
 
     /**
-     * Creates an array of this class.
+     * Create Array
      *
      * @param array $data
      * @return Address[]
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     static function createArray(array $data): array {
         $returnable = [];

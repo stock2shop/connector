@@ -6,6 +6,7 @@ use stock2shop\base\ValueObject;
 
 class QtyAvailability extends ValueObject
 {
+
     /** @var string|null $description */
     public $description;
 
@@ -37,4 +38,5 @@ class QtyAvailability extends ValueObject
         }
         return $a;
     }
+
 }

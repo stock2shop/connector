@@ -2,7 +2,6 @@
 
 namespace stock2shop\vo;
 
-
 class SystemSegment extends Segment
 {
     /** @var int $id */
