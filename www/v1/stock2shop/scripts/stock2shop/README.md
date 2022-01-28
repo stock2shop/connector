@@ -2,7 +2,7 @@
 
 ## vojson.php
 
-Run this PHP script to output the Value Object/VO classes in JSON format. The script serializes the class properties outputs it to stdout.
+Run this PHP script to output the Value Object/VO classes in JSON format.
 
 The syntax is:
 
