@@ -4,6 +4,25 @@ namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
 
+/**
+ * Flag
+ *
+ * This is the Value Object for a Flag item on the system.
+ *
+ * Flags determine if a product and variant property should be
+ * updated on the channel. You can override product properties
+ * in your channel by setting its flag to "channel". This is done
+ * by configuring the $code class property of an object of the
+ * Flag class.
+ *
+ * @property $client_id
+ * @property $channel_id
+ * @property $source_id
+ * @property $table
+ * @property $column
+ * @property $description
+ * @property $code
+ */
 class Flag extends ValueObject
 {
     /** @var int|null $client_id */

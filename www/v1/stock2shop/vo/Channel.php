@@ -3,7 +3,6 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
-use stock2shop\vo\Meta;
 
 /**
  * Channel
