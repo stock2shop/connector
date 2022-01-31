@@ -2,26 +2,23 @@
 
 namespace stock2shop\dal\channel;
 
-/**
- * Creator
- */
 abstract class Creator
 {
 
     /**
      * @return Products
      */
-    abstract public function createProducts(): array;
+    abstract public function createProducts(): Products;
 
     /**
      * @return Orders
      */
-    abstract public function createOrders(): array;
+    abstract public function createOrders(): Orders;
 
     /**
      * @return Fulfillments
      */
-    abstract public function createFulfillments(): array;
+    abstract public function createFulfillments(): Fulfillments;
 
 }
 
