@@ -57,6 +57,8 @@ php ${S2S_PATH}/connector/www/v1/stock2shop/scripts/stock2shop/VOJSON.php --clas
 
 This is useful for quickly viewing classes which may extend multiple parents.
 
+For more information read the [README.md](www/v1/stock2shop/vo/README.md) file in the `/www/v1/stock2shop/vo` directory.
+
 ### /www/v1/stock2shop/dal
 
 DAL stands for "Data Access Layer".
@@ -72,13 +74,29 @@ shopping cart, then you will create a directory here.
 
 Each channel must have these classes:-
 
-- Connector.php
+- 
 - Creator.php
 
 These are called by our application using the factory method.
 
-`creator.php` is used to create a new instance of your channel.
-You can copy the Creator found in `example/Creator.php`.
+`Creator.php` is used to create a new instance of the Factory class which dynamically instantiates the required channel type from the following three options:
+
+1. Products
+2. Orders
+3. Fulfillments
+
+As a starting point, you may copy the Creator.php file found in `example` and adjust it accordingly. 
+If the service you are coding the connector integration for does not require any of the aforementioned channel types, then you must throw 
+a custom exception from our exceptions namespace.
+
+For example, if your shopping cart does not need to sync fulfillment data (i.e. shipping information/logistics) then add the following to your Creator.php file in the `channels/[yourconnector]` directory: 
+
+```php
+public function createFulfillments(): channel\Fulfillments
+{
+    throw new exceptions\NotImplemented();
+}
+```
 
 `connector.php` implements the `channel/Connector.php` interface.
 It must therefore include all methods and have the same method signatures.

@@ -48,7 +48,7 @@ Creating a new channel means adding a directory to:
 
 `${S2S_PATH}/connector/www/v1/stock2shop/dal/channels`
 
-Once you hav added this directory, the E2E tests will automatically
+Once you have added this directory, the E2E tests will automatically
 call the appropriate methods with test data.
 
 See [architecture](architecture.md) about the channel interface.
