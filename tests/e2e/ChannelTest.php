@@ -2,13 +2,9 @@
 
 namespace tests\e2e;
 
-use phpDocumentor\Reflection\Types\Void_;
 use PHPUnit\Framework;
-
-use stock2shop\dal\channels;
-use stock2shop\vo\Meta;
-use stock2shop\vo\Channel;
-
+use stock2shop\vo;
+use stock2shop\dal\channel;
 
 /**
  * This "end to end" test runs through all channel types.
@@ -17,34 +13,30 @@ use stock2shop\vo\Channel;
 final class ChannelTest extends Framework\TestCase
 {
 
-    /**
-     * FACTORY
-     */
+    /** @var stock2shop\dal\channel\Creator $creator */
     static $creator;
 
-    /**
-     * CHANNEL
-     */
-    static $channel;
+    /** @var channel\Products | channel\Orders | channel\Fulfillments $connector */
+    static $connector;
 
-    /**
-     * VARIABLES
-     */
+    /** @var string[] $channelTypes */
     static $channelTypes;
+
+    /** @var array $channelFulfillmentsData */
     static $channelFulfillmentsData;
+
+    /** @var array $channelProductsData */
     static $channelProductsData;
+
+    /** @var array $channelMetaData */
     static $channelMetaData;
+
+    /** @var array $channelOrderData */
     static $channelOrderData;
 
     /**
-     * CHANNEL TYPES
-     */
-    const CHANNEL_TYPE_PRODUCTS         = "createProducts";
-    const CHANNEL_TYPE_FULFILLMENTS     = "createFulfillments";
-    const CHANNEL_TYPE_ORDERS           = "createOrders";
-
-    /**
-     * SETUP
+     * Set Up
+     * @return void
      */
     function setUp(): void
     {
@@ -54,9 +46,10 @@ final class ChannelTest extends Framework\TestCase
     /**
      * Test Sync Products
      *
-     * This test case evaluates syncing of products in implementation the
-     * implementation. The following test workflow is repeated for each
-     * channel type configured in this test class.
+     * This test case evaluates syncing of products for all custom connectors
+     * implemented in the 'channels' directory.
+     *
+     * The following workflow is repeated for each connector type:
      *
      * 1. Data.
      * 2. Channel.
@@ -64,31 +57,58 @@ final class ChannelTest extends Framework\TestCase
      * 4. Verify.
      *
      * @return void
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    function testSyncProducts()
+    function testSyncProducts(): void
     {
+
         foreach (self::$channelTypes as $type) {
 
-            /**
-             * 1. Set channel factory creator.
-             */
-            self::setChannelFactory($type);
+            self::loadTestData($type);                                                    // load test data from type.
+            self::setChannelFactory($type);                                               // instantiate factory from type.
 
             /**
-             * 2. Load test data for channel.
+             * SCENARIO 1:
              */
-            self::loadTestData($type);
+            $scenarioProducts = vo\ChannelProduct::createArray(self::$channelProductsData);
+
+            $channel = new vo\Channel(json_encode(self::$channelData, true));       // create channel object with config.
+            self::$connector = self::$creator->createProducts();                          // create products from connector.
+
+            $syncedProductData = self::$connector->sync(
+                $channelProducts,
+                $channel,
+                []
+            );
 
             /**
-             * 3. Set channel by type name.
+             * SCENARIO 2:
              */
-            $channelTypeName = "createProducts";
-            $channel = self::$creator->$channelTypeName;
+            $scenarioProducts = vo\ChannelProduct::createArray(self::$channelProductsData);
+            unset($scenarioProducts[1]['variants'][1]);
+
+            $channel = new vo\Channel(json_encode(self::$channelData, true));       // create channel object with config.
+            self::setChannelFactory($type);                                               // instantiate factory from type.
+            self::loadTestData($type);                                                    // load test data from type.
+            self::$connector = self::$creator->createProducts();                          // create products from connector.
+
+            $syncedProductData = self::$connector->sync(
+                $channelProducts,
+                $channel,
+                []
+            );
+
 
             /**
-             * 4. Call sync on the channel.
+             * SCENARIO 3:
              */
-            $channel->sync(self::$channelProductsData, self::$channel, []);
+
+
+            /**
+             * SCENARIO 4:
+             */
+
+
 
         }
     }
@@ -174,24 +194,24 @@ final class ChannelTest extends Framework\TestCase
              * 2. Load test data using self::loadTestData($type).
              */
             self::loadTestData($type);
-            self::setChannelCreator($type);
+            self::setCreator($type);
 
             /**
-             * 3. Set the custom factory creator.
+             * 3. Create an instance of the products connector.
              */
-            self::$channel = self::$creator->createProducts();
+            self::$connector = self::$creator->createProducts();
 
             /**
              * 4. Create new channel with the $channelMetaData.
              */
-            $channel = new Channel(self::$channelMetaData);
+            self::$channel = new Channel(self::$channelMetaData);
 
             /**
              * 5. Sync all test data ($channelProductsData) on the $channel.
              */
             $response = self::$channel->sync(
                 self::$channelProductsData,
-                $channel,
+                self::$channel,
                 []
             );
 
@@ -346,13 +366,23 @@ final class ChannelTest extends Framework\TestCase
 
     /**
      * Verify Product Sync
+     *
+     * This method is used to verify whether the connector is working correctly
+     * by comparing the requested product and product variant data with the
+     * data received in response from the channel.
+     *
+     * Product sync is verified by:
+     *
+     * 1. Fetch products from the channel by use of getByCode().
+     *
      * @param $request
      * @param $response
      */
     function verifyProductSync($request, $response)
     {
         // Check against existing products on channel by fetching them first
-        $existingProducts   = self::$channel->getByCode($request);
+        $existingProducts = self::$connector->getByCode($request);
+
         $requestProductCnt  = 0;
         $requestVariantCnt  = 0;
         $existingVariantCnt = 0;
@@ -446,75 +476,43 @@ final class ChannelTest extends Framework\TestCase
 
     /**
      * Load Test Data
-     * @param $type
+     *
+     * Get the test data from the test data directory and
+     * convert JSON strings into PHP arrays for each test
+     * data segment.
+     *
+     * @param string $type
      * @return void
      */
-    function loadTestData($type)
+    function loadTestData(string $type): void
     {
-        $channelFulfillmentsJSON       = file_get_contents(__DIR__ . '/data/syncChannelFulfillments.json');
-        $channelProductsJSON           = file_get_contents(__DIR__ . '/data/syncChannelProducts.json');
-        $channelMetaJSON               = file_get_contents(__DIR__ . '/data/channelMeta.json');
-        $channelOrderJSON              = file_get_contents(__DIR__ . '/data/channels/' . $type . '/orderTransform.json');
-
-        self::$channelFulfillmentsData = json_decode($channelFulfillmentsJSON, true);
-        self::$channelProductsData     = self::loadValueObjectCollection(json_decode($channelProductsJSON, true), "stock2shop\\vo\\ChannelProduct");
-        self::$channelMetaData         = self::loadValueObjectCollection(json_decode($channelMetaJSON, true), "stock2shop\\vo\\Meta");
-        self::$channelMetaData         = self::loadValueObjectCollection(json_decode($channelMetaJSON, true), "stock2shop\\vo\\Meta");
-//        self::$channelMetaData         = self::loadValueObjectCollection(json_decode($channelMetaJSON, true), "stock2shop\\vo\\");
-//        self::$channelMetaData         = self::loadValueObjectCollection(json_decode($channelOrderJSON, true), "stock2shop\\vo\\ChannelOrder");
-//        self::$channelOrderData        = json_decode(, true);
+        self::$channelFulfillmentsRaw = json_decode(file_get_contents(__DIR__ . '/data/syncChannelFulfillments.json'), true);
+        self::$channelProductsRaw     = json_decode(file_get_contents(__DIR__ . '/data/syncChannelProducts.json'), true);
+        self::$channelMetaRaw         = json_decode(file_get_contents(__DIR__ . '/data/channelMeta.json'), true);
+        self::$channelOrderRaw        = json_decode(file_get_contents(__DIR__ . '/data/channels/' . $type . '/orderTransform.json'), true);
     }
 
     /**
-     * Load Value Object Collection
-     *
-     * This is a helper method to load the raw array data into value objects
-     * and return them in an array. (not a 'typed collection').
-     *
-     * @param array $data
-     * @param string $valueObjectClassName
-     * @return void
-     */
-    function loadValueObjectCollection(array $data, string $valueObjectClassName) {
-        $returnArray = [];
-        if(!empty($data)) {
-            foreach($data as $item) {
-                $returnArray[] = new $valueObjectClassName($item);
-            }
-        }
-        return $returnArray;
-    }
-
-    /**
+     * Get Channel Types
      * Channel types are directories and classes found in /dal/channels/
      * @return array
      */
     function getChannelTypes(): array
     {
         $channels = [];
-        $items    = array_diff(scandir(
+
+        $items = array_diff(scandir(
             __DIR__ . '/../../www/v1/stock2shop/dal/channels',
             SCANDIR_SORT_ASCENDING
-        ), array('..', '.', 'README.md'));
+            ), ['..', '.']);
+
         foreach ($items as $item) {
-            $channels[] = $item;
+            if(is_dir($item)) {
+                $channels[] = $item;
+            }
         }
 
         return $channels;
-    }
-
-    /**
-     * Set Channel
-     *
-     * Sets the channel based on the string type passed to
-     * this function.
-     *
-     * @param string $type
-     */
-    function setChannelCreator(string $type)
-    {
-        $creatorNameSpace = "stock2shop\\dal\\channels\\" . $type . "\\Creator";
-        self::$creator    = new $creatorNameSpace();
     }
 
     /**
