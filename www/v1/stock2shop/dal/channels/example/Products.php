@@ -2,12 +2,9 @@
 
 namespace stock2shop\dal\channels\example;
 
-use stock2shop\dal\channel;
-use stock2shop\exceptions;
 use stock2shop\vo;
-use stock2shop\vo\Meta;
-use stock2shop\vo\ChannelProduct;
-use stock2shop\vo\ChannelVariant;
+use stock2shop\exceptions;
+use stock2shop\dal\channel;
 
 /**
  * Products
@@ -20,7 +17,7 @@ class Products implements channel\Products
 {
 
     /**
-     * Data directory
+     * @const string DATA_PATH
      */
     const DATA_PATH = __DIR__ . "/data";
 
@@ -34,23 +31,20 @@ class Products implements channel\Products
      * product.id is the file name for the product.
      * product.variant[].channel_variant_code is the file name for the variant.
      *
-     * @param array $channelProducts
+     * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
-     * @param array $flagsMap
-     * @return array
+     * @param vo\Flag[] $flagsMap
+     * @return vo\ChannelProduct[] $channelProducts
      */
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
 
         /**
-         * 1. Configure the channel meta.
+         * Configure channel meta.
          */
         $map = Meta::createArray($channel->meta);
         $separator = $map['separator'];
 
-        /**
-         * 2. Iterate over products.
-         */
         foreach($channelProducts as $product) {
 
             /**
@@ -73,7 +67,6 @@ class Products implements channel\Products
             $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, "products");
 
             /**
-             * Delete Product/Variants
              * If the $delete property is set, then remove the product.
              */
             if ($product->delete) {
@@ -95,7 +88,9 @@ class Products implements channel\Products
                  */
                 $variantsToKeep = [];
                 foreach ($product->variants as $variant) {
+
                     $filePath = self::DATA_PATH . '/products/' . $variant->channel_variant_code;
+
                     if ($product->delete) {
                         unlink($filePath);
                     } else {
@@ -105,13 +100,15 @@ class Products implements channel\Products
                 }
 
                 /**
-                 * Remove old product variants.
+                 * Remove old products and/or product variants.
+                 * $currentFiles may contain fileNames for either.
                  */
                 foreach ($currentFiles as $fileName => $obj) {
                     if (!in_array($fileName, $variantsToKeep) && strpos($fileName, $separator) !== false) {
                         unlink(self::DATA_PATH . '/products/' . $fileName);
                     }
                 }
+
             }
 
             /**
@@ -140,24 +137,24 @@ class Products implements channel\Products
      * @param string $token
      * @param int $limit
      * @param vo\Channel $channel
-     * @return array
+     * @return ChannelProduct[] $channelProducts
      */
     public function get(string $token, int $limit, vo\Channel $channel): array
     {
 
-        /**
-         * 1. Destructure into local variables.
-         */
-        $map             = $channel->meta;
-        $separator       = $map['separator'];
-        $channelProducts = [];
-        $currentFiles    = data\Helper::getJSONFiles("products");
+        /** @var Meta $map */
+        $map = $channel->meta;
+        $separator = $map['separator'];
+
+        /** @var string[] $currentFiles */
+        $currentFiles = data\Helper::getJSONFiles("products");
 
         /**
-         * 2. Page through the files (i.e. resources).
-         * This would typically be a resource like a paginated API endpoint.
+         * In this example, we are using JSON files for each product as
+         * the source of the product data.
          */
         $cnt = 1;
+        $channelProducts = [];
 
         foreach ($currentFiles as $fileName => $obj) {
             if (strcmp($token, $fileName) < 0) {
@@ -178,7 +175,9 @@ class Products implements channel\Products
 
                 } else {
 
-                    // This is a variant
+                    /**
+                     * Create new product variant from source.
+                     */
                     $channelProducts[count($channelProducts) - 1]->variants[] = new ChannelVariant(
                         [
                             "sku"                  => $obj->sku,

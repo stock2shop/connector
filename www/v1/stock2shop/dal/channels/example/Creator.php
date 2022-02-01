@@ -5,9 +5,6 @@ namespace stock2shop\dal\channels\example;
 use stock2shop\dal\channel;
 use stock2shop\exceptions;
 
-/**
- * This is the adapter for
- */
 class Creator extends channel\Creator
 {
 
@@ -22,7 +19,7 @@ class Creator extends channel\Creator
      *
      * The workflow is:
      *
-     * 1. Get the products from the data directory.
+     * 1. Get the products from the source.
      * 2. Iterate through channel products.
      *
      * @return channel\Products
@@ -41,4 +38,5 @@ class Creator extends channel\Creator
     {
         throw new exceptions\NotImplemented();
     }
+
 }

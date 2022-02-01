@@ -6,6 +6,13 @@ use stock2shop\vo\Product;
 use stock2shop\vo\ChannelVariant;
 use stock2shop\vo\ChannelImage;
 
+/**
+ * Channel Product
+ *
+ * This is the Value Object for a product from a Stock2Shop channel.
+ * Use this class to model the products from your connector source
+ * in terms of Stock2Shop channels.
+ */
 class ChannelProduct extends Product
 {
     /** @var int $id */

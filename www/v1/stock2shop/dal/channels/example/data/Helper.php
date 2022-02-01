@@ -7,6 +7,11 @@ class Helper
     const DATA_PATH = __DIR__;
 
     /**
+     * Get JSON Files By Prefix
+     *
+     * This method returns all the JSON files with the specified
+     * prefix.
+     *
      * @param string $prefix
      * @param string $type
      * @return array
@@ -24,7 +29,13 @@ class Helper
     }
 
     /**
-     * @param $type
+     * Get JSON Files
+     *
+     * Internally uses file_get_contents() to get the data from each
+     * file found in the data directory configured in the DATA_PATH
+     * class constant, by connector $type name.
+     *
+     * @param $type Connector type name.
      * @return array
      */
     static function getJSONFiles($type): array
