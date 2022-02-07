@@ -1,8 +1,7 @@
 <?php
-
 namespace stock2shop\dal\channel;
 
-use stock2shop\dal\channel;
+use stock2shop\vo;
 
 /**
  * Creator

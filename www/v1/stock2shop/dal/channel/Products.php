@@ -1,11 +1,7 @@
 <?php
-
 namespace stock2shop\dal\channel;
 
 use stock2shop\vo;
-//use stock2shop\vo\Flag;
-use stock2shop\vo\Channel;
-use stock2shop\vo\ChannelProduct;
 
 /**
  * Products
@@ -36,12 +32,12 @@ interface Products
      * i.e. For us to mark an image as updated, both ChannelProduct.success and
      * ChannelProduct.images[].success must be true
      *
-     * @param ChannelProduct[] $channelProducts
-     * @param Channel $channel
-     * @param array $flagsMap Flags::createMap
-     * @return ChannelProduct[]
+     * @param vo\ChannelProduct[] $channelProducts
+     * @param vo\Channel $channel
+     * @param array $flagsMap vo\Flags::createMap
+     * @return vo\ChannelProduct[]
      */
-    public function sync(array $channelProducts, Channel $channel, array $flagsMap): array;
+    public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array;
 
     /**
      * The following properties must be returned on the ChannelProducts:-
@@ -54,7 +50,7 @@ interface Products
      * @param vo\Channel $channel
      * @return vo\ChannelProduct[]
      */
-    public function getByCode(array $channelProducts, Channel $channel): array;
+    public function getByCode(array $channelProducts, vo\Channel $channel): array;
 
     /**
      * The following properties must be returned on the ChannelProducts:-
@@ -74,6 +70,6 @@ interface Products
      * @param vo\Channel $channel
      * @return vo\ChannelProduct[]
      */
-    public function get(string $token, int $limit, Channel $channel): array;
+    public function get(string $token, int $limit, vo\Channel $channel): array;
 
 }

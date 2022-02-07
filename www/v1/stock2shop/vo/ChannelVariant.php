@@ -23,7 +23,6 @@ class ChannelVariant extends Variant
     * Creates the data object to spec.
     *
     * @param array $data
-    *
     * @return void
     */
     public function __construct(array $data)
@@ -39,7 +38,6 @@ class ChannelVariant extends Variant
 
     /**
      * Computes a hash of the ChannelVariant
-     *
      * @return string
      */
     public function computeHash(): string
