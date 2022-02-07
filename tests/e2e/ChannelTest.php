@@ -460,7 +460,7 @@ final class ChannelTest extends Framework\TestCase
             // --------------------------------------------------------
 
             // Delete a variant from a product.
-            unset($request[1]->variants[1]);
+            $request[1]->variants[1]->delete = true;
 
             // Run the sync on the channel.
             $response = $connector->sync($request, $channel, $flagMap);
