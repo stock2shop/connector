@@ -25,25 +25,25 @@ use stock2shop\base\ValueObject;
  */
 class Flag extends ValueObject
 {
-    /** @var int|null $client_id */
+    /** @var int|null $client_id The client ID where the flag is applicable. */
     public $client_id;
 
-    /** @var int|null $channel_id */
+    /** @var int|null $channel_id The channel ID where the flag is applicable. */
     public $channel_id;
 
-    /** @var int|null $source_id */
+    /** @var int|null $source_id The source ID where the flag is applicable. */
     public $source_id;
 
-    /** @var string|null |null $table */
+    /** @var string|null $table The table name of the column to flag. */
     public $table;
 
-    /** @var string|null |null $column */
+    /** @var string|null $column The name of the column to flag in the table. */
     public $column;
 
-    /** @var string|null |null $description */
+    /** @var string|null $description The description of the flag. */
     public $description;
 
-    /** @var string|null |null $code system|channel|source */
+    /** @var string|null $code system|channel|source */
     public $code;
 
     /**

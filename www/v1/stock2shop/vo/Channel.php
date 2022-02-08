@@ -54,4 +54,24 @@ class Channel extends ValueObject
         $this->sync_token       = static::stringFrom($data, 'sync_token');
         $this->meta             = Meta::createArray(self::arrayFrom($data, "meta"));
     }
+
+    /**
+     * Get Meta Item Value By Key
+     *
+     * This is method to help with accessing the objects stored in the meta
+     * class property of a Channel object.
+     *
+     * @param string $keyName
+     * @return Meta|false $metaObject
+     */
+    public function getMetaItemValueByKey(string $keyName) {
+        foreach($this->meta as $metaItem) {
+            // If the key matches the requested keyName, return the object.
+            if($metaItem->key === $keyName) {
+                return $metaItem->value;
+            }
+        }
+        return "";
+    }
+
 }

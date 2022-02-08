@@ -4,6 +4,12 @@ namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
 
+/**
+ * Channel Image
+ *
+ * This is the Value Object for an image on a Stock2Shop vo\Channel.
+ * An image is always associated with a ChannelProduct.
+ */
 class ChannelImage extends ValueObject
 {
     /** @var int|null $id */
@@ -40,14 +46,14 @@ class ChannelImage extends ValueObject
     }
 
     /**
-     * Checks if the channel image is valid.
-     * Valid means that the minimum required fields are set
+     * Valid
      *
-     * TODO not sure what other properties make a "valid" image?
+     * Checks if the channel image is valid.
+     * Valid means that the minimum required fields are set.
      *
      * @return bool
      */
-    public function valid():bool {
+    public function valid(): bool {
         return (
             is_bool($this->success) &&
             is_string($this->channel_image_code) &&
@@ -70,4 +76,5 @@ class ChannelImage extends ValueObject
         }
         return $a;
     }
+
 }

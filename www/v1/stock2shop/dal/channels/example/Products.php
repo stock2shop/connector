@@ -38,101 +38,102 @@ class Products implements ProductsInterface
      */
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
-        // Get the separator meta from the Channel object.
-        $meta = $channel->meta;
 
-        // TODO: Ask Chris about a better way to access channel meta data.
-//        $separator = $map['separator'];
+        // Separator is used when creating variant file names.
+        // The separator is an example of Stock2Shop Channel 'meta'.
+        // Meta is a configured on Channel level and describes the
+        // channel and the required functionality.
 
-        $separator = null;
-        // Loop through the meta data for the channel and assign the value of
-        // the one with the 'separator' key to a local variable.
-        foreach($meta as $metaItem) {
-            if($metaItem->key === "separator")
-            {
-                $separator = $metaItem->value;
-            }
-        }
+        /** @var string $separator */
+        $separator = $channel->getMetaItemValueByKey("separator");
 
-        // Loop through all the channelProducts and
-        foreach($channelProducts as $product) {
+        // Iterate through the channel products.
+        foreach ($channelProducts as &$product) {
 
-            // Transform product id as prefix.
             $prefix          = urlencode($product->id);
             $productFileName = $prefix . '.json';
 
-            // Assign the channel_product_code to the product from the filename.
+            // Create channel_product_code for each product from the file name.
+            // In your integration, this would be the ID or code that the target
+            // system uses to uniquely identify the product.
+            // i.e. in WooCommerce this would be the post ID of the product.
             $product->channel_product_code = $productFileName;
             foreach ($product->variants as $variant) {
-                // And also assign a channeL_variant_code to each variant using the prefix and the
-                // separator configured in the Meta.
+
+                // Create channel_variant_code for each product variant.
+                // In this example, the channel_variant_code is a combination
+                // of the $prefix + channel separator (configured as channel meta)
+                // + the url encoded variant SKU code.
                 $variant->channel_variant_code = $prefix . $separator . urlencode($variant->sku) . '.json';
+
             }
 
-            // Get all source products which have been marked.
+            // Fetch the current fies from the source (in this case, flat-file).
             $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, "products");
 
-            // Delete products which have been marked.
+            // Check if the product has been flagged for delete.
             if ($product->delete) {
                 foreach ($currentFiles as $currentFileName => $obj) {
-                    // Unlink file from source.
                     unlink(self::DATA_PATH . '/products/' . $currentFileName);
                 }
             } else {
 
-                // Create or update product.
-                // Here we are writing back to the channel to update the products.
-                // In this example, the product data is being written to file instead.
+                // Create or update product by writing the product data to disk/file.
                 file_put_contents(self::DATA_PATH . '/products/' . $product->channel_product_code, json_encode($product));
 
-                // Create or update product variants.
-                // This is where the product variants are being create or updated.
                 $variantsToKeep = [];
+
+                // Iterate through the product variants.
                 foreach ($product->variants as $variant) {
 
-                    // This is the path we are writing the channel product's data to.
+                    // This is the path to the source system storage for this file.
                     $filePath = self::DATA_PATH . '/products/' . $variant->channel_variant_code;
 
-                    // If the product has been marked to be deleted, then unlink the file from the source.
                     if ($product->delete) {
+
+                        // Delete the product from the source system.
+                        // In this example, each product is saved to file.
+                        // We are calling unlink() on the file path to delete the product.
                         unlink($filePath);
+
                     } else {
 
-                        // Write the product to the source (file).
+                        // Add the product.
+                        // In this example, each product is saved to file.
+                        // We are going to save the JSON structure to file.
                         file_put_contents($filePath, json_encode($variant));
-
-                        // Gather the variant codes of variants which must be retained.
                         $variantsToKeep[] = $variant->channel_variant_code;
+
                     }
                 }
 
-                // Loop through the source data (files).
+                // Remove old variants
                 foreach ($currentFiles as $fileName => $obj) {
-
-                    // Check whether to delete the variant from the source (file).
                     if (!in_array($fileName, $variantsToKeep) && strpos($fileName, $separator) !== false) {
+
+                        // Unlink the JSON file from the source products directory.
                         unlink(self::DATA_PATH . '/products/' . $fileName);
+
                     }
                 }
             }
 
-            // Mark product as successfully synchronised.
-            $product->success = true;
-
-            // The current date and time is added in the required format.
+            // Mark products and variants as successfully synced
+            // TODO: Shouldn't this be in the Value Object itself? Something like $product->setSynced();
             $date = new \DateTime();
             $product->synced  = $date->format('Y-m-d H:i:s');
 
-            // Loop through variants.
+            // Mark product as successfully synced.
+            $product->success = true;
             foreach ($product->variants as $variant) {
 
-                // Mark product variant as successfully synchronised.
+                // Set product variants as successfully synced.
                 $variant->success = true;
+
             }
 
         }
 
-        // Finally, return all the channel products.
         return $channelProducts;
 
     }
@@ -140,7 +141,15 @@ class Products implements ProductsInterface
     /**
      * Get
      *
-     * Returns the products from this channel.
+     * This method implements the get() method from the dal\channel\Products interface class.
+     * Use this method to structure the integration you are coding according to Stock2Shop's
+     * requirements.
+     *
+     * You will use the vo\ChannelProductGet class here for each ChannelProduct in order to
+     * also add a token to each product. Stock2Shop makes use of a token-based system to
+     * determine the last product returned from the channel - much like a 'cursor'.
+     * In your workflow in this method, you must remember to set the token property of each
+     * ChannelProductGet class object to the channel_product_code.
      *
      * @param string $token
      * @param int $limit
@@ -149,45 +158,64 @@ class Products implements ProductsInterface
      */
     public function get(string $token, int $limit, vo\Channel $channel): array
     {
-
-        /** @var Meta $map */
-        $map = $channel->meta;
-        $separator = $map['separator'];
+        // Get separator value from the separator key name
+        $metaSeparatorValue = $channel->getMetaItemValueByKey("separator");
 
         /** @var string[] $currentFiles */
         $currentFiles = data\Helper::getJSONFiles("products");
-        $cnt = 1;
 
         /** @var ChannelProductGet[] $channelProducts */
         $channelProducts = [];
 
+        // --------------------------------------------------------
+
         // Loop through the product source data - which in this example integration
         // is provided by the data\Helper's getJSONFiles() method.
         foreach ($currentFiles as $fileName => $obj) {
+
+            // PHP's function strcmp(string1, string2) will return a value less than 0 if the value
+            // of string1 is less than the value of string2. Inversely, a value greater than 0 will
+            // be returned if the string2 is less than string1. 0 is returned if the values are equal.
+
+            // Hence,
+            // if $token is less than $fileName; proceed --->
             if (strcmp($token, $fileName) < 0) {
-                if (strpos($fileName, $separator) === false) {
-                    if ($cnt > $limit) {
+
+                // If $fileName does not contain the separator; proceed --->
+                if (strpos($fileName, $metaSeparatorValue) === false) {
+
+                    // If the number of channel products has reached the limit, break.
+                    if (count($channelProducts) > $limit) {
                         break;
                     }
-                    $channelProducts[] = new vo\ChannelProductGet([
-                        "channel_product_code" => $obj->channel_product_code
-                    ]);
-                    $cnt++;
+
+                    // Convert the \stdClass object to an array and add the token to the
+                    // array elements with the 'token' key. These are the requirements for
+                    // the vo\ChannelProductGet VO which we must use to implement the get()
+                    // functionality.
+                    $arrayProduct = (array)$obj;
+                    $arrayProduct["token"] = $token;
+
+                    // And add it to the channelProducts[] array.
+                    $channelProducts[] = new vo\ChannelProductGet($arrayProduct);
+
                 } else {
+
                     $channelProducts[count($channelProducts) - 1]->variants[] = new vo\ChannelVariant(
                         [
                             "sku"                  => $obj->sku,
                             "channel_variant_code" => $obj->channel_variant_code
                         ]
                     );
+
                     $channelProducts[count($channelProducts) - 1]->token = $obj->channel_variant_code;
+
                 }
 
             }
         }
 
         return $channelProducts;
-
     }
 
     /**
