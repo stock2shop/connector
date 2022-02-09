@@ -18,16 +18,20 @@ class QtyAvailability extends ValueObject
      * @param array $data
      * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    function __construct(array $data)
+    public function __construct(array $data)
     {
         $this->description = self::stringFrom($data, "description");
         $this->qty         = self::intFrom($data, "qty");
     }
 
     /**
+     * Create Array
+     *
+     * Creates an array from this object.
+     *
      * @param array $data
      * @return QtyAvailability[]
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     static function createArray(array $data): array
     {

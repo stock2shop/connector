@@ -15,13 +15,7 @@ use stock2shop\base\ValueObject;
  * by configuring the $code class property of an object of the
  * Flag class.
  *
- * @property $client_id
- * @property $channel_id
- * @property $source_id
- * @property $table
- * @property $column
- * @property $description
- * @property $code
+ * @package stock2shop\vo
  */
 class Flag extends ValueObject
 {
@@ -54,12 +48,12 @@ class Flag extends ValueObject
     public function __construct(array $data)
     {
         $this->description = self::stringFrom($data, 'description');
-        $this->client_id   = self::intFrom($data, 'client_id');
-        $this->table       = self::stringFrom($data, 'table');
-        $this->column      = self::stringFrom($data, 'column');
-        $this->code        = self::stringFrom($data, 'code');
-        $this->source_id   = self::intFrom($data, 'source_id');
-        $this->channel_id  = self::intFrom($data, 'channel_id');
+        $this->client_id = self::intFrom($data, 'client_id');
+        $this->table = self::stringFrom($data, 'table');
+        $this->column = self::stringFrom($data, 'column');
+        $this->code = self::stringFrom($data, 'code');
+        $this->source_id = self::intFrom($data, 'source_id');
+        $this->channel_id = self::intFrom($data, 'channel_id');
     }
 
     /**
@@ -84,7 +78,7 @@ class Flag extends ValueObject
      */
     static function createMap(array $data): array
     {
-        $map   = [];
+        $map = [];
         $flags = self::createArray($data);
         foreach ($flags as $flag) {
             if (!isset($map[$flag->table])) {

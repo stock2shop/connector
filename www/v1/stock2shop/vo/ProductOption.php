@@ -3,7 +3,15 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
+use stock2shop\exceptions\UnprocessableEntity;
 
+/**
+ * Product Option
+ *
+ * This is the Value Object class for vo\ProductOption items.
+ *
+ * @package stock2shop\vo
+ */
 class ProductOption extends ValueObject
 {
     /** @var string $name */
@@ -16,21 +24,28 @@ class ProductOption extends ValueObject
     public $position;
 
     /**
-     * ProductOption constructor.
+     * Default Constructor
+     *
      * @param array $data
+     * @throws UnprocessableEntity
      */
-    function __construct(array $data) {
+    public function __construct(array $data)
+    {
         $this->name = self::stringFrom($data, "name");
         $this->value = self::stringFrom($data, "value");
         $this->position = self::intFrom($data, "position");
     }
 
     /**
-     * Creates an array of this class
+     * Ceate Array
+     *
+     * Creates an array of this class.
+     *
      * @param array $data
      * @return ProductOption[]
      */
-    static function createArray(array $data): array {
+    public static function createArray(array $data): array
+    {
         $a = [];
         foreach ($data as $item) {
             $pmd = new ProductOption((array)$item);
@@ -38,4 +53,5 @@ class ProductOption extends ValueObject
         }
         return $a;
     }
+
 }

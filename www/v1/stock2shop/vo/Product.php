@@ -3,7 +3,16 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
+use stock2shop\exceptions;
 
+/**
+ * Product
+ *
+ * This is the base class for products in the system.
+ * It is extended by ChannelProduct.
+ *
+ * @package stock2shop\vo
+ */
 class Product extends ValueObject
 {
     /** @var bool|null $active */
@@ -36,9 +45,9 @@ class Product extends ValueObject
     /**
      * Product constructor.
      * @param array $data
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
-    function __construct(array $data)
+    public function __construct(array $data)
     {
         $this->active       = self::boolFrom($data, "active");
         $this->title        = self::stringFrom($data, "title");
@@ -62,7 +71,7 @@ class Product extends ValueObject
 
     /**
      * @return string
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws exceptions\UnprocessableEntity
      */
     public function computeHash(): string
     {

@@ -2,15 +2,29 @@
 
 namespace stock2shop\vo;
 
+use stock2shop\exceptions\UnprocessableEntity;
+
+/**
+ * Channel Variant
+ *
+ * This is the ChannelVariant class.
+ * It extends the Variant base class.
+ *
+ * Use this class to represent product variants.
+ * You will add these objects in an array structure to
+ * ChannelProduct objects when you code your DAL.
+ *
+ * @package stock2shop\vo
+ */
 class ChannelVariant extends Variant
 {
-    /** @var int $id */
+    /** @var int $id This is the internal ID assigned to a variant by Stock2Shop. */
     public $id;
 
-    /** @var int $product_id */
+    /** @var int $product_id This is the ID of the ChannelProduct to which this variant belongs.  */
     public $product_id;
 
-    /** @var string $channel_variant_code */
+    /** @var string $channel_variant_code This is the unique identifier used by the source system. */
     public $channel_variant_code;
 
     /** @var bool $delete */
@@ -37,8 +51,12 @@ class ChannelVariant extends Variant
     }
 
     /**
-     * Computes a hash of the ChannelVariant
+     * Compute Hash
+     *
+     * Computes a hash of the ChannelVariant.
+     *
      * @return string
+     * @throws UnprocessableEntity
      */
     public function computeHash(): string
     {
@@ -52,11 +70,14 @@ class ChannelVariant extends Variant
     }
 
     /**
-     * Creates an array of this class
+     * Create Array
+     *
+     * Creates an array of this class.
+     *
      * @param array $data
      * @return ChannelVariant[]
      */
-    static function createArray(array $data): array {
+    public static function createArray(array $data): array {
         $a = [];
         foreach ($data as $item) {
             $cv = new ChannelVariant((array)$item);
@@ -64,4 +85,5 @@ class ChannelVariant extends Variant
         }
         return $a;
     }
+
 }

@@ -13,6 +13,8 @@ namespace stock2shop\vo;
  * the stock2shop\dal\channel\Products interface when you code your
  * connector integration to add a filter token to each ChannelProduct
  * item.
+ *
+ * @package stock2shop\vo
  */
 class ChannelProductGet extends ChannelProduct
 {
@@ -23,7 +25,6 @@ class ChannelProductGet extends ChannelProduct
      * Creates the data object to spec.
      *
      * @param array $data
-     *
      * @return void
      */
     public function __construct(array $data)

@@ -3,12 +3,15 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
+use stock2shop\exceptions\UnprocessableEntity;
 
 /**
  * Channel Image
  *
- * This is the Value Object for an image on a Stock2Shop vo\Channel.
+ * This is the Value Object for an image on a Stock2Shop Channel.
  * An image is always associated with a ChannelProduct.
+ *
+ * @package stock2shop\vo
  */
 class ChannelImage extends ValueObject
 {
@@ -31,9 +34,10 @@ class ChannelImage extends ValueObject
     public $success;
 
     /**
-     * ChannelImage constructor.
+     * Default Constructor
+     *
      * @param array $data
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     public function __construct(array $data)
     {
@@ -62,10 +66,13 @@ class ChannelImage extends ValueObject
     }
 
     /**
-     * Creates an array of this class
+     * Create Array
+     *
+     * Creates an array of this class.
+     *
      * @param array $data
      * @return ChannelImage[]
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     static function createArray(array $data): array
     {

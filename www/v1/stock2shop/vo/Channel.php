@@ -3,9 +3,14 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
+use stock2shop\exceptions\UnprocessableEntity;
 
 /**
  * Channel
+ *
+ * This is the Channel Value Object definition.
+ *
+ * @package stock2shop\vo
  */
 class Channel extends ValueObject
 {
@@ -38,9 +43,9 @@ class Channel extends ValueObject
     public $meta;
 
     /**
-     * Channel constructor.
+     * Default Constructor
      * @param array $data
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     public function __construct(array $data)
     {
@@ -61,8 +66,8 @@ class Channel extends ValueObject
      * This is method to help with accessing the objects stored in the meta
      * class property of a Channel object.
      *
-     * @param string $keyName
-     * @return Meta|false $metaObject
+     * @param string $keyName The key you want the value for,
+     * @return mixed $metaItem->value The value of the Meta item which has the matching key name.
      */
     public function getMetaItemValueByKey(string $keyName) {
         foreach($this->meta as $metaItem) {

@@ -2,9 +2,16 @@
 
 namespace stock2shop\vo;
 
-use stock2shop\vo\Product;
-use stock2shop\vo\ChannelVariant;
+use stock2shop\exceptions\UnprocessableEntity;
 
+/**
+ * Channel Product
+ *
+ * This is the ChannelProduct class.
+ * It extends the Product base class.
+ *
+ * @package stock2shop\vo
+ */
 class ChannelProduct extends Product
 {
     /** @var int|null $id */
@@ -38,9 +45,10 @@ class ChannelProduct extends Product
     public $synced;
 
     /**
-     * ChannelProduct constructor.
+     * Default Constructor
+     *
      * @param array $data
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     public function __construct(array $data)
     {
@@ -59,14 +67,14 @@ class ChannelProduct extends Product
     }
 
     /**
-     * Checks if the channel product is valid.
-     * Valid means that the minimum required fields are set
+     * Valid
      *
-     * TODO not sure what other properties make a "valid" product?
+     * Checks if the channel product is valid.
+     * Valid means that the minimum required fields are set.
      *
      * @return bool
      */
-    public function valid():bool {
+    public function valid(): bool {
         return (
             is_bool($this->success) &&
             !is_null($this->channel_product_code) &&
@@ -77,7 +85,11 @@ class ChannelProduct extends Product
     }
 
     /**
-     * sort array properties of ChannelProduct
+     * Sort
+     *
+     * Sorts the array properties of ChannelProduct.
+     *
+     * @return void
      */
     public function sort()
     {
@@ -86,9 +98,12 @@ class ChannelProduct extends Product
     }
 
     /**
+     * Compute Hash
+     *
      * Computes a hash of the ChannelProduct
+     *
      * @return string
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     public function computeHash(): string
     {
@@ -113,11 +128,15 @@ class ChannelProduct extends Product
     }
 
     /**
+     * Create Array
+     *
+     * Creates an array from this object.
+     *
      * @param array $data
      * @return ChannelProduct[]
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
-    static function createArray(array $data): array
+    public static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {
@@ -126,4 +145,5 @@ class ChannelProduct extends Product
         }
         return $a;
     }
+
 }

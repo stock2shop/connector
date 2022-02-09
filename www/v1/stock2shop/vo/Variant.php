@@ -3,7 +3,16 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
+use stock2shop\exceptions\UnprocessableEntity;
 
+/**
+ * Variant
+ *
+ * This is the Value Object class for vo\Variant.
+ * It is extended by vo\ProductVariant.
+ *
+ * @package stock2shop\vo
+ */
 class Variant extends ValueObject
 {
     /** @var string|null $source_variant_code */
@@ -18,7 +27,7 @@ class Variant extends ValueObject
     /** @var int|null $qty */
     public $qty;
 
-    /** @var QtyAvailabilityItem[] $qty_availability */
+    /** @var QtyAvailability[] $qty_availability */
     public $qty_availability;
 
     /** @var float|null $price */
@@ -49,9 +58,9 @@ class Variant extends ValueObject
     public $meta;
 
     /**
-     * Variant constructor.
+     * Default Constructor
      * @param array $data
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     function __construct(array $data)
     {
