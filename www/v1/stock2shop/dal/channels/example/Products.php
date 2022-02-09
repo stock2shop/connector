@@ -50,7 +50,7 @@ class Products implements ProductsInterface
         // Iterate through the channel products.
         foreach ($channelProducts as &$product) {
 
-            $prefix          = urlencode($product->id);
+            $prefix = urlencode($product->id);
             $productFileName = $prefix . '.json';
 
             // Create channel_product_code for each product from the file name.
@@ -68,7 +68,7 @@ class Products implements ProductsInterface
 
             }
 
-            // Fetch the current fies from the source (in this case, flat-file).
+            // Fetch the current files from the source (in this case, flat-file).
             $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, "products");
 
             // Check if the product has been flagged for delete.
@@ -110,10 +110,8 @@ class Products implements ProductsInterface
                 // Remove old variants
                 foreach ($currentFiles as $fileName => $obj) {
                     if (!in_array($fileName, $variantsToKeep) && strpos($fileName, $separator) !== false) {
-
                         // Unlink the JSON file from the source products directory.
                         unlink(self::DATA_PATH . '/products/' . $fileName);
-
                     }
                 }
             }
@@ -121,15 +119,13 @@ class Products implements ProductsInterface
             // Mark products and variants as successfully synced
             // TODO: Shouldn't this be in the Value Object itself? Something like $product->setSynced();
             $date = new \DateTime();
-            $product->synced  = $date->format('Y-m-d H:i:s');
+            $product->synced = $date->format('Y-m-d H:i:s');
 
             // Mark product as successfully synced.
             $product->success = true;
             foreach ($product->variants as $variant) {
-
                 // Set product variants as successfully synced.
                 $variant->success = true;
-
             }
 
         }
@@ -158,56 +154,41 @@ class Products implements ProductsInterface
      */
     public function get(string $token, int $limit, vo\Channel $channel): array
     {
-        // Get separator value from the separator key name
-        $metaSeparatorValue = $channel->getMetaItemValueByKey("separator");
-
-        /** @var string[] $currentFiles */
+        // Get separator.
+        $separator = $channel->getMetaItemValueByKey('separator');
+        $channelProducts = [];
         $currentFiles = data\Helper::getJSONFiles("products");
 
-        /** @var ChannelProductGet[] $channelProducts */
-        $channelProducts = [];
-
-        // --------------------------------------------------------
-
-        // Loop through the product source data - which in this example integration
-        // is provided by the data\Helper's getJSONFiles() method.
+        // Create paged results.
+        $cnt = 1;
         foreach ($currentFiles as $fileName => $obj) {
 
-            // PHP's function strcmp(string1, string2) will return a value less than 0 if the value
-            // of string1 is less than the value of string2. Inversely, a value greater than 0 will
-            // be returned if the string2 is less than string1. 0 is returned if the values are equal.
-
-            // Hence,
-            // if $token is less than $fileName; proceed --->
+            // Compare the token and file name.
             if (strcmp($token, $fileName) < 0) {
+                if (strpos($fileName, $separator) === false) {
 
-                // If $fileName does not contain the separator; proceed --->
-                if (strpos($fileName, $metaSeparatorValue) === false) {
-
-                    // If the number of channel products has reached the limit, break.
-                    if (count($channelProducts) > $limit) {
+                    // This a product
+                    if ($cnt > $limit) {
                         break;
                     }
 
-                    // Convert the \stdClass object to an array and add the token to the
-                    // array elements with the 'token' key. These are the requirements for
-                    // the vo\ChannelProductGet VO which we must use to implement the get()
-                    // functionality.
-                    $arrayProduct = (array)$obj;
-                    $arrayProduct["token"] = $token;
-
-                    // And add it to the channelProducts[] array.
-                    $channelProducts[] = new vo\ChannelProductGet($arrayProduct);
+                    // Add vo\ChannelProductGet object to return array.
+                    $channelProducts[] = new vo\ChannelProductGet([
+                        "channel_product_code" => $obj->channel_product_code
+                    ]);
+                    $cnt++;
 
                 } else {
 
+                    // Add a variant to the ChannelProduct in the return array.
                     $channelProducts[count($channelProducts) - 1]->variants[] = new vo\ChannelVariant(
                         [
-                            "sku"                  => $obj->sku,
+                            "sku" => $obj->sku,
                             "channel_variant_code" => $obj->channel_variant_code
                         ]
                     );
 
+                    // Set the vo\ChannelProductGet's token value to the channel_variant_code.
                     $channelProducts[count($channelProducts) - 1]->token = $obj->channel_variant_code;
 
                 }
@@ -216,6 +197,7 @@ class Products implements ProductsInterface
         }
 
         return $channelProducts;
+
     }
 
     /**
@@ -230,7 +212,8 @@ class Products implements ProductsInterface
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
-        $matchingProducts = [];
+
+        $channelProducts = [];
 
         foreach ($channelProducts as $product) {
 
@@ -240,22 +223,26 @@ class Products implements ProductsInterface
             foreach ($currentFiles as $fileName => $obj) {
                 if ($fileName === $prefix . '.json') {
 
-                    $matchingProducts[] = new vo\ChannelProduct([
+                    // This is a Product
+                    $channelProducts[] = new vo\ChannelProduct([
                         "channel_product_code" => $obj->channel_product_code
                     ]);
 
                 } else {
 
-                    $matchingProducts[count($matchingProducts) - 1]->variants[] = new vo\ChannelVariant([
-                        "sku" => $obj->sku,
-                        "channel_variant_code" => $obj->channel_variant_code
-                    ]);
+                    // This is a Variant
+                    $channelProducts[count($channelProducts) - 1]->variants[] = new vo\ChannelVariant(
+                        [
+                            "sku" => $obj->sku,
+                            "channel_variant_code" => $obj->channel_variant_code
+                        ]
+                    );
 
                 }
             }
         }
 
-        return $matchingProducts;
+        return $channelProducts;
     }
 
 }
