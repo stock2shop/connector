@@ -3,16 +3,7 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
-use stock2shop\exceptions;
 
-/**
- * Product
- *
- * This is the base class for products in the system.
- * It is extended by ChannelProduct.
- *
- * @package stock2shop\vo
- */
 class Product extends ValueObject
 {
     /** @var bool|null $active */
@@ -45,19 +36,19 @@ class Product extends ValueObject
     /**
      * Product constructor.
      * @param array $data
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public function __construct(array $data)
+    function __construct(array $data)
     {
-        $this->active = self::boolFrom($data, "active");
-        $this->title = self::stringFrom($data, "title");
-        $this->body_html = self::stringFrom($data, "body_html");
-        $this->collection = self::stringFrom($data, "collection");
+        $this->active       = self::boolFrom($data, "active");
+        $this->title        = self::stringFrom($data, "title");
+        $this->body_html    = self::stringFrom($data, "body_html");
+        $this->collection   = self::stringFrom($data, "collection");
         $this->product_type = self::stringFrom($data, "product_type");
-        $this->tags = self::stringFrom($data, "tags");
-        $this->vendor = self::stringFrom($data, "vendor");
-        $this->options = ProductOption::createArray(self::arrayFrom($data, "options"));
-        $this->meta = Meta::createArray(self::arrayFrom($data, "meta"));
+        $this->tags         = self::stringFrom($data, "tags");
+        $this->vendor       = self::stringFrom($data, "vendor");
+        $this->options      = ProductOption::createArray(self::arrayFrom($data, "options"));
+        $this->meta         = Meta::createArray(self::arrayFrom($data, "meta"));
     }
 
     /**
@@ -71,7 +62,7 @@ class Product extends ValueObject
 
     /**
      * @return string
-     * @throws exceptions\UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function computeHash(): string
     {

@@ -3,11 +3,9 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
-use stock2shop\exceptions\UnprocessableEntity;
 
 class QtyAvailability extends ValueObject
 {
-
     /** @var string|null $description */
     public $description;
 
@@ -17,24 +15,20 @@ class QtyAvailability extends ValueObject
     /**
      * QtyAvailabilityItem constructor.
      * @param array $data
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public function __construct(array $data)
+    function __construct(array $data)
     {
         $this->description = self::stringFrom($data, "description");
-        $this->qty = self::intFrom($data, "qty");
+        $this->qty         = self::intFrom($data, "qty");
     }
 
     /**
-     * Create Array
-     *
-     * Creates an array from this object.
-     *
      * @param array $data
      * @return QtyAvailability[]
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public static function createArray(array $data): array
+    static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {
@@ -43,5 +37,4 @@ class QtyAvailability extends ValueObject
         }
         return $a;
     }
-
 }

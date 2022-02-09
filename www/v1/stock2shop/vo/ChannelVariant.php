@@ -2,61 +2,59 @@
 
 namespace stock2shop\vo;
 
-use stock2shop\exceptions\UnprocessableEntity;
-
-/**
- * Channel Variant
- *
- * This is the ChannelVariant class.
- * It extends the Variant base class.
- *
- * Use this class to represent product variants.
- * You will add these objects in an array structure to
- * ChannelProduct objects when you code your DAL.
- *
- * @package stock2shop\vo
- */
 class ChannelVariant extends Variant
 {
-    /** @var int $id This is the internal ID assigned to a variant by Stock2Shop. */
+    /** @var int|null $id */
     public $id;
 
-    /** @var int $product_id This is the ID of the ChannelProduct to which this variant belongs. */
+    /** @var int|null $product_id */
     public $product_id;
 
-    /** @var string $channel_variant_code This is the unique identifier used by the source system. */
+    /** @var string|null $channel_variant_code */
     public $channel_variant_code;
 
-    /** @var bool $delete */
+    /** @var bool|null $delete */
     public $delete;
 
-    /** @var bool $success */
+    /** @var bool|null $success */
     public $success;
 
     /**
-     * Default Constructor
-     *
+     * ChannelVariant constructor.
      * @param array $data
-     * @return void
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function __construct(array $data)
     {
         parent::__construct($data);
 
-        $this->id = self::intFrom($data, 'id');
-        $this->product_id = self::intFrom($data, 'product_id');
+        $this->id                   = self::intFrom($data, 'id');
+        $this->product_id           = self::intFrom($data, 'product_id');
         $this->channel_variant_code = self::stringFrom($data, 'channel_variant_code');
-        $this->delete = self::boolFrom($data, 'delete');
-        $this->success = self::boolFrom($data, 'success');
+        $this->delete               = self::boolFrom($data, 'delete');
+        $this->success              = self::boolFrom($data, 'success');
     }
 
     /**
-     * Compute Hash
+     * Checks if the channel variant is valid.
+     * Valid means that the minimum required fields are set
      *
-     * Computes a hash of the ChannelVariant.
+     * TODO not sure what other properties make a "valid" variant?
      *
+     * @return bool
+     */
+    public function valid():bool {
+        return (
+            is_bool($this->success) &&
+            is_string($this->channel_variant_code) &&
+            $this->channel_variant_code !== ""
+        );
+    }
+
+    /**
+     * Computes a hash of the ChannelVariant
      * @return string
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function computeHash(): string
     {
@@ -70,21 +68,17 @@ class ChannelVariant extends Variant
     }
 
     /**
-     * Create Array
-     *
-     * Creates an array of this class.
-     *
      * @param array $data
      * @return ChannelVariant[]
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public static function createArray(array $data): array
+    static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {
-            $cv = new ChannelVariant((array)$item);
+            $cv  = new ChannelVariant((array)$item);
             $a[] = $cv;
         }
         return $a;
     }
-
 }

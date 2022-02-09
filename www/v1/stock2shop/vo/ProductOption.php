@@ -3,48 +3,36 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
-use stock2shop\exceptions\UnprocessableEntity;
 
-/**
- * Product Option
- *
- * This is the Value Object class for vo\ProductOption items.
- *
- * @package stock2shop\vo
- */
 class ProductOption extends ValueObject
 {
-    /** @var string $name */
+    /** @var string|null $name */
     public $name;
 
-    /** @var string $value */
+    /** @var string|null $value */
     public $value;
 
-    /** @var int $position */
+    /** @var int|null $position */
     public $position;
 
     /**
-     * Default Constructor
-     *
+     * ProductOption constructor.
      * @param array $data
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public function __construct(array $data)
+    function __construct(array $data)
     {
-        $this->name = self::stringFrom($data, "name");
-        $this->value = self::stringFrom($data, "value");
+        $this->name     = self::stringFrom($data, "name");
+        $this->value    = self::stringFrom($data, "value");
         $this->position = self::intFrom($data, "position");
     }
 
     /**
-     * Ceate Array
-     *
-     * Creates an array of this class.
-     *
      * @param array $data
      * @return ProductOption[]
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public static function createArray(array $data): array
+    static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {
@@ -53,5 +41,4 @@ class ProductOption extends ValueObject
         }
         return $a;
     }
-
 }

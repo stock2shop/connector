@@ -5,11 +5,11 @@ namespace stock2shop\vo;
 use stock2shop\base\ValueObject;
 
 /**
- * Meta
  *
  * This is used by many classes.
- * e.g. Customers, Products, Sources, Channels.
+ * e.g. Customers, Products, Sources, Channels ...
  *
+ * Class Meta
  * @package stock2shop\vo
  */
 class Meta extends ValueObject
@@ -21,28 +21,25 @@ class Meta extends ValueObject
     /** @var string|null $value */
     public $value;
 
-    /** @var string|null $template_name Meta items may be associated with a template name which groups them categorically. */
+    /** @var string|null $template_name */
     public $template_name;
 
     /**
-     * Default Constructor
+     * Meta constructor.
      * @param array $data
-     * @return void
      */
-    public function __construct(array $data)
+    function __construct(array $data)
     {
-        $this->key = self::stringFrom($data, "key");
-        $this->value = self::stringFrom($data, "value");
+        $this->key           = self::stringFrom($data, "key");
+        $this->value         = self::stringFrom($data, "value");
         $this->template_name = self::stringFrom($data, "template_name");
     }
 
     /**
-     * Create Array
-     *
      * @param array $data
      * @return Meta[]
      */
-    public static function createArray(array $data): array
+    static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {

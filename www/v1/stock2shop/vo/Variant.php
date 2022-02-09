@@ -3,16 +3,7 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
-use stock2shop\exceptions\UnprocessableEntity;
 
-/**
- * Variant
- *
- * This is the Value Object class for vo\Variant.
- * It is extended by vo\ProductVariant.
- *
- * @package stock2shop\vo
- */
 class Variant extends ValueObject
 {
     /** @var string|null $source_variant_code */
@@ -27,7 +18,7 @@ class Variant extends ValueObject
     /** @var int|null $qty */
     public $qty;
 
-    /** @var QtyAvailability[] $qty_availability */
+    /** @var QtyAvailabilityItem[] $qty_availability */
     public $qty_availability;
 
     /** @var float|null $price */
@@ -58,35 +49,30 @@ class Variant extends ValueObject
     public $meta;
 
     /**
-     * Default Constructor
-     *
+     * Variant constructor.
      * @param array $data
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public function __construct(array $data)
+    function __construct(array $data)
     {
-        $this->source_variant_code = self::stringFrom($data, "source_variant_code");
-        $this->sku = self::stringFrom($data, "sku");
-        $this->active = self::boolFrom($data, "active");
-        $this->qty = self::intFrom($data, "qty");
-        $this->qty_availability = QtyAvailability::createArray(self::arrayFrom($data, "qty_availability"));
-        $this->price = self::floatFrom($data, "price");
-        $this->price_tiers = PriceTier::createArray(self::arrayFrom($data, "price_tiers"));
-        $this->barcode = self::stringFrom($data, "barcode");
+        $this->source_variant_code  = self::stringFrom($data, "source_variant_code");
+        $this->sku                  = self::stringFrom($data, "sku");
+        $this->active               = self::boolFrom($data, "active");
+        $this->qty                  = self::intFrom($data, "qty");
+        $this->qty_availability     = QtyAvailability::createArray(self::arrayFrom($data, "qty_availability"));
+        $this->price                = self::floatFrom($data, "price");
+        $this->price_tiers          = PriceTier::createArray(self::arrayFrom($data, "price_tiers"));
+        $this->barcode              = self::stringFrom($data, "barcode");
         $this->inventory_management = self::boolFrom($data, "inventory_management");
-        $this->grams = self::intFrom($data, "grams");
-        $this->option1 = self::stringFrom($data, "option1");
-        $this->option2 = self::stringFrom($data, "option2");
-        $this->option3 = self::stringFrom($data, "option3");
-        $this->meta = Meta::createArray(self::arrayFrom($data, "meta"));
+        $this->grams                = self::intFrom($data, "grams");
+        $this->option1              = self::stringFrom($data, "option1");
+        $this->option2              = self::stringFrom($data, "option2");
+        $this->option3              = self::stringFrom($data, "option3");
+        $this->meta                 = Meta::createArray(self::arrayFrom($data, "meta"));
     }
 
     /**
-     * Sort
-     *
-     * Sorts the array properties in this Variant object.
-     *
-     * @return void
+     * sort array properties of Variant
      */
     public function sort()
     {
@@ -96,10 +82,10 @@ class Variant extends ValueObject
     }
 
     /**
-     * Compute Hash
+     * computeHash of the Variant
      *
      * @return string
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function computeHash(): string
     {

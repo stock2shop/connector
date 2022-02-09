@@ -2,16 +2,9 @@
 
 namespace stock2shop\vo;
 
-use stock2shop\exceptions\UnprocessableEntity;
+use stock2shop\vo\Product;
+use stock2shop\vo\ChannelVariant;
 
-/**
- * Channel Product
- *
- * This is the ChannelProduct class.
- * It extends the Product base class.
- *
- * @package stock2shop\vo
- */
 class ChannelProduct extends Product
 {
     /** @var int|null $id */
@@ -45,37 +38,35 @@ class ChannelProduct extends Product
     public $synced;
 
     /**
-     * Default Constructor
-     *
+     * ChannelProduct constructor.
      * @param array $data
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function __construct(array $data)
     {
         parent::__construct($data);
 
-        $this->id = self::intFrom($data, 'id');
-        $this->source_product_code = self::stringFrom($data, 'source_product_code');
-        $this->channel_id = self::intFrom($data, 'channel_id');
-        $this->client_id = self::intFrom($data, 'client_id');
+        $this->id                   = self::intFrom($data, 'id');
+        $this->source_product_code  = self::stringFrom($data, 'source_product_code');
+        $this->channel_id           = self::intFrom($data, 'channel_id');
+        $this->client_id            = self::intFrom($data, 'client_id');
         $this->channel_product_code = self::stringFrom($data, 'channel_product_code');
-        $this->variants = ChannelVariant::createArray(self::arrayFrom($data, 'variants'));
-        $this->images = ChannelImage::createArray(self::arrayFrom($data, 'images'));
-        $this->delete = self::boolFrom($data, 'delete');
-        $this->success = self::boolFrom($data, 'success');
-        $this->synced = self::stringFrom($data, 'synced');
+        $this->variants             = ChannelVariant::createArray(self::arrayFrom($data, 'variants'));
+        $this->images               = ChannelImage::createArray(self::arrayFrom($data, 'images'));
+        $this->delete               = self::boolFrom($data, 'delete');
+        $this->success              = self::boolFrom($data, 'success');
+        $this->synced               = self::stringFrom($data, 'synced');
     }
 
     /**
-     * Valid
-     *
      * Checks if the channel product is valid.
-     * Valid means that the minimum required fields are set.
+     * Valid means that the minimum required fields are set
+     *
+     * TODO not sure what other properties make a "valid" product?
      *
      * @return bool
      */
-    public function valid(): bool
-    {
+    public function valid():bool {
         return (
             is_bool($this->success) &&
             !is_null($this->channel_product_code) &&
@@ -86,11 +77,7 @@ class ChannelProduct extends Product
     }
 
     /**
-     * Sort
-     *
-     * Sorts the array properties of ChannelProduct.
-     *
-     * @return void
+     * sort array properties of ChannelProduct
      */
     public function sort()
     {
@@ -99,12 +86,9 @@ class ChannelProduct extends Product
     }
 
     /**
-     * Compute Hash
-     *
      * Computes a hash of the ChannelProduct
-     *
      * @return string
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function computeHash(): string
     {
@@ -129,22 +113,17 @@ class ChannelProduct extends Product
     }
 
     /**
-     * Create Array
-     *
-     * Creates an array from this object.
-     *
      * @param array $data
      * @return ChannelProduct[]
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public static function createArray(array $data): array
+    static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {
-            $cv = new ChannelProduct((array)$item);
+            $cv  = new ChannelProduct((array)$item);
             $a[] = $cv;
         }
         return $a;
     }
-
 }

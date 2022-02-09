@@ -3,15 +3,7 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
-use stock2shop\exceptions\UnprocessableEntity;
 
-/**
- * Price Tier
- *
- * This is the Value Object for the PriceTier items.
- *
- * @package stock2shop\vo
- */
 class PriceTier extends ValueObject
 {
     /** @var string|null $tier */
@@ -21,25 +13,22 @@ class PriceTier extends ValueObject
     public $price;
 
     /**
-     * Default Constructor
-     *
+     * PriceTier constructor.
      * @param array $data
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public function __construct(array $data)
+    function __construct(array $data)
     {
-        $this->tier = self::stringFrom($data, "tier");
+        $this->tier  = self::stringFrom($data, "tier");
         $this->price = self::floatFrom($data, "price");
     }
 
     /**
-     * Creqte Array
-     *
      * @param array $data
      * @return PriceTier[]
-     * @throws UnprocessableEntity
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public static function createArray(array $data): array
+    static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {
@@ -48,5 +37,4 @@ class PriceTier extends ValueObject
         }
         return $a;
     }
-
 }
