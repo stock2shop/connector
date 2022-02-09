@@ -43,9 +43,12 @@ class Products implements ProductsInterface
         // The separator is an example of Stock2Shop Channel 'meta'.
         // Meta is a configured on Channel level and describes the
         // channel and the required functionality.
-
-        /** @var string $separator */
-        $separator = $channel->getMetaItemValueByKey("separator");
+        $separator = "";
+        foreach($channel->meta as $metaItem) {
+            if($metaItem->key === "separator") {
+                $separator = $metaItem->value;
+            }
+        }
 
         // Iterate through the channel products.
         foreach ($channelProducts as &$product) {
@@ -156,7 +159,13 @@ class Products implements ProductsInterface
     public function get(string $token, int $limit, vo\Channel $channel): array
     {
         // Get separator.
-        $separator = $channel->getMetaItemValueByKey('separator');
+        $separator = "";
+        foreach($channel->meta as $metaItem) {
+            if($metaItem->key === "separator") {
+                $separator = $metaItem->value;
+            }
+        }
+
         $channelProducts = [];
         $currentFiles = data\Helper::getJSONFiles("products");
 
