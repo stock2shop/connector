@@ -361,8 +361,6 @@ final class ChannelTest extends Framework\TestCase
             $fetchedProducts = $connector->get($token, $limit, $channel);
 
             // We are expecting the connector->get() method to return all the products on the channel.
-
-
             self::verifyGetProducts($token, $limit, $fetchedProducts);
 
             // --------------------------------------------------------
