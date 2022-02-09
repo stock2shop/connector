@@ -22,7 +22,7 @@ class ChannelProductGet extends ChannelProduct
     public $token;
 
     /**
-     * Creates the data object to spec.
+     * Default Constructor
      *
      * @param array $data
      * @return void

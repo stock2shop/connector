@@ -28,7 +28,7 @@ class PriceTier extends ValueObject
      */
     public function __construct(array $data)
     {
-        $this->tier  = self::stringFrom($data, "tier");
+        $this->tier = self::stringFrom($data, "tier");
         $this->price = self::floatFrom($data, "price");
     }
 

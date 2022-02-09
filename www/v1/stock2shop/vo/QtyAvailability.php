@@ -22,7 +22,7 @@ class QtyAvailability extends ValueObject
     public function __construct(array $data)
     {
         $this->description = self::stringFrom($data, "description");
-        $this->qty         = self::intFrom($data, "qty");
+        $this->qty = self::intFrom($data, "qty");
     }
 
     /**
@@ -34,7 +34,7 @@ class QtyAvailability extends ValueObject
      * @return QtyAvailability[]
      * @throws UnprocessableEntity
      */
-    static function createArray(array $data): array
+    public static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {

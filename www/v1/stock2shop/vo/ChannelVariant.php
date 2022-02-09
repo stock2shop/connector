@@ -21,7 +21,7 @@ class ChannelVariant extends Variant
     /** @var int $id This is the internal ID assigned to a variant by Stock2Shop. */
     public $id;
 
-    /** @var int $product_id This is the ID of the ChannelProduct to which this variant belongs.  */
+    /** @var int $product_id This is the ID of the ChannelProduct to which this variant belongs. */
     public $product_id;
 
     /** @var string $channel_variant_code This is the unique identifier used by the source system. */
@@ -34,11 +34,11 @@ class ChannelVariant extends Variant
     public $success;
 
     /**
-    * Creates the data object to spec.
-    *
-    * @param array $data
-    * @return void
-    */
+     * Default Constructor
+     *
+     * @param array $data
+     * @return void
+     */
     public function __construct(array $data)
     {
         parent::__construct($data);
@@ -77,7 +77,8 @@ class ChannelVariant extends Variant
      * @param array $data
      * @return ChannelVariant[]
      */
-    public static function createArray(array $data): array {
+    public static function createArray(array $data): array
+    {
         $a = [];
         foreach ($data as $item) {
             $cv = new ChannelVariant((array)$item);

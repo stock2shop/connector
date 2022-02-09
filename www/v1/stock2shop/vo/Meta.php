@@ -31,8 +31,8 @@ class Meta extends ValueObject
      */
     public function __construct(array $data)
     {
-        $this->key           = self::stringFrom($data, "key");
-        $this->value         = self::stringFrom($data, "value");
+        $this->key = self::stringFrom($data, "key");
+        $this->value = self::stringFrom($data, "value");
         $this->template_name = self::stringFrom($data, "template_name");
     }
 

@@ -3,6 +3,7 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
+use stock2shop\exceptions\UnprocessableEntity;
 
 /**
  * Flag
@@ -43,7 +44,7 @@ class Flag extends ValueObject
     /**
      * Flag constructor.
      * @param array $data
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     public function __construct(array $data)
     {
@@ -59,9 +60,9 @@ class Flag extends ValueObject
     /**
      * @param array $data
      * @return Flag[]
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
-    static function createArray(array $data): array
+    public static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {
@@ -74,9 +75,9 @@ class Flag extends ValueObject
     /**
      * @param array $data
      * @return array
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
-    static function createMap(array $data): array
+    public static function createMap(array $data): array
     {
         $map = [];
         $flags = self::createArray($data);

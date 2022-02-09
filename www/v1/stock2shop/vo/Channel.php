@@ -49,15 +49,15 @@ class Channel extends ValueObject
      */
     public function __construct(array $data)
     {
-        $this->id               = static::intFrom($data, 'id');
-        $this->client_id        = static::intFrom($data, 'client_id');
-        $this->description      = static::stringFrom($data, 'description');
-        $this->active           = static::boolFrom($data, 'active');
-        $this->type             = static::stringFrom($data, 'type');
-        $this->price_tier       = static::stringFrom($data, 'price_tier');
+        $this->id = static::intFrom($data, 'id');
+        $this->client_id = static::intFrom($data, 'client_id');
+        $this->description = static::stringFrom($data, 'description');
+        $this->active = static::boolFrom($data, 'active');
+        $this->type = static::stringFrom($data, 'type');
+        $this->price_tier = static::stringFrom($data, 'price_tier');
         $this->qty_availability = static::stringFrom($data, 'qty_availability');
-        $this->sync_token       = static::stringFrom($data, 'sync_token');
-        $this->meta             = Meta::createArray(self::arrayFrom($data, "meta"));
+        $this->sync_token = static::stringFrom($data, 'sync_token');
+        $this->meta = Meta::createArray(self::arrayFrom($data, "meta"));
     }
 
     /**
@@ -69,10 +69,11 @@ class Channel extends ValueObject
      * @param string $keyName The key you want the value for,
      * @return mixed $metaItem->value The value of the Meta item which has the matching key name.
      */
-    public function getMetaItemValueByKey(string $keyName) {
-        foreach($this->meta as $metaItem) {
+    public function getMetaItemValueByKey(string $keyName)
+    {
+        foreach ($this->meta as $metaItem) {
             // If the key matches the requested keyName, return the object.
-            if($metaItem->key === $keyName) {
+            if ($metaItem->key === $keyName) {
                 return $metaItem->value;
             }
         }

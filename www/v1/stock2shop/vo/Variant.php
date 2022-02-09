@@ -59,29 +59,34 @@ class Variant extends ValueObject
 
     /**
      * Default Constructor
+     *
      * @param array $data
      * @throws UnprocessableEntity
      */
-    function __construct(array $data)
+    public function __construct(array $data)
     {
-        $this->source_variant_code  = self::stringFrom($data, "source_variant_code");
-        $this->sku                  = self::stringFrom($data, "sku");
-        $this->active               = self::boolFrom($data, "active");
-        $this->qty                  = self::intFrom($data, "qty");
-        $this->qty_availability     = QtyAvailability::createArray(self::arrayFrom($data, "qty_availability"));
-        $this->price                = self::floatFrom($data, "price");
-        $this->price_tiers          = PriceTier::createArray(self::arrayFrom($data, "price_tiers"));
-        $this->barcode              = self::stringFrom($data, "barcode");
+        $this->source_variant_code = self::stringFrom($data, "source_variant_code");
+        $this->sku = self::stringFrom($data, "sku");
+        $this->active = self::boolFrom($data, "active");
+        $this->qty = self::intFrom($data, "qty");
+        $this->qty_availability = QtyAvailability::createArray(self::arrayFrom($data, "qty_availability"));
+        $this->price = self::floatFrom($data, "price");
+        $this->price_tiers = PriceTier::createArray(self::arrayFrom($data, "price_tiers"));
+        $this->barcode = self::stringFrom($data, "barcode");
         $this->inventory_management = self::boolFrom($data, "inventory_management");
-        $this->grams                = self::intFrom($data, "grams");
-        $this->option1              = self::stringFrom($data, "option1");
-        $this->option2              = self::stringFrom($data, "option2");
-        $this->option3              = self::stringFrom($data, "option3");
-        $this->meta                 = Meta::createArray(self::arrayFrom($data, "meta"));
+        $this->grams = self::intFrom($data, "grams");
+        $this->option1 = self::stringFrom($data, "option1");
+        $this->option2 = self::stringFrom($data, "option2");
+        $this->option3 = self::stringFrom($data, "option3");
+        $this->meta = Meta::createArray(self::arrayFrom($data, "meta"));
     }
 
     /**
-     * sort array properties of Variant
+     * Sort
+     *
+     * Sorts the array properties in this Variant object.
+     *
+     * @return void
      */
     public function sort()
     {
@@ -91,10 +96,10 @@ class Variant extends ValueObject
     }
 
     /**
-     * computeHash of the Variant
+     * Compute Hash
      *
      * @return string
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     public function computeHash(): string
     {

@@ -41,12 +41,12 @@ class ChannelImage extends ValueObject
      */
     public function __construct(array $data)
     {
-        $this->id                 = self::intFrom($data, 'id');
-        $this->active             = self::boolFrom($data, 'active');
-        $this->src                = self::stringFrom($data, 'src');
+        $this->id = self::intFrom($data, 'id');
+        $this->active = self::boolFrom($data, 'active');
+        $this->src = self::stringFrom($data, 'src');
         $this->channel_image_code = self::stringFrom($data, "channel_image_code");
-        $this->delete             = self::boolFrom($data, 'delete');
-        $this->success            = self::boolFrom($data, 'success');
+        $this->delete = self::boolFrom($data, 'delete');
+        $this->success = self::boolFrom($data, 'success');
     }
 
     /**
@@ -57,7 +57,8 @@ class ChannelImage extends ValueObject
      *
      * @return bool
      */
-    public function valid(): bool {
+    public function valid(): bool
+    {
         return (
             is_bool($this->success) &&
             is_string($this->channel_image_code) &&
@@ -74,11 +75,11 @@ class ChannelImage extends ValueObject
      * @return ChannelImage[]
      * @throws UnprocessableEntity
      */
-    static function createArray(array $data): array
+    public static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {
-            $ci  = new ChannelImage((array)$item);
+            $ci = new ChannelImage((array)$item);
             $a[] = $ci;
         }
         return $a;

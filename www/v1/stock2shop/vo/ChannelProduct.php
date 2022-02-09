@@ -54,16 +54,16 @@ class ChannelProduct extends Product
     {
         parent::__construct($data);
 
-        $this->id                   = self::intFrom($data, 'id');
-        $this->source_product_code  = self::stringFrom($data, 'source_product_code');
-        $this->channel_id           = self::intFrom($data, 'channel_id');
-        $this->client_id            = self::intFrom($data, 'client_id');
+        $this->id = self::intFrom($data, 'id');
+        $this->source_product_code = self::stringFrom($data, 'source_product_code');
+        $this->channel_id = self::intFrom($data, 'channel_id');
+        $this->client_id = self::intFrom($data, 'client_id');
         $this->channel_product_code = self::stringFrom($data, 'channel_product_code');
-        $this->variants             = ChannelVariant::createArray(self::arrayFrom($data, 'variants'));
-        $this->images               = ChannelImage::createArray(self::arrayFrom($data, 'images'));
-        $this->delete               = self::boolFrom($data, 'delete');
-        $this->success              = self::boolFrom($data, 'success');
-        $this->synced               = self::stringFrom($data, 'synced');
+        $this->variants = ChannelVariant::createArray(self::arrayFrom($data, 'variants'));
+        $this->images = ChannelImage::createArray(self::arrayFrom($data, 'images'));
+        $this->delete = self::boolFrom($data, 'delete');
+        $this->success = self::boolFrom($data, 'success');
+        $this->synced = self::stringFrom($data, 'synced');
     }
 
     /**
@@ -74,7 +74,8 @@ class ChannelProduct extends Product
      *
      * @return bool
      */
-    public function valid(): bool {
+    public function valid(): bool
+    {
         return (
             is_bool($this->success) &&
             !is_null($this->channel_product_code) &&
@@ -140,7 +141,7 @@ class ChannelProduct extends Product
     {
         $a = [];
         foreach ($data as $item) {
-            $cv  = new ChannelProduct((array)$item);
+            $cv = new ChannelProduct((array)$item);
             $a[] = $cv;
         }
         return $a;

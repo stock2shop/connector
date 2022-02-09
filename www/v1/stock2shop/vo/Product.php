@@ -49,15 +49,15 @@ class Product extends ValueObject
      */
     public function __construct(array $data)
     {
-        $this->active       = self::boolFrom($data, "active");
-        $this->title        = self::stringFrom($data, "title");
-        $this->body_html    = self::stringFrom($data, "body_html");
-        $this->collection   = self::stringFrom($data, "collection");
+        $this->active = self::boolFrom($data, "active");
+        $this->title = self::stringFrom($data, "title");
+        $this->body_html = self::stringFrom($data, "body_html");
+        $this->collection = self::stringFrom($data, "collection");
         $this->product_type = self::stringFrom($data, "product_type");
-        $this->tags         = self::stringFrom($data, "tags");
-        $this->vendor       = self::stringFrom($data, "vendor");
-        $this->options      = ProductOption::createArray(self::arrayFrom($data, "options"));
-        $this->meta         = Meta::createArray(self::arrayFrom($data, "meta"));
+        $this->tags = self::stringFrom($data, "tags");
+        $this->vendor = self::stringFrom($data, "vendor");
+        $this->options = ProductOption::createArray(self::arrayFrom($data, "options"));
+        $this->meta = Meta::createArray(self::arrayFrom($data, "meta"));
     }
 
     /**
