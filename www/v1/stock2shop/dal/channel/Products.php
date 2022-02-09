@@ -4,16 +4,11 @@ namespace stock2shop\dal\channel;
 use stock2shop\vo;
 
 /**
- * Products
- *
- * Implement all methods in this interface in your custom Data Access Layer.
- * Use the provided Value Objects to represent the data segments processed
- * in each class method.
+ * Interface Products
  *
  * @package stock2shop\dal\channel
  */
-interface Products
-{
+interface Products {
 
     /**
      * Syncs products to channel.
@@ -41,7 +36,6 @@ interface Products
 
     /**
      * The following properties must be returned on the ChannelProducts:-
-     *
      * - product.channel_product_code
      * - product.variant[].channel_variant_code
      * - product.variant[].sku
@@ -53,6 +47,7 @@ interface Products
     public function getByCode(array $channelProducts, vo\Channel $channel): array;
 
     /**
+     *
      * The following properties must be returned on the ChannelProducts:-
      * - product.channel_product_code
      * - product.variant[].channel_variant_code
@@ -73,3 +68,4 @@ interface Products
     public function get(string $token, int $limit, vo\Channel $channel): array;
 
 }
+

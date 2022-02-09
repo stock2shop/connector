@@ -1,28 +1,22 @@
 <?php
-
 namespace stock2shop\dal\channel;
 
 use stock2shop\vo;
-use stock2shop\vo\Channel;
-use stock2shop\vo\SystemOrder;
 
-/**
- * Orders
- */
-interface Orders
-{
+interface Orders {
 
     /**
      * TODO TBC
      *
      * @param string $token
      * @param int $limit
-     * @param Channel $channel
+     * @param vo\Channel $channel
      * @return array
      */
-//    public function getOrders(string $token, int $limit, Channel $channel): array;
+//    public function getOrders(string $token, int $limit,  vo\Channel $channel): array;
 
     /**
+     *
      * TODO TBC
      *
      * @param ChannelOrder[] $orders
@@ -40,8 +34,9 @@ interface Orders
      *
      * @param mixed $webhookOrder
      * @param MetaItem[] $meta
-     * @return SystemOrder
+     * @return ChannelOrder
      */
-//    public function transformOrder($webhookOrder, array $meta): SystemOrder;
+//    public function transformOrder($webhookOrder, array $meta): ChannelOrder;
 
 }
+

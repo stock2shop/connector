@@ -1,14 +1,9 @@
 <?php
-
 namespace stock2shop\dal\channel;
 
 use stock2shop\vo;
 
-/**
- * Fulfillments
- */
-interface Fulfillments
-{
+interface Fulfillments {
 
     /**
      * TODO TBC
@@ -21,6 +16,7 @@ interface Fulfillments
 //    public function syncFulfillments(ChannelFulfillments $ChannelFulfillments, vo\Channel $channel): ChannelFulfillmentsSync;
 
     /**
+     *
      * TODO TBC
      *
      * The following properties must be set:-
@@ -30,5 +26,5 @@ interface Fulfillments
      * @return ChannelFulfillment[]
      */
 //    public function getFulfillmentsByOrderCode(ChannelFulfillmentsSync $ChannelFulfillmentsSync): array;
-
 }
+
