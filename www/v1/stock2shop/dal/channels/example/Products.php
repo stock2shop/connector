@@ -141,10 +141,11 @@ class Products implements ProductsInterface
      * Use this method to structure the integration you are coding according to Stock2Shop's
      * requirements.
      *
-     * You will use the vo\ChannelProductGet class here for each ChannelProduct in order to
-     * also add a token to each product. Stock2Shop makes use of a token-based system to
-     * determine the last product returned from the channel - much like a 'cursor'.
-     * In your workflow in this method, you must remember to set the token property of each
+     * You will use the vo\ChannelProductGet class here to associate a token value with each
+     * product. We use the tokens in our system to determine the last product returned from
+     * the channel (like a 'cursor').
+     *
+     * The workflow you define in this method must include setting the token property of each
      * ChannelProductGet class object to the channel_product_code.
      *
      * @param string $token

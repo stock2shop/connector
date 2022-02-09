@@ -2,31 +2,27 @@
 
 This document describes the high-level architecture of the connector code base.
 
-## Code Map
-
-This section talks about important directories and data structures. 
+## Project Structure
 
 ### /tests
 
-PHP unit test framework.
 We have included E2E (end-to-end) tests directory.
-
 You do not have to write your own tests, the E2E tests should cover our requirements.
 
 There are certain tests that may require you to add data.
 For example, an order webhook, which would require example data sent to our connector.
 This can be added to the `tests/data/` directory.
 
-### /www/vendor
+Please refer to the [tests readme](./tests/README.md) for more information.
 
-composer libraries
+### /www/vendor
 
 Ensure you commit any libraries added.
 Do not change the version of existing libraries.
 Check first if there is a library to perform the function
 you want before loading a new library.
 
-Use / learn composer
+Install Composer globally on your system:
 
 ```bash
 brew install composer # macOS / Linux
@@ -34,29 +30,40 @@ choco install composer # Windows
 ```
 
 If you need to add new libraries, ensure these are added 
-by composer and that the appropriate vendor files are committed.
+by composer and that you have not committed the vendor files to the repository.
+It is sufficient to commit the `composer.json` file.
+
+Examples:
+
+```bash
+composer require automattic/woocommerce
+composer install
+```
 
 ### /www/v1/stock2shop/vo
 
 VO Stands for [Value Object](https://martinfowler.com/bliki/ValueObject.html).
 The purpose of the Value Object classes is to define the data we pass around.
 
-You cannot edit anything in this directory.
+You must not edit anything in this directory. The classes in the `stock2shop\vo` namespace are 
+our Domain Model and you are required to transform the data coming into your connector implementation 
+as required to match our specifications.
 
-To output all the data structures in a JSON format via the command line, run this:
+Use the following helper class to generate JSON documents for each Value Object:
+
+Run the following from your command line:
 
 ```bash
-php ${S2S_PATH}/connector/www/v1/stock2shop/scripts/stock2shop/VOJSON.php
+php ${S2S_PATH}/connector/www/v1/stock2shop/scripts/stock2shop/voJson.php
 ```
 
 If you want to view a specific VO, use this.
 
 ```bash
-php ${S2S_PATH}/connector/www/v1/stock2shop/scripts/stock2shop/VOJSON.php --class=Variant
+php ${S2S_PATH}/connector/www/v1/stock2shop/scripts/stock2shop/voJson.php --class=Variant
 ```
 
 This is useful for quickly viewing classes which may extend multiple parents.
-
 For more information read the [README.md](www/v1/stock2shop/vo/README.md) file in the `/www/v1/stock2shop/vo` directory.
 
 ### /www/v1/stock2shop/dal
@@ -64,6 +71,8 @@ For more information read the [README.md](www/v1/stock2shop/vo/README.md) file i
 DAL stands for "Data Access Layer".
 The purpose of this directory is to separate logic related 
 to different systems.
+
+The `channel` directory contains the interfaces which describe our system and must not be modified.
 
 ### /www/v1/stock2shop/dal/channels
 
@@ -73,11 +82,6 @@ If you have been commissioned to integrate code into a specific
 shopping cart, then you will create a directory here.
 
 Each channel must have these classes:-
-
-- 
-- Creator.php
-
-These are called by our application using the factory method.
 
 `Creator.php` is used to create a new instance of the Factory class which dynamically instantiates the required channel type from the following three options:
 
@@ -101,8 +105,7 @@ public function createFulfillments(): channel\Fulfillments
 `connector.php` implements the `channel/Connector.php` interface.
 It must therefore include all methods and have the same method signatures.
 
-## General
+## How To Use Value Objects
 
-This sections talks about the things which are everywhere and nowhere in particular.
-
-### TODO 
+Refer to the [readme file](./www/v1/stock2shop/vo/README.md) in the `www/v1/stock2shop/vo` directory for specific use of
+each of the Value Object classes.

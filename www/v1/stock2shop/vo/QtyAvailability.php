@@ -3,6 +3,7 @@
 namespace stock2shop\vo;
 
 use stock2shop\base\ValueObject;
+use stock2shop\exceptions\UnprocessableEntity;
 
 class QtyAvailability extends ValueObject
 {
@@ -16,7 +17,7 @@ class QtyAvailability extends ValueObject
     /**
      * QtyAvailabilityItem constructor.
      * @param array $data
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     public function __construct(array $data)
     {

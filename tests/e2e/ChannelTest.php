@@ -3,9 +3,9 @@
 namespace tests\e2e;
 
 use PHPUnit\Framework;
-
 use stock2shop\vo;
 use stock2shop\dal;
+use stock2shop\exceptions\UnprocessableEntity;
 
 /**
  * This "end to end" test runs through all channel types.
@@ -14,28 +14,28 @@ use stock2shop\dal;
 final class ChannelTest extends Framework\TestCase
 {
     /** @var dal\channel\Creator The object of the concrete class which extends the dal\channel\Creator factory abstract class. */
-    static $creator;
+    public static $creator;
 
     /** @var vo\Channel $channel The channel object being tested. */
-    static $channel;
+    public static $channel;
 
     /** @var string[] $channelTypes The channel types which will be tested. (dal/channels/[type]) */
-    static $channelTypes;
+    public static $channelTypes;
 
     /** @var array $channelFulfillmentsData The raw testing data for fulfillments. */
-    static $channelFulfillmentsData;
+    public static $channelFulfillmentsData;
 
     /** @var array $channelProductsData The raw testing data for products data. */
-    static $channelProductsData;
+    public static $channelProductsData;
 
     /** @var array $channelMetaData The raw testing data for channel meta. */
-    static $channelMetaData;
+    public static $channelMetaData;
 
     /** @var array $channelOrderData The raw testing data for orders. */
-    static $channelOrderData;
+    public static $channelOrderData;
 
     /** @var string $currentChannelType The active channel type being tested. */
-    static $currentChannelType;
+    public static $currentChannelType;
 
     /**
      * Set Up
@@ -43,55 +43,11 @@ final class ChannelTest extends Framework\TestCase
      * Executes the code which sets up the test before running the test
      * cases. The integrations are loaded into $channelTypes by
      * getChannelTypes().
-     *
-     * @return void
      */
-    function setUp()
+    public function setUp()
     {
         self::$channelTypes = self::getChannelTypes();
     }
-
-//    function testGetProducts()
-//    {
-//        foreach (self::$channelTypes as $type) {
-//
-//            // load test data and set channel
-//            self::loadTestData($type);
-//            self::setChannel($type);
-//
-//            // sync all test data
-//            $request  = new ChannelProductsSync(
-//                [
-//                    "meta"             => self::$channelMetaData,
-//                    "channel_products" => self::$channelProductsData,
-//                    "flag_map"         => []
-//                ]
-//            );
-//            $response = self::$channel->syncProducts($request);
-//
-//            // fetch all products
-//            $token           = "";
-//            $limit           = count(self::$channelProductsData);
-//            $meta            = MetaItem::createArray(self::$channelMetaData);
-//            $fetchedProducts = self::$channel->getProducts("", count(self::$channelProductsData), $meta);
-//            self::verifyGetProducts($token, $limit, $fetchedProducts);
-//
-//            // Get products using paging (one at a time)
-//            $token = "";
-//            $cnt   = 0;
-//            for ($i = 0; $i < count(self::$channelProductsData); $i++) {
-//                $fetchedProducts = self::$channel->getProducts($token, 1, $meta);
-//                self::verifyGetProducts($token, 1, $fetchedProducts);
-//                $cnt   += count($fetchedProducts);
-//                $token = $fetchedProducts[0]->token;
-//            }
-//            $this->assertEquals(count(self::$channelProductsData), $cnt);
-//        }
-//    }
-//
-
-
-
 
     /**
      * Load Test Data
@@ -101,7 +57,7 @@ final class ChannelTest extends Framework\TestCase
      * @param string $type
      * @return void
      */
-    function loadTestData(string $type)
+    public function loadTestData(string $type)
     {
         // Get data from JSON files.
         $channelFulfillmentsJSON = file_get_contents(__DIR__ . '/data/syncChannelFulfillments.json');
@@ -123,7 +79,7 @@ final class ChannelTest extends Framework\TestCase
      *
      * @return array
      */
-    function getChannelTypes(): array
+    public function getChannelTypes(): array
     {
         $channels = [];
         $items = array_diff(scandir(
@@ -145,7 +101,7 @@ final class ChannelTest extends Framework\TestCase
      *
      * @param $type
      */
-    function setFactory($type)
+    public function setFactory($type)
     {
         // Instantiate factory creator object.
         $creatorNameSpace = "stock2shop\\dal\\channels\\" . $type . "\\Creator";
@@ -175,7 +131,7 @@ final class ChannelTest extends Framework\TestCase
      * You may expect the outcomes to indicate issues, bugs and logic problems in specific
      * areas of code in the integration you are working on.
      */
-    function testSyncProducts()
+    public function testSyncProducts()
     {
 
         // Loop through the channel types found in the
@@ -266,7 +222,7 @@ final class ChannelTest extends Framework\TestCase
      * @param $channel
      * @return void
      */
-    function verifyProductSync(array $request, array $response, $connector, $channel)
+    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, $channel)
     {
 
         // Check against existing products on channel by fetching them first
@@ -274,10 +230,10 @@ final class ChannelTest extends Framework\TestCase
         $this->assertNotNull($existingProducts);
 
         // Counter variables.
-        $requestProductCnt   = 0;
-        $requestVariantCnt   = 0;
+        $requestProductCnt = 0;
+        $requestVariantCnt = 0;
         $existingProductsCnt = 0;
-        $existingVariantCnt  = 0;
+        $existingVariantCnt = 0;
 
         // Loop through the request products.
         foreach ($request as $key => $product) {
@@ -358,8 +314,10 @@ final class ChannelTest extends Framework\TestCase
      * The method evaluates the get() functionality of the Products connector for
      * all the connector implementations in the dal/channels directory.
      *
+     * @return void
+     * @throws UnprocessableEntity
      */
-    function testGetProducts()
+    public function testGetProducts()
     {
         // Loop through the channel types found in the
         // dal/channels/ directory.
@@ -370,7 +328,6 @@ final class ChannelTest extends Framework\TestCase
             self::setFactory($type);
 
             // Instantiate the Creator factory object.
-            /** @var dal\channel\Creator $creator */
             $creator = self::$creator;
 
             // Get the products connector object.
@@ -427,26 +384,26 @@ final class ChannelTest extends Framework\TestCase
         }
     }
 
-
     /**
      * Verify Get Products
      *
      * This is a helper test method which is used to evaluate whether the get() method of
      * the dal\channel\Products has been implemented correctly in your connector integration.
-     *
-     * A successful get() action on a Products channel will match this criteria:
+     * A successful get() action on a dal\channel\Products will return items which match
+     * the following criteria:
      *
      * 1. Each product will be a hydrated vo\ChannelProductGet object.
      * 2. Each product will have a token value smaller than the cursor token.
      * 3. vo\ChannelProductGet items must be sorted by the token value.
-     * 4.
+     * 4. Check that the Variant has a sku.
+     * 5. Check that the Variant has a channel_variant_code.
      *
      * @param string $token
      * @param int $limit
      * @param vo\ChannelProductGet[] $fetchedProducts
      * @return void
      */
-    function verifyGetProducts(string $token, int $limit, array $fetchedProducts)
+    public function verifyGetProducts(string $token, int $limit, array $fetchedProducts)
     {
         // Assert on the limit.
         $this->assertLessThanOrEqual($limit, count($fetchedProducts));
@@ -484,6 +441,52 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
+     * Test Sync Fulfillments
+     *
+     * This method synchronizes the test data for fulfillments onto a channel.
+     * verifyFulfillmentsSync() method is called after each test scenario to
+     * evaluate whether the sync was successful.
+     *
+     * Run this test to confirm whether your Fulfillments connector code is
+     * working correctly.
+     *
+     * After running the sync and if the test did not produce any errors, you
+     * should see the data in your connector directory fill up with JSON
+     * fulfillment records.
+     *
+     * The testing workflow is:
+     *
+     * 1. Iterate through the channel types.
+     * 2. Load test data for channel type.
+     * 3. Create new channel using test metadata.
+     * 4. Create connector from channel type and call sync().
+     * 5. Pass response and expected result to verifyFulfillmentsSync().
+     *
+     * @return void
+     */
+    // TODO: Complete when interface is ready.
+//    public function testSyncFulfillments()
+//    {
+//        foreach (self::$channelTypes as $type) {
+//
+//            // load test data and set channel
+//            self::loadTestData($type);
+//            self::setFactory($type);
+//
+//            // sync all fulfillments
+//            $request  = new ChannelFulfillmentsSync(
+//                [
+//                    "meta"             => self::$channelMetaData,
+//                    "channel_fulfillments" => self::$channelFulfillmentsData
+//                ]
+//            );
+//            $response = self::$channel->syncFulfillments($request);
+//            self::verifyFulfillmentSync($request, $response);
+//        }
+//
+//    }
+
+    /**
      * Verify Fulfillment Sync
      *
      * This method evaluates whether the request and response of a fulfillment
@@ -496,7 +499,7 @@ final class ChannelTest extends Framework\TestCase
      * 3. The items in the channel_fulfillments property are objects of the ChannelFulfillment class.
      * 4. Each ChannelFulfillment object has its channel_fulfillment_code set.
      * 5. Each ChannelFulfillment object has its channel_synced property set.
-     * 6. A call to the getByOrderCode() method to get the current fulfillments returns the same amount of
+     * 6. A call to the getByCode() method to get the current fulfillments returns the same amount of
      *    ChannelFulfillment objects as there are in the $request structure.
      *
      * @param ChannelFulfillmentsSync $request
@@ -505,69 +508,53 @@ final class ChannelTest extends Framework\TestCase
      * @param vo\Channel $channel
      * @return void
      */
-    function verifyFulfillmentSync(ChannelFulfillmentsSync $request, ChannelFulfillmentsSync $response, $connector, vo\Channel $channel)
-    {
-        $codes = [];
-
-        // Assert whether the response is a ChannelFulfillmentsSync object.
-        $this->assertInstanceOf("stock2shop\\vo\\ChannelFulfillmentsSync", $response);
-
-        // Assert whether the request is a ChannelFulfillmentsSync object.
-        $this->assertSameSize($request->channel_fulfillments, $response->channel_fulfillments);
-
-        // Loop through channel_fulfillments property items and assert on individual ChannelFulfillment objects.
-        foreach ($response->channel_fulfillments as $f) {
-
-            $this->assertInstanceOf("stock2shop\\vo\\ChannelFulfillment", $f);
-            $this->assertNotEmpty($f->channel_fulfillment_code);
-            $this->assertNotEmpty($f->channel_synced);
-            $this->assertTrue(ChannelFulfillment::isValidChannelSynced($f->channel_synced));
-
-            $codes[$f->channel_fulfillment_code] = $f->channel_fulfillment_code;
-        }
-
-        // Get the current fulfillments from the current connector implementation.
-        $currentFulfillments = $connector->getByCode($response);
-
-        // Check whether the number of ChannelFulfillments on the channel match the
-        $this->assertEquals(count($request->channel_fulfillments), count($current));
-
-        foreach ($current as $f) {
-            $this->assertInstanceOf("stock2shop\\vo\\ChannelFulfillment", $f);
-            $this->assertArrayHasKey($f->channel_fulfillment_code, $codes);
-        }
-
-    }
-
-    function testGetByProductCode() {
-
-//        $matchingProducts
-
-    }
-
-//    function testTransformOrder()
+    // TODO: Complete when interface is ready.
+//    public function verifyFulfillmentSync(ChannelFulfillmentsSync $request, ChannelFulfillmentsSync $response, dal\channel\Fulfillments $connector, vo\Channel $channel)
 //    {
-//        foreach (self::$channelTypes as $type) {
+//        $codes = [];
 //
-//            // load test data and set channel
-//            self::loadTestData($type);
-//            self::setChannel($type);
+//        // Assert whether the response is a ChannelFulfillmentsSync object.
+//        $this->assertInstanceOf("stock2shop\\vo\\ChannelFulfillmentsSync", $response);
 //
-//            $channelOrder = self::$channel->transformOrder(
-//                self::$channelOrderData,
-//                MetaItem::createArray(self::$channelMetaData)
-//            );
-//            $this->verifyTransformOrder($channelOrder);
+//        // Assert whether the request is a ChannelFulfillmentsSync object.
+//        $this->assertSameSize($request->channel_fulfillments, $response->channel_fulfillments);
+//
+//        // Loop through channel_fulfillments property items and assert on individual ChannelFulfillment objects.
+//        foreach ($response->channel_fulfillments as $f) {
+//
+//            $this->assertInstanceOf("stock2shop\\vo\\ChannelFulfillment", $f);
+//            $this->assertNotEmpty($f->channel_fulfillment_code);
+//            $this->assertNotEmpty($f->channel_synced);
+//            $this->assertTrue(ChannelFulfillment::isValidChannelSynced($f->channel_synced));
+//
+//            $codes[$f->channel_fulfillment_code] = $f->channel_fulfillment_code;
 //        }
+//
+//        // Get the current fulfillments from the current connector implementation.
+//        $currentFulfillments = $connector->getByCode($response);
+//
+//        // Check whether the number of ChannelFulfillments on the channel match the number of Fulfillments
+//        // from the current connector implementation.
+//        $this->assertEquals(count($request->channel_fulfillments), count($currentFulfillments));
+//
+//        foreach ($currentFulfillments as $f) {
+//            $this->assertInstanceOf("stock2shop\\vo\\ChannelFulfillment", $f);
+//            $this->assertArrayHasKey($f->channel_fulfillment_code, $codes);
+//        }
+//
 //    }
 
-//    function testGetOrders()
+    /**
+     * Test Get Orders
+     * @return void
+     */
+    // TODO: Complete when interface is ready.
+//    public function testGetOrders()
 //    {
 //        foreach (self::$channelTypes as $type) {
 //
 //            // load test data and set channel
 //            self::loadTestData($type);
-//            self::setChannel($type);
 //
 //            // Get orders (return 2)
 //            $fetchedOrders = self::$channel->getOrders("", 2, MetaItem::createArray(self::$channelMetaData));
@@ -577,9 +564,17 @@ final class ChannelTest extends Framework\TestCase
 //            }
 //        }
 //    }
-//
 
-//    function testGetOrdersByCode()
+    /**
+     * Test Get Orders By Code
+     *
+     * This test case evaluates the get() method from the dal\channel\Orders interface
+     * which is implemented in your connector.
+     *
+     * @return void
+     */
+    // TODO: Complete when interface is ready.
+//    public function testGetOrdersByCode()
 //    {
 //        foreach (self::$channelTypes as $type) {
 //
@@ -600,9 +595,18 @@ final class ChannelTest extends Framework\TestCase
 //            }
 //        }
 //    }
-//
 
-//    function testSyncFulfillments()
+    /**
+     * Test Transform Order
+     *
+     * This method transforms an order of a specified connector type.
+     * It loops through the channel types configured in this e2e test
+     * and calls the corresponding method from the connector object.
+     *
+     * @return void
+     */
+    // TODO: Complete when interface is ready.
+//    public function testTransformOrder()
 //    {
 //        foreach (self::$channelTypes as $type) {
 //
@@ -610,28 +614,33 @@ final class ChannelTest extends Framework\TestCase
 //            self::loadTestData($type);
 //            self::setChannel($type);
 //
-//            // sync all fulfillments
-//            $request  = new ChannelFulfillmentsSync(
-//                [
-//                    "meta"             => self::$channelMetaData,
-//                    "channel_fulfillments" => self::$channelFulfillmentsData
-//                ]
+//            // Call the method to transform the order.
+//            // We are creating an array of vo\Order objects
+//            // and an array of vo\Meta objects and passing it
+//            // to the connector implementation.
+//            $channelOrder = self::$channel->transformOrder(
+//                vo\Order::createArray(self::$channelOrderData),
+//                vo\Meta::createArray(self::$channelMetaData)
 //            );
-//            $response = self::$channel->syncFulfillments($request);
-//            self::verifyFulfillmentSync($request, $response);
+//
+//            // Call the verify method to evaluate the transformation.
+//            $this->verifyTransformOrder($channelOrder);
 //        }
-//
 //    }
-//
-//    /**
-//     * @param $channelOrder
-//     * @param $webhook
-//     */
-//    function verifyTransformOrder($channelOrder)
+
+
+    /**
+     * Verify Transform Order
+     *
+     * Verifies the order transformation.
+     *
+     * @param $channelOrder
+     */
+    // TODO: Complete when interface is ready.
+//    public function verifyTransformOrder($channelOrder)
 //    {
 //        $this->assertInstanceOf("stock2shop\\vo\\ChannelOrder", $channelOrder);
 //        $this->assertNotEmpty($channelOrder->channel_order_code);
 //    }
-//
 
 }

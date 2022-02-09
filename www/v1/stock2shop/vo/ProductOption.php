@@ -14,7 +14,7 @@ use stock2shop\exceptions\UnprocessableEntity;
  */
 class ProductOption extends ValueObject
 {
-    /** @var string $name */
+    /** @var string $name */x
     public $name;
 
     /** @var string $value */
