@@ -166,40 +166,45 @@ class Products implements ProductsInterface
             }
         }
 
-        $channelProducts = [];
         $currentFiles = data\Helper::getJSONFiles("products");
 
-        // Create paged results.
+        $channelProducts = [];
         $cnt = 1;
-        foreach ($currentFiles as $fileName => $obj) {
+
+        foreach ($currentFiles as $fileName => $file) {
 
             // Compare the token and file name.
             if (strcmp($token, $fileName) < 0) {
+
+                // Does the file name have the separator string in it.
+                // If not, then we know that this product is not a product variant.
+                // Which means we can continue and add the product to the channelProducts
+                // array.
                 if (strpos($fileName, $separator) === false) {
 
-                    // This a product
                     if ($cnt > $limit) {
                         break;
                     }
 
-                    // Add vo\ChannelProductGet object to return array.
-                    $channelProducts[] = new vo\ChannelProductGet([
-                        "channel_product_code" => $obj->channel_product_code
-                    ]);
+                    $channelProduct = new vo\ChannelProduct($file);
+
+                    // Create stdClass object so that we can attach the token to the
+                    // object dynamically.
+                    $channelProductGet = new \stdClass;
+                    foreach($channelProduct as $key => $val) {
+                        $channelProductGet->$key = $val;
+                        $channelProductGet->token = $channelProduct->channel_product_code;
+                    }
+
+                    $channelProducts[] = $channelProductGet;
+
                     $cnt++;
 
                 } else {
 
-                    // Add a variant to the ChannelProduct in the return array.
-                    $channelProducts[count($channelProducts) - 1]->variants[] = new vo\ChannelVariant(
-                        [
-                            "sku" => $obj->sku,
-                            "channel_variant_code" => $obj->channel_variant_code
-                        ]
-                    );
-
-                    // Set the vo\ChannelProductGet's token value to the channel_variant_code.
-                    $channelProducts[count($channelProducts) - 1]->token = $obj->channel_variant_code;
+                    // The separator is in the fileName somewhere, so this means that we're going
+                    // to add a variant to one of the products in the result set array.
+                    $channelProductGetArray = [];
 
                 }
 

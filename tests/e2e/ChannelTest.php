@@ -348,8 +348,7 @@ final class ChannelTest extends Framework\TestCase
             // --------------------------------------------------------
 
             // Create all products on the channel.
-            // Run the sync on the channel.
-            $response = $connector->sync($request, $channel, $flagMap);
+            $connector->sync($request, $channel, $flagMap);
 
             // --------------------------------------------------------
 
@@ -358,22 +357,25 @@ final class ChannelTest extends Framework\TestCase
             $token = "";
             $limit = count(self::$channelProductsData);
             $meta = vo\Meta::createArray(self::$channelMetaData);
-            $fetchedProducts = $connector->get($token, $limit, $channel);
+
+            /** @var object $channelProductsGetArray */
+            $channelProductsGetArray = $connector->get($token, $limit, $channel);
 
             // We are expecting the connector->get() method to return all the products on the channel.
-            self::verifyGetProducts($token, $limit, $fetchedProducts);
+            self::verifyGetProducts($token, $limit, $channelProductsGetArray);
 
             // --------------------------------------------------------
 
-            // Get products using paging (one at a time).
             $cnt = 0;           // zero counter.
             $limit = 1;         // set limit to 1.
 
+            // Iterate through the number of products in the $request array.
+            // Check each product by getting it from the channel and verifying
+            // it using verifyGetProducts.
             for ($i = 0; $i < count($request); $i++) {
-                $fetchedProducts = $connector->get($token, $limit, $channel);
-                self::verifyGetProducts($token, $limit, $fetchedProducts);
-                $cnt += count($fetchedProducts);
-                $token = $fetchedProducts[0]->token;
+                $fetchedProductGet = $connector->get($token, $limit, $channel);
+                self::verifyGetProducts($token, $limit, $fetchedProductGet);
+                $cnt += count($fetchedProductGet);
             }
 
             // Assert on the product count.
@@ -398,7 +400,7 @@ final class ChannelTest extends Framework\TestCase
      *
      * @param string $token
      * @param int $limit
-     * @param vo\ChannelProductGet[] $fetchedProducts
+     * @param ChannelProduct[] $fetchedProducts
      * @return void
      */
     public function verifyGetProducts(string $token, int $limit, array $fetchedProducts)
@@ -411,7 +413,9 @@ final class ChannelTest extends Framework\TestCase
         foreach ($fetchedProducts as $product) {
 
             // Each product must be a ChannelProductGet object.
-            $this->assertInstanceOf("stock2shop\\vo\\ChannelProductGet", $product);
+//            $this->assertInstanceOf("stock2shop\\vo\\ChannelProduct", $product);
+            $this->assertInstanceOf("\stdClass", $product);
+            $this->assertObjectHasAttribute("token", $product);
 
             // The product token must not be greater than cursor token.
             $this->assertGreaterThan($token, $product->token);

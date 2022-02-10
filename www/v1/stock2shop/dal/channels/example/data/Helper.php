@@ -4,7 +4,7 @@ namespace stock2shop\dal\channels\example\data;
 
 class Helper
 {
-    const DATA_PATH = __DIR__;
+    public const DATA_PATH = __DIR__;
 
     /**
      * Get JSON Files By Prefix
@@ -35,7 +35,7 @@ class Helper
      * file found in the data directory configured in the DATA_PATH
      * class constant, by connector $type name.
      *
-     * @param $type Connector type name.
+     * @param string $type Connector type name.
      * @return array
      */
     static function getJSONFiles($type): array
@@ -47,7 +47,10 @@ class Helper
         foreach ($fileNames as $file) {
             if (substr($file, -5) === '.json') {
                 $contents     = file_get_contents($path . '/' . $file);
-                $files[$file] = json_decode($contents);
+
+                // Update the json_decode to decode each file into an array
+                // instead of a \stdClass object.
+                $files[$file] = json_decode($contents, true);
             }
         }
         return $files;
