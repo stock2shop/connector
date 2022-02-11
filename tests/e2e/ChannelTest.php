@@ -199,6 +199,20 @@ final class ChannelTest extends Framework\TestCase
 
             // --------------------------------------------------------
 
+            // Remove all product images by setting 'delete' to true.
+            foreach ($request as $key => $product) {
+                $product->delete = true;
+            }
+
+            // Run the sync on the channel.
+            $response = $connector->sync($request, $channel, $flagMap);
+            $this->assertNotNull($response);
+
+            // Verify the sync.
+            self::verifyProductSync($request, $response, $connector, $channel);
+
+            // --------------------------------------------------------
+
             // Send empty payload of ChannelProducts with connector.
             $response = $connector->sync([], $channel, $flagMap);
             $this->assertNotNull($response);
@@ -317,7 +331,7 @@ final class ChannelTest extends Framework\TestCase
      * @return void
      * @throws UnprocessableEntity
      */
-    public function testGetProducts()
+    public function _testGetProducts()
     {
         // Loop through the channel types found in the
         // dal/channels/ directory.
@@ -358,7 +372,7 @@ final class ChannelTest extends Framework\TestCase
             $limit = count(self::$channelProductsData);
             $meta = vo\Meta::createArray(self::$channelMetaData);
 
-            /** @var object $channelProductsGetArray */
+            /** @var ChannelProduct[] $channelProductsGetArray */
             $channelProductsGetArray = $connector->get($token, $limit, $channel);
 
             // We are expecting the connector->get() method to return all the products on the channel.
@@ -373,7 +387,7 @@ final class ChannelTest extends Framework\TestCase
             // Check each product by getting it from the channel and verifying
             // it using verifyGetProducts.
             for ($i = 0; $i < count($request); $i++) {
-                $fetchedProductGet = $connector->get($token, $limit, $channel);
+                $fetchedProductGet = $connector->get($request[$i]->channel_product_code, $limit, $channel);
                 self::verifyGetProducts($token, $limit, $fetchedProductGet);
                 $cnt += count($fetchedProductGet);
             }
@@ -410,25 +424,17 @@ final class ChannelTest extends Framework\TestCase
         $currentToken = $token;
 
         // Loop through the fetched products and check their values.
+        /** @var vo\ChannelProduct $product */
         foreach ($fetchedProducts as $product) {
 
             // Each product must be a ChannelProductGet object.
-//            $this->assertInstanceOf("stock2shop\\vo\\ChannelProduct", $product);
-            $this->assertInstanceOf("\stdClass", $product);
-            $this->assertObjectHasAttribute("token", $product);
-
-            // The product token must not be greater than cursor token.
-            $this->assertGreaterThan($token, $product->token);
-
-            // The result set must be sorted by the token value.
-            $this->assertGreaterThan($currentToken, $product->token);
-            $currentToken = $product->token;
-
-            // Check that the token property is set.
-            $this->assertNotEmpty($product->token);
+            $this->assertInstanceOf("stock2shop\\vo\\ChannelProduct", $product);
 
             // Check that the channel_product_code property is set.
             $this->assertNotEmpty($product->channel_product_code);
+
+            // The product token must not be greater than cursor token.
+            $this->assertGreaterThan($token, $product->channel_product_code);
 
             // Check variants.
             foreach ($product->variants as $variant) {
@@ -438,6 +444,18 @@ final class ChannelTest extends Framework\TestCase
 
                 // Check that the product variant sku property has been set.
                 $this->assertNotEmpty($variant->sku);
+
+            }
+
+            // Check images.
+            foreach ($product->images as $image) {
+
+                // Check that the channel_variant_code has been set for the product variant.
+                $this->assertNotEmpty($image->channel_image_code);
+
+                // Check that the product variant sku property has been set.
+                $this->assertTrue($image->valid());
+
             }
         }
     }
