@@ -1,41 +1,33 @@
 [
   {
-    "id": "43243",
     "key": "api_url",
     "value": "https://www.your-store.com/wc-api/v3"
   },
   {
-    "id": "43244",
     "key": "authentication",
     "value": "query_params"
   },
   {
-    "id": "43245",
     "key": "channelmeta",
     "value": "K48MH_0"
   },
   {
-    "id": "43246",
     "key": "consumer_key",
     "value": "xxx"
   },
   {
-    "id": "43247",
     "key": "consumer_secret",
     "value": "xxx"
   },
   {
-    "id": "43248",
     "key": "variant_separator",
     "value": "~"
   },
   {
-    "id": "43250",
     "key": "image_separator",
     "value": "="
   },
   {
-    "id": "43249",
     "key": "config_notes",
     "value": "<p>sasdasdas</p>"
   }
