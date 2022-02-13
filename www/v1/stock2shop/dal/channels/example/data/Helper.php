@@ -4,7 +4,7 @@ namespace stock2shop\dal\channels\example\data;
 
 class Helper
 {
-    public const DATA_PATH = __DIR__;
+    const DATA_PATH = __DIR__;
 
     /**
      * Get JSON Files By Prefix
@@ -46,11 +46,14 @@ class Helper
         sort($fileNames);
         foreach ($fileNames as $file) {
             if (substr($file, -5) === '.json') {
-                $contents     = file_get_contents($path . '/' . $file);
+
+                // Get file contents.
+                $contents = file_get_contents($path . '/' . $file);
 
                 // Update the json_decode to decode each file into an array
                 // instead of a \stdClass object.
                 $files[$file] = json_decode($contents, true);
+
             }
         }
         return $files;
