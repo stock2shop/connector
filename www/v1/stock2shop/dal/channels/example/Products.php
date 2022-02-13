@@ -39,28 +39,6 @@ class Products implements ProductsInterface
      * @param vo\Flag[] $flagsMap
      * @return ChannelProduct[] $channelProducts
      */
-    public function sync2(array $channelProducts, vo\Channel $channel, array $flagsMap): array {
-
-        return [];
-
-    }
-
-
-    /**
-     * Sync
-     *
-     * Creates a file for each product and for each product variant.
-     * This method illustrates the possible cleanup operations required
-     * for e-commerce channels.
-     *
-     * product.id is the file name for the product.
-     * product.variant[].channel_variant_code is the file name for the variant.
-     *
-     * @param vo\ChannelProduct[] $channelProducts
-     * @param vo\Channel $channel
-     * @param vo\Flag[] $flagsMap
-     * @return ChannelProduct[] $channelProducts
-     */
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
 
