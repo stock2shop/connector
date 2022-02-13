@@ -1,7 +1,6 @@
 <?php
 
 namespace stock2shop\base;
-
 use stock2shop\exceptions;
 
 abstract class ValueObject
@@ -66,7 +65,6 @@ abstract class ValueObject
     }
 
     /**
-     * String From
      * @param array $data
      * @param string $key
      * @return string|null Value of key if it exists
@@ -89,7 +87,6 @@ abstract class ValueObject
     }
 
     /**
-     * Float From
      * "There is no difference in PHP.
      * float, double or real are the same datatype.
      * At the C level, everything is stored as a double"
@@ -146,7 +143,6 @@ abstract class ValueObject
     }
 
     /**
-     * Array From
      * @param array $data
      * @param string $key
      * @return array Value of key if it exists,
