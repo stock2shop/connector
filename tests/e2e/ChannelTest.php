@@ -80,6 +80,10 @@ final class ChannelTest extends Framework\TestCase
         self::$channelOrderData = json_decode($channelOrderJSON, true);
         self::$channelProductsData = json_decode($channelProductsJSON, true);
         self::$channelFulfillmentsData = json_decode($channelFulfillmentsJSON, true);
+
+        // Assert on file content.
+        $this->assertCount(2, self::$channelProductsData);
+
     }
 
     /**
@@ -143,9 +147,7 @@ final class ChannelTest extends Framework\TestCase
      */
     public function testSyncProducts()
     {
-
-        // Loop through the channel types found in the
-        // dal/channels/ directory.
+        // Loop through the channel types found in the dal/channels/directory.
         foreach (self::$channelTypes as $type) {
 
             // Load test data and set channel
@@ -166,69 +168,55 @@ final class ChannelTest extends Framework\TestCase
             // Create flag map array.
             $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
 
-            // Prepare the request by creating an array of ChannelProducts.
+            // --------------------------------------------------------
+
+            // 1. Create all products on the channel.
+            // 2. Prepare the request by creating an array of ChannelProducts.
+            // 3. Run the sync on the channel.
+            // 4. Verify the sync.
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
-            $this->assertNotNull($request);
-
-            // --------------------------------------------------------
-
-            // Create all products on the channel.
-            // Run the sync on the channel.
             $response = $connector->sync($request, $channel, $flagMap);
-            $this->assertNotNull($response);
-
-            // Verify the sync.
             self::verifyProductSync($request, $response, $connector, $channel);
 
             // --------------------------------------------------------
 
-            // Delete a variant from a product.
+            // 1. Delete a variant from a product.
+            // 2. Run the sync on the channel.
+            // 3. Verify the sync.
             $request[1]->variants[1]->delete = true;
-
-            // Run the sync on the channel.
             $response = $connector->sync($request, $channel, $flagMap);
-            $this->assertNotNull($response);
-
-            // Verify the sync.
             self::verifyProductSync($request, $response, $connector, $channel);
 
             // --------------------------------------------------------
 
-            // Remove all products by setting 'delete' to true.
+            // 1. Remove all products by setting 'delete' to true.
+            // 2. Run the sync on the channel.
+            // 3. Verify the sync.
             foreach ($request as $key => $product) {
                 $product->delete = true;
             }
-
-            // Run the sync on the channel.
             $response = $connector->sync($request, $channel, $flagMap);
-            $this->assertNotNull($response);
-
-            // Verify the sync.
             self::verifyProductSync($request, $response, $connector, $channel);
 
             // --------------------------------------------------------
 
-            // Remove all product images by setting 'delete' to true.
+            // 1. Remove all product images by setting 'delete' to true.
+            // 2. Run the sync on the channel.
+            // 3. Verify the sync.
             foreach ($request as $key => $product) {
                 foreach($product->images as $productImage) {
                     $productImage->delete = true;
                 }
             }
-
-            // Run the sync on the channel.
             $response = $connector->sync($request, $channel, $flagMap);
-            $this->assertNotNull($response);
-
-            // Verify the sync.
             self::verifyProductSync($request, $response, $connector, $channel);
 
             // --------------------------------------------------------
 
-            // Send empty payload of ChannelProducts with connector.
+            // 1. Send empty payload of ChannelProducts.
+            // 2. Run the sync on the channel.
+            // 3. Verify the sync.
             $response = $connector->sync([], $channel, $flagMap);
-            $this->assertNotNull($response);
-
-            // Verify the sync.
             self::verifyProductSync($request, $response, $connector, $channel);
 
         }
@@ -241,56 +229,44 @@ final class ChannelTest extends Framework\TestCase
      * This method verifies whether the synchronization of products on a channel was
      * successful using the custom connector.
      *
-     * @param array $request
-     * @param array $response
+     * @param vo\ChannelProduct[] $request
+     * @param vo\ChannelProduct[] $response
      * @param dal\channel\Products $connector
-     * @param $channel
+     * @param vo\Channel $channel
      * @return void
      */
-    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, $channel)
+    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel)
     {
 
         // Check against existing products on channel by fetching them first
         $existingProducts = $connector->getByCode($request, $channel);
-        $this->assertNotNull($existingProducts);
 
-        // Counter variables.
-        $requestProductCnt = 0;
-        $requestVariantCnt = 0;
-        $existingProductsCnt = 0;
+        $requestProductCnt  = 0;
+        $requestVariantCnt  = 0;
         $existingVariantCnt = 0;
 
-        // Loop through the request products.
         foreach ($request as $key => $product) {
             if (!$product->delete) {
-                // Add to product counter.
                 $requestProductCnt++;
                 foreach ($product->variants as $variant) {
-                    // Add to variant counter.
                     $requestVariantCnt++;
                 }
             }
         }
 
-        // Loop through the existing products
         foreach ($existingProducts as $key => $product) {
             foreach ($product->variants as $variant) {
-                // Add to existing product variant counter.
                 $existingVariantCnt++;
             }
         }
 
-        // Assert on the product and product variant counts.
-        $this->assertEquals(count($requestProductCnt), count($existingProductsCnt), ' sync count');
-        $this->assertEquals(count($requestVariantCnt), count($existingVariantCnt), ' sync count');
+        $this->assertEquals($requestProductCnt, count($existingProducts), ' sync count');
+        $this->assertEquals($requestVariantCnt, $existingVariantCnt, ' sync count');
 
-        // Instantiate the responseProductMap and the responseVariantMap.
+        // Check response values are set
         $responseProductMap = [];
         $responseVariantMap = [];
 
-        // Here we are looping through the response products and build a map
-        // of key value pairs in $responseProductMap. The same is done for all
-        // the product variants in $responseVariantMap.
         foreach ($response as $product) {
             $responseProductMap[$product->channel_product_code] = $product;
             foreach ($product->variants as $variant) {
@@ -298,34 +274,27 @@ final class ChannelTest extends Framework\TestCase
             }
         }
 
-        // In this section of code we are looping through the existing products
-        // and destructuring each iteration to get the $key and $existingProduct
-        // (the actual vo\ChannelProduct item).
-        foreach ($existingProducts as $key => $existingProduct) {
+        foreach ($existingProducts as $existingProduct) {
 
-            /** @var vo\ChannelProduct $product */
             $product = $responseProductMap[$existingProduct->channel_product_code];
 
-            $this->assertTrue($product->success, ' success set to true');
-            $this->assertNotEmpty($product->synced, ' synced set');
-            $this->assertTrue($product->valid(), ' success set to true');   // updated since VO changed.
-            $this->assertNotEmpty($product->channel_product_code, ' channel_product_code set');
+//            $this->assertTrue($existingProduct->valid(), ' product->valid() is false.');
+            $this->assertTrue($product->success, ' product->success NOT set to TRUE.');
+            $this->assertNotEmpty($product->synced, ' product->synced NOT set to date/time synchronised.');
+            $this->assertNotEmpty($product->channel_product_code, ' product->channel_product_code set.');
 
-            // Existing and product variants count.
-            $tempExistingProductCount = count($existingProduct->variants);
-            $tempProductCount = count($product->variants);
             $this->assertEquals(
-                $tempExistingProductCount,
-                $tempProductCount,
-                " The number of existing product variants (" . $tempExistingProductCount . ") does not match the number of variants for this product. (" . $tempProductCount . ")"
+                count($existingProduct->variants),
+                (count($product->variants))
             );
 
             foreach ($existingProduct->variants as $existingVariant) {
 
-                $this->assertArrayHasKey($existingVariant->channel_variant_code, $responseVariantMap, " product variant not found in existing variant map.");
                 $variant = $responseVariantMap[$existingVariant->channel_variant_code];
-                $this->assertTrue($variant->success, ' success set to true');
-                $this->assertNotEmpty($variant->channel_variant_code, ' channel_variant_code set');
+
+                $this->assertTrue($variant->success, ' success not set to TRUE.');
+                $this->assertNotEmpty($variant->sku, ' sku property is NOT set.');
+                $this->assertNotEmpty($variant->channel_variant_code, ' channel_variant_code set.');
 
             }
 
@@ -366,6 +335,7 @@ final class ChannelTest extends Framework\TestCase
 
             // Prepare the request by creating an array of ChannelProducts.
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
+            $this->assertCount(2, $request);
 
             // --------------------------------------------------------
 
@@ -377,7 +347,7 @@ final class ChannelTest extends Framework\TestCase
             // Provide an empty token.
             // We are expecting to receive all the products in the response from this function call.
             $token = "";
-            $limit = count(self::$channelProductsData);
+            $limit = count($request);
 
             /** @var ChannelProduct[] $channelProductsGetArray */
             $channelProductsGetArray = $connector->get($token, $limit, $channel);
@@ -399,6 +369,9 @@ final class ChannelTest extends Framework\TestCase
                 $cnt += count($fetchedProductGet);
             }
 
+            $productsRequestCount = count($request);
+            $actualCount = $cnt;
+
             // Assert on the product count.
             $this->assertEquals(count($request), $cnt);
 
@@ -416,8 +389,9 @@ final class ChannelTest extends Framework\TestCase
      * 1. Each product will be a hydrated vo\ChannelProductGet object.
      * 2. Each product will have a token value smaller than the cursor token.
      * 3. vo\ChannelProductGet items must be sorted by the token value.
-     * 4. Check that the Variant has a sku.
-     * 5. Check that the Variant has a channel_variant_code.
+     * 4. Check that each variant has a sku and channel_variant_code set.
+     * 5. Check that each image has its channel_image_code set.
+     * 5. Check that.
      *
      * @param string $token
      * @param int $limit
@@ -426,8 +400,6 @@ final class ChannelTest extends Framework\TestCase
      */
     public function verifyGetProducts(string $token, int $limit, array $fetchedProducts)
     {
-        return;
-
         file_put_contents("./fetchedProducts.json", json_encode($fetchedProducts, JSON_PRETTY_PRINT));
 
         // Assert on the limit.
@@ -460,9 +432,12 @@ final class ChannelTest extends Framework\TestCase
 
             // Check images.
             foreach ($product->images as $image) {
+
                 // Check that the channel_variant_code has been set for the product variant.
                 $this->assertNotEmpty($image->channel_image_code);
+
             }
+
         }
     }
 
@@ -653,7 +628,6 @@ final class ChannelTest extends Framework\TestCase
 //            $this->verifyTransformOrder($channelOrder);
 //        }
 //    }
-
 
     /**
      * Verify Transform Order
