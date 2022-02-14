@@ -80,10 +80,6 @@ final class ChannelTest extends Framework\TestCase
         self::$channelOrderData = json_decode($channelOrderJSON, true);
         self::$channelProductsData = json_decode($channelProductsJSON, true);
         self::$channelFulfillmentsData = json_decode($channelFulfillmentsJSON, true);
-
-        // Assert on file content.
-        $this->assertCount(2, self::$channelProductsData);
-
     }
 
     /**
@@ -226,8 +222,15 @@ final class ChannelTest extends Framework\TestCase
     /**
      * Verify Product Sync
      *
-     * This method verifies whether the synchronization of products on a channel was
-     * successful using the custom connector.
+     * This method verifies whether the synchronization of products was
+     * successful using the custom connectors in the stock2shop/dal/channels.
+     * Please note that in the context of this test case, 'existing'
+     * ($existingProducts) refers to data which has been persisted on a
+     * Stock2Shop channel.
+     *
+     * The workflow includes:
+     *
+     * 1. Get the existing products on the channel by calling getByCode().
      *
      * @param vo\ChannelProduct[] $request
      * @param vo\ChannelProduct[] $response
@@ -263,14 +266,17 @@ final class ChannelTest extends Framework\TestCase
         $this->assertEquals($requestProductCnt, count($existingProducts), ' sync count');
         $this->assertEquals($requestVariantCnt, $existingVariantCnt, ' sync count');
 
-        // Check response values are set
         $responseProductMap = [];
         $responseVariantMap = [];
+        $responseImageMap = [];
 
         foreach ($response as $product) {
             $responseProductMap[$product->channel_product_code] = $product;
             foreach ($product->variants as $variant) {
                 $responseVariantMap[$variant->channel_variant_code] = $variant;
+            }
+            foreach ($product->images as $image) {
+                $responseImageMap[$image->channel_image_code] = $image;
             }
         }
 
@@ -288,14 +294,18 @@ final class ChannelTest extends Framework\TestCase
                 (count($product->variants))
             );
 
+            // Check product variants.
             foreach ($existingProduct->variants as $existingVariant) {
-
                 $variant = $responseVariantMap[$existingVariant->channel_variant_code];
-
                 $this->assertTrue($variant->success, ' success not set to TRUE.');
                 $this->assertNotEmpty($variant->sku, ' sku property is NOT set.');
                 $this->assertNotEmpty($variant->channel_variant_code, ' channel_variant_code set.');
+            }
 
+            // Check product images.
+            foreach ($existingProduct->images as $existingImage) {
+                $image = $responseImageMap[$existingImage->channel_image_code];
+                $this->assertNotEmpty($image->channel_image_code, ' channel_variant_code set.');
             }
 
         }
@@ -311,35 +321,31 @@ final class ChannelTest extends Framework\TestCase
      * @return void
      * @throws UnprocessableEntity
      */
-    public function _testGetProducts()
+    public function testGetProducts()
     {
         foreach (self::$channelTypes as $type) {
 
-            // Load test data and set channel
+            // Load test data.
             self::loadTestData($type);
+
+            // Set factory.
             self::setFactory($type);
 
             // Instantiate the Creator factory object.
             $creator = self::$creator;
-
-            // Get the products connector object.
             $connector = $creator->createProducts();
 
             // Instantiate new channel object using the test channel meta data.
             $meta = vo\Meta::createArray(self::$channelMetaData);
             $mergedChannelData = array_merge(self::$channelData, ["meta" => $meta]);
             $channel = new vo\Channel($mergedChannelData);
-
-            // Create flag map array.
             $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
-
-            // Prepare the request by creating an array of ChannelProducts.
-            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
-            $this->assertCount(2, $request);
 
             // --------------------------------------------------------
 
             // Create all products on the channel.
+            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
+            $this->assertCount(2, $request);
             $connector->sync($request, $channel, $flagMap);
 
             // --------------------------------------------------------
@@ -357,8 +363,8 @@ final class ChannelTest extends Framework\TestCase
 
             // --------------------------------------------------------
 
-            $cnt = 0;           // zero counter.
-            $limit = 1;         // set limit to 1.
+            $cnt = 0;
+            $limit = 1;
 
             // Iterate through the number of products in the $request array.
             // Check each product by getting it from the channel and verifying
@@ -366,11 +372,8 @@ final class ChannelTest extends Framework\TestCase
             for ($i = 0; $i < count($request); $i++) {
                 $fetchedProductGet = $connector->get("", $limit, $channel);
                 self::verifyGetProducts("", $limit, $fetchedProductGet);
-                $cnt += count($fetchedProductGet);
+                $cnt++;
             }
-
-            $productsRequestCount = count($request);
-            $actualCount = $cnt;
 
             // Assert on the product count.
             $this->assertEquals(count($request), $cnt);
@@ -391,7 +394,6 @@ final class ChannelTest extends Framework\TestCase
      * 3. vo\ChannelProductGet items must be sorted by the token value.
      * 4. Check that each variant has a sku and channel_variant_code set.
      * 5. Check that each image has its channel_image_code set.
-     * 5. Check that.
      *
      * @param string $token
      * @param int $limit
@@ -400,13 +402,9 @@ final class ChannelTest extends Framework\TestCase
      */
     public function verifyGetProducts(string $token, int $limit, array $fetchedProducts)
     {
-        file_put_contents("./fetchedProducts.json", json_encode($fetchedProducts, JSON_PRETTY_PRINT));
-
         // Assert on the limit.
-        $this->assertLessThanOrEqual($limit, count($fetchedProducts));
-        $currentToken = $token;
+        $this->assertLessThanOrEqual(count($fetchedProducts), $limit);
 
-        // Loop through the fetched products and check their values.
         /** @var vo\ChannelProduct $product */
         foreach ($fetchedProducts as $product) {
 
@@ -421,21 +419,16 @@ final class ChannelTest extends Framework\TestCase
 
             // Check variants.
             foreach ($product->variants as $variant) {
-
                 // Check that the channel_variant_code has been set for the product variant.
                 $this->assertNotEmpty($variant->channel_variant_code);
-
                 // Check that the product variant sku property has been set.
                 $this->assertNotEmpty($variant->sku);
-
             }
 
             // Check images.
             foreach ($product->images as $image) {
-
-                // Check that the channel_variant_code has been set for the product variant.
+                // Check that the channel_image_code has been set for the product image.
                 $this->assertNotEmpty($image->channel_image_code);
-
             }
 
         }
