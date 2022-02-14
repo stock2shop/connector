@@ -3,7 +3,6 @@
 namespace stock2shop\dal\channels\example;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
-use stock2shop\exceptions;
 use stock2shop\vo;
 
 /**
@@ -15,6 +14,7 @@ use stock2shop\vo;
  */
 class Products implements ProductsInterface
 {
+
     /** @const string DATA_PATH */
     const DATA_PATH = __DIR__ . "/data";
 
@@ -42,6 +42,8 @@ class Products implements ProductsInterface
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
 
+        $logLineCounter = 0;
+
         // A 'separator' is used when creating product variant and product image file names.
         // The separator is an example of Stock2Shop Channel 'meta'.
         // Meta is a configured on Channel level and describes the channel and the required functionality.
@@ -64,6 +66,11 @@ class Products implements ProductsInterface
         // Iterate through the channel products.
         foreach ($channelProducts as &$product) {
 
+            $productId = $product->id;
+            $sourceProductCode = $product->source_product_code;
+            $channelProductCode = $product->channel_product_code;
+            $clientId = $product->client_id;
+
             $prefix = urlencode($product->id);
             $productFileName = $prefix . '.json';
 
@@ -80,7 +87,8 @@ class Products implements ProductsInterface
                 // In this example, the channel_variant_code is a combination
                 // of the $prefix + channel separator (configured as channel meta)
                 // + the url encoded variant SKU code.
-                $variant->channel_variant_code = $prefix . $variantSeparator . urlencode($variant->sku) . '.json';
+                $encodedVariantSku = urlencode($variant->sku);
+                $variant->channel_variant_code = $prefix . $variantSeparator . $encodedVariantSku . '.json';
 
             }
 
@@ -88,7 +96,8 @@ class Products implements ProductsInterface
 
             // Do the same as the loop above to set the channel_image_code for each channel image.
             foreach ($product->images as $image) {
-                $image->channel_image_code = $prefix . $imageSeparator . urlencode($image->id) . '.json';
+                $encodedChannelImageId = urlencode($image->id);
+                $image->channel_image_code = $prefix . $imageSeparator . $encodedChannelImageId . '.json';
             }
 
             // ------------------------------------------------
@@ -97,7 +106,7 @@ class Products implements ProductsInterface
             $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, "products");
 
             // Check if the product has been flagged for delete.
-            if ($product->delete) {
+            if ($product->delete === true) {
                 foreach ($currentFiles as $currentFileName => $obj) {
                     unlink(self::DATA_PATH . '/products/' . $currentFileName);
                 }
@@ -110,16 +119,22 @@ class Products implements ProductsInterface
 
                 $filesToKeep = [];
 
+                $filesToKeep[] = $product->channel_product_code;
+
                 // Iterate through the product variants.
                 foreach ($product->variants as $variant) {
 
                     // This is the path to the source system storage for this file.
-                    $filePath = self::DATA_PATH . '/products/' . $product->id . $variantSeparator . urlencode($variant->channel_variant_code);
+                    $filePath = self::DATA_PATH . '/products/' . $variant->channel_variant_code;
 
                     if ($product->delete) {
+
                         unlink($filePath);
+
                     } else {
+
                         file_put_contents($filePath, json_encode($variant));
+
                         $filesToKeep[] = $variant->channel_variant_code;
                     }
                 }
@@ -130,7 +145,7 @@ class Products implements ProductsInterface
                 foreach ($product->images as $image) {
 
                     // This is the path to the source system storage for this file.
-                    $filePath = self::DATA_PATH . '/products/' . $product->id . $imageSeparator . urlencode($image->channel_image_code);
+                    $filePath = self::DATA_PATH . '/products/' . $image->channel_image_code;
 
                     if ($product->delete) {
                         unlink($filePath);
@@ -206,7 +221,7 @@ class Products implements ProductsInterface
         /** @var  $currentFiles */
         $currentFiles = data\Helper::getJSONFiles("products");
 
-        $cnt = 1;
+        $cnt = 0;
         $channelProducts = [];
         foreach ($currentFiles as $fileName => $fileData) {
 
@@ -215,40 +230,44 @@ class Products implements ProductsInterface
                 // Use regex to check the filename and determine what
                 // kind of object it is.
 
-                // 1. Product
-                // -----------------------------------------------------
-                if(preg_match('/[0-9]{4}.[json]{4}/', $fileName)) {
-
-                    // Check that we have not reached the limit.
-                    if ($cnt > $limit) {
-                        break;
-                    }
-
-                    // Create new ChannelProduct using the VO and add to the array.
-                    $channelProducts[$fileName] = new vo\ChannelProduct($fileData);
-
-                }
-
                 // 2. Variant
                 // -----------------------------------------------------
-                if(preg_match('/[0-9]{4}[~][\w%]+.[json]{4}/', $fileName)) {
+
+                // The regex pattern may be broken up into:
+
+                // product prefix:   [^[0-9]{5}]   include all numbers up to 5 characters at the start of the string.
+                // separator:        [~]           include the separator.
+                // variant suffix:   [\w%]+        include all numbers and letters of any length.
+
+                if(preg_match('/^[[0-9]{5}[~][\w%]+].json/', $fileName)) {
 
                     // Create new Variant using the VO and add to the product.
-                    $channelProducts[count($channelProducts) - 1]->variants[] = new vo\ChannelVariant($fileData);
+                    $channelProducts[$fileName]->variants[] = new vo\ChannelVariant($fileData);
 
                 }
 
                 // 3. Image
                 // -----------------------------------------------------
-                if(preg_match('/[0-9]{4}[=][\w]+.[json]{4}/', $fileName)) {
-
-                    // TODO: We need to check whether the image is linked to a product
-                    // or linked to a variant.
-
+                if(preg_match('/^[[0-9]{5}[=][\w]+].json/', $fileName)) {
+                    // TODO: We need to check whether the image is linked to a product or linked to a variant.
                     // Create new ChannelImage using the VO and add to the product.
-                    $channelProducts[count($channelProducts) - 1]->images[] = new vo\ChannelImage($fileData);
-
+                    $channelProducts[$fileName]->images[] = new vo\ChannelImage($fileData);
                 }
+
+                // 1. Product
+                // -----------------------------------------------------
+                // The regex pattern may be broken up into:
+                // product prefix:   [^[0-9]{5}]   include all numbers up to 5 characters at the start of the string.
+                if(preg_match('/^[0-9]{5}.json/', $fileName)) {
+                    // Check that we have not reached the limit.
+                    if ($cnt > $limit) {
+                        break;
+                    }
+                    // Create new ChannelProduct using the VO and add to the array.
+                    $channelProducts[$fileName] = new vo\ChannelProduct($fileData);
+                    $cnt++;
+                }
+
             }
         }
 
@@ -328,42 +347,50 @@ class Products implements ProductsInterface
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
-     * @return array
-     * @throws exceptions\UnprocessableEntity
+     * @return vo\ChannelProduct[]
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
-
-        $channelProducts = [];
+        $channelProductsSync = [];
 
         foreach ($channelProducts as $product) {
 
             $prefix = urlencode($product->id);
-            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, "products");
+            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, 'products');
 
             foreach ($currentFiles as $fileName => $obj) {
+
                 if ($fileName === $prefix . '.json') {
 
-                    // This is a Product
-                    $channelProducts[] = new vo\ChannelProduct([
-                        "channel_product_code" => $obj->channel_product_code
+                    $newSyncProduct = new vo\ChannelProduct([
+                        'channel_product_code' => $fileName
                     ]);
+
+                    $channelProductsSync[$prefix] = $newSyncProduct;
 
                 } else {
 
-                    // This is a Variant
-                    $channelProducts[count($channelProducts) - 1]->variants[] = new vo\ChannelVariant(
-                        [
-                            "sku" => $obj->sku,
-                            "channel_variant_code" => $obj->channel_variant_code
-                        ]
-                    );
+                    $extractedProductId = $prefix . ".json";
+
+                    if(array_key_exists("channel_image_code", $obj)) {
+                        $channelProductsSync[$prefix]->images[] = new vo\ChannelImage([
+                            "channel_image_code" => $obj["channel_image_code"]
+                        ]);
+                    }
+
+                    if (array_key_exists('channel_variant_code', $obj)) {
+                            $channelProductsSync[$prefix]->variants[] = new vo\ChannelVariant([
+                            "sku" => $obj["sku"],
+                            "channel_variant_code" => $obj["channel_variant_code"]
+                        ]);
+                    }
 
                 }
+
             }
         }
 
-        return $channelProducts;
+        return $channelProductsSync;
     }
 
 }
