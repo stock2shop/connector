@@ -56,8 +56,8 @@ class Helper
 
             }
         }
+
         return $files;
     }
-
 
 }
