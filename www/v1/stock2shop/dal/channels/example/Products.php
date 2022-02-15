@@ -195,32 +195,14 @@ class Products implements ProductsInterface
 
             if (strcmp($token, $fileName) < 0) {
 
-                // Use regex to check the filename and determine what
-                // kind of object it is.
-
-                // 2. Variant
-                // -----------------------------------------------------
-
-                // The regex pattern may be broken up into:
-
-                // product prefix:   [^[0-9]{5}]   include all numbers up to 5 characters at the start of the string.
-                // separator:        [~]           include the separator.
-                // variant suffix:   [\w%]+        include all numbers and letters of any length.
-
-                if(preg_match('/^[[0-9]{5}[~][\w%]+].json/', $fileName)) {
-
-                    // Create new Variant using the VO and add to the product.
+                // Variant check.
+                if(strcmp($variantSeparator, $fileName) < 0) {
                     $channelProducts[$fileName]->variants[] = new vo\ChannelVariant($fileData);
-
                 }
 
+                // Image check.
                 $imageSeparator = helpers\Meta::get($channel->meta, "image_separator");
-
-                // 3. Image
-                // -----------------------------------------------------
-                if(preg_match('/^[[0-9]{5}[=][\w]+].json/', $fileName)) {
-                    // TODO: We need to check whether the image is linked to a product or linked to a variant.
-                    // Create new ChannelImage using the VO and add to the product.
+                if(strcmp($imageSeparator, $fileName) < 0) {
                     $channelProducts[$fileName]->images[] = new vo\ChannelImage($fileData);
                 }
 
