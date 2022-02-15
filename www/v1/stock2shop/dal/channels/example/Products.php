@@ -8,7 +8,7 @@ use stock2shop\vo;
 /**
  * Products
  *
- * This class is where the Data Access Layer is mapping onto
+ * This class is where the Data Access Layer is mapped onto
  * the Stock2Shop Value Objects from the source system you are
  * integrating with.
  */
@@ -27,12 +27,14 @@ class Products implements ProductsInterface
     /**
      * Sync
      *
-     * Creates a file for each product and for each product variant.
-     * This method illustrates the possible cleanup operations required
-     * for e-commerce channels.
+     * Creates a file for each product and for each product, variant
+     * and product image. This method illustrates the possible cleanup
+     * operations required for e-commerce channels.
      *
-     * product.id is the file name for the product.
-     * product.variant[].channel_variant_code is the file name for the variant.
+     * - product.id is the file name for the product.
+     * - product.variant[].channel_variant_code is the file name for a variant.
+     * - product.image[].channel_image_code is the file name for an image.
+     * - 
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
@@ -41,8 +43,6 @@ class Products implements ProductsInterface
      */
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
-
-        $logLineCounter = 0;
 
         // A 'separator' is used when creating product variant and product image file names.
         // The separator is an example of Stock2Shop Channel 'meta'.
@@ -65,11 +65,6 @@ class Products implements ProductsInterface
 
         // Iterate through the channel products.
         foreach ($channelProducts as &$product) {
-
-            $productId = $product->id;
-            $sourceProductCode = $product->source_product_code;
-            $channelProductCode = $product->channel_product_code;
-            $clientId = $product->client_id;
 
             $prefix = urlencode($product->id);
             $productFileName = $prefix . '.json';
@@ -118,23 +113,16 @@ class Products implements ProductsInterface
                 // ------------------------------------------------
 
                 $filesToKeep = [];
-
                 $filesToKeep[] = $product->channel_product_code;
 
                 // Iterate through the product variants.
                 foreach ($product->variants as $variant) {
-
                     // This is the path to the source system storage for this file.
                     $filePath = self::DATA_PATH . '/products/' . $variant->channel_variant_code;
-
                     if ($product->delete) {
-
                         unlink($filePath);
-
                     } else {
-
                         file_put_contents($filePath, json_encode($variant));
-
                         $filesToKeep[] = $variant->channel_variant_code;
                     }
                 }
@@ -143,17 +131,14 @@ class Products implements ProductsInterface
 
                 // Iterate through the product images.
                 foreach ($product->images as $image) {
-
                     // This is the path to the source system storage for this file.
                     $filePath = self::DATA_PATH . '/products/' . $image->channel_image_code;
-
                     if ($product->delete) {
                         unlink($filePath);
                     } else {
                         file_put_contents($filePath, json_encode($image));
                         $filesToKeep[] = $image->channel_image_code;
                     }
-
                 }
 
                 // ------------------------------------------------
@@ -161,11 +146,7 @@ class Products implements ProductsInterface
                 // Remove old variants and images
                 foreach ($currentFiles as $fileName => $obj) {
                     if (!in_array($fileName, $filesToKeep)) {
-                        // Check if the file is an image or a variant of the product.
-//                        if(strpos($fileName, $imageSeparator) !== false || strpos($fileName, $variantSeparator) !== false) {
-                        // Unlink the JSON file from the source products directory.
                         unlink(self::DATA_PATH . '/products/' . $fileName);
-//                        }
                     }
                 }
 
@@ -257,7 +238,9 @@ class Products implements ProductsInterface
                 // 1. Product
                 // -----------------------------------------------------
                 // The regex pattern may be broken up into:
+
                 // product prefix:   [^[0-9]{5}]   include all numbers up to 5 characters at the start of the string.
+
                 if(preg_match('/^[0-9]{5}.json/', $fileName)) {
                     // Check that we have not reached the limit.
                     if ($cnt > $limit) {
@@ -270,75 +253,8 @@ class Products implements ProductsInterface
 
             }
         }
-
         return $channelProducts;
-
     }
-
-
-//    public function get(string $token, int $limit, vo\Channel $channel): array
-//    {
-//
-//        // Variant separator.
-//        $variantSeparator = "";
-//        foreach ($channel->meta as $metaItem) {
-//            if ($metaItem->key === "variant_separator") {
-//                $variantSeparator = $metaItem->value;
-//            }
-//        }
-//
-//        // Image separator
-//        $imageSeparator = "";
-//        foreach ($channel->meta as $metaItem) {
-//            if ($metaItem->key === "image_separator") {
-//                $imageSeparator = $metaItem->value;
-//            }
-//        }
-//
-//        $currentFiles = data\Helper::getJSONFiles("products");
-//        $channelProducts = [];
-//        $cnt = 1;
-//
-//        foreach ($currentFiles as $fileName => $file) {
-//
-//            if ($cnt > $limit) {
-//                break;
-//            }
-//
-//            // Compare the token and file name.
-//            if (strcmp($token, $fileName) < 0) {
-//
-//                // Do the strpos calculations.
-//                $isFileVariant = strpos($fileName, $variantSeparator);
-//                $isFileImage = strpos($fileName, $imageSeparator);
-//
-//                // Does the file name have the separator string in it.
-//                // If not, then we know that this product is not a product variant.
-//                // Which means we can continue and add the product to the channelProducts array.
-//                if ($isFileVariant) $channelProducts[$fileName]->variants[] = new vo\ChannelVariant($file);
-//                if ($isFileImage) $channelProducts[$fileName]->images[] = new vo\ChannelImage($file);
-//
-//
-//            } else {
-//
-//                $channelProduct = new vo\ChannelProduct($file);
-//                $channelProduct->channel_product_code = $channelProduct->id;
-//
-//                if (empty($channelProducts)) {
-//                    $channelProducts = [$fileName => $channelProduct];
-//                }
-//
-//                $channelProducts[$fileName] = $channelProduct;
-//
-//            }
-//
-//
-//            $cnt++;
-//        }
-//
-//        return $channelProducts;
-//
-//    }
 
     /**
      * Get By Code
