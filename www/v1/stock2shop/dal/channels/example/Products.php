@@ -4,6 +4,7 @@ namespace stock2shop\dal\channels\example;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
 use stock2shop\vo;
+use stock2shop\helpers;
 
 /**
  * Products
@@ -34,7 +35,6 @@ class Products implements ProductsInterface
      * - product.id is the file name for the product.
      * - product.variant[].channel_variant_code is the file name for a variant.
      * - product.image[].channel_image_code is the file name for an image.
-     * - 
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
@@ -44,22 +44,11 @@ class Products implements ProductsInterface
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
 
-        // A 'separator' is used when creating product variant and product image file names.
-        // The separator is an example of Stock2Shop Channel 'meta'.
-        // Meta is a configured on Channel level and describes the channel and the required functionality.
-        $variantSeparator = "";
-        $imageSeparator = "";
+        /** @var string $imageSeparator Channel separator meta for images. */
+        $imageSeparator = helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_IMAGE);
 
-        // Loop through the channel meta and assign values to local variables
-        // for the two separators we need.
-        foreach ($channel->meta as $metaItem) {
-            if ($metaItem->key === self::CHANNEL_SEPARATOR_VARIANT) {
-                $variantSeparator = $metaItem->value;
-            }
-            if ($metaItem->key === self::CHANNEL_SEPARATOR_IMAGE) {
-                $imageSeparator = $metaItem->value;
-            }
-        }
+        /** @var string $variantSeparator Channel separator meta for variants. */
+        $variantSeparator = helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_VARIANT);
 
         // ------------------------------------------------
 
@@ -191,13 +180,11 @@ class Products implements ProductsInterface
      */
     public function get(string $token, int $limit, vo\Channel $channel): array
     {
-        /** @var Meta[] $map */
-        $map = [];
+        /** @var string $imageSeparator Channel separator meta for images. */
+        $imageSeparator = helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_IMAGE);
 
-        /** @var Meta $metaRow */
-        foreach($channel->meta as $metaRow) {
-            $map[$metaRow->key] = $metaRow->value;
-        }
+        /** @var string $variantSeparator Channel separator meta for variants. */
+        $variantSeparator = helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_VARIANT);
 
         /** @var  $currentFiles */
         $currentFiles = data\Helper::getJSONFiles("products");
@@ -226,6 +213,8 @@ class Products implements ProductsInterface
                     $channelProducts[$fileName]->variants[] = new vo\ChannelVariant($fileData);
 
                 }
+
+                $imageSeparator = helpers\Meta::get($channel->meta, "image_separator");
 
                 // 3. Image
                 // -----------------------------------------------------
