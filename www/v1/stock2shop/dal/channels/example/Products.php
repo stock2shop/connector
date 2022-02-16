@@ -141,7 +141,7 @@ class Products implements ProductsInterface
 
             }
 
-            // Mark products and variants as successfully synced
+            // Mark products, images and variants as successfully synced.
             // TODO: Shouldn't this be in the Value Object itself? Something like $product->setSynced();
             $date = new \DateTime();
             $product->synced = $date->format('Y-m-d H:i:s');
@@ -151,6 +151,10 @@ class Products implements ProductsInterface
             foreach ($product->variants as $variant) {
                 // Set product variants as successfully synced.
                 $variant->success = true;
+            }
+            foreach ($product->images as $image) {
+                // Set product images as successfully synced.
+                $image->success = true;
             }
 
         }
@@ -201,23 +205,17 @@ class Products implements ProductsInterface
                 }
 
                 // Image check.
-                $imageSeparator = helpers\Meta::get($channel->meta, "image_separator");
                 if(strcmp($imageSeparator, $fileName) < 0) {
                     $channelProducts[$fileName]->images[] = new vo\ChannelImage($fileData);
                 }
 
-                // 1. Product
-                // -----------------------------------------------------
-                // The regex pattern may be broken up into:
-
                 // product prefix:   [^[0-9]{5}]   include all numbers up to 5 characters at the start of the string.
-
                 if(preg_match('/^[0-9]{5}.json/', $fileName)) {
                     // Check that we have not reached the limit.
                     if ($cnt > $limit) {
                         break;
                     }
-                    // Create new ChannelProduct using the VO and add to the array.
+                    // Create new vo\ChannelProduct using the VO and add to the array.
                     $channelProducts[$fileName] = new vo\ChannelProduct($fileData);
                     $cnt++;
                 }
@@ -238,11 +236,14 @@ class Products implements ProductsInterface
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
+        /** @var vo\ChannelProduct[] $channelProductsSync */
         $channelProductsSync = [];
 
         foreach ($channelProducts as $product) {
 
             $prefix = urlencode($product->id);
+
+            // Get all product data from the channel.
             $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, 'products');
 
             foreach ($currentFiles as $fileName => $obj) {
@@ -265,6 +266,8 @@ class Products implements ProductsInterface
                         ]);
                     }
 
+                    // For channel product variants, the sku and channel_variant_code are
+                    // properties which must be set and are evaluated in the ChannelTest class.
                     if (array_key_exists('channel_variant_code', $obj)) {
                             $channelProductsSync[$prefix]->variants[] = new vo\ChannelVariant([
                             "sku" => $obj["sku"],
