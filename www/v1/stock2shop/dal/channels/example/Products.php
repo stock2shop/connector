@@ -93,24 +93,14 @@ class Products implements ProductsInterface
             if ($product->delete === true) {
 
                 foreach ($currentFiles as $currentFileName => $obj) {
-                    unlink(self::DATA_PATH . '/products/' . $currentFileName);
+
+                    $this->deleteProduct(self::DATA_PATH . '/products/' . $currentFileName);
+
                 }
 
             } else {
 
-                /**
-                 * SEND PRODUCT TO CHANNEL.
-                 * This is where the product is sent to the physical channel. If the
-                 * channel is an eCommerce website such as Magento or WooCommerce, then
-                 * you will do this over HTTP (using the corresponding API client library
-                 * or a client like Guzzle).
-                 */
-                file_put_contents(self::DATA_PATH . '/products/' . $product->channel_product_code, json_encode($product));
-
-                // ------------------------------------------------
-
-                $filesToKeep = [];
-                $filesToKeep[] = $product->channel_product_code;
+                $this->saveProduct(self::DATA_PATH . '/products/' . $product->channel_product_code, $product);
 
                 // Iterate through the product variants.
                 foreach ($product->variants as $variant) {
@@ -120,52 +110,28 @@ class Products implements ProductsInterface
 
                     if ($product->delete) {
 
-                        unlink($filePath);
+                        $this->deleteVariant($filePath);
 
                     } else {
 
-                        /**
-                         * SEND VARIANT TO CHANNEL.
-                         * This is where the variant is sent to the channel.
-                         */
-                        file_put_contents($filePath, json_encode($variant));
-
-                        // ------------------------------------------------
-
-                        $filesToKeep[] = $variant->channel_variant_code;
+                        $this->saveVariant($filePath, $variant);
 
                     }
                 }
 
                 // Iterate through the product images.
                 foreach ($product->images as $image) {
-                    // This is the path to the source system storage for this file.
+
                     $filePath = self::DATA_PATH . '/products/' . $image->channel_image_code;
+
                     if ($product->delete) {
 
-                        /**
-                         * DELETE IMAGE ON CHANNEL.
-                         */
-                        unlink($filePath);
+                        $this->deleteImage($filePath);
 
                     } else {
 
-                        /**
-                         * SEND IMAGE TO CHANNEL.
-                         * This is where the image is sent to the channel.
-                         */
-                        file_put_contents($filePath, json_encode($image));
+                        $this->saveImage($filePath, $image);
 
-                        // ------------------------------------------------
-
-                        $filesToKeep[] = $image->channel_image_code;
-                    }
-                }
-
-                // Remove old variants and images
-                foreach ($currentFiles as $fileName => $obj) {
-                    if (!in_array($fileName, $filesToKeep)) {
-                        unlink(self::DATA_PATH . '/products/' . $fileName);
                     }
                 }
 
@@ -178,13 +144,19 @@ class Products implements ProductsInterface
 
             // Mark product as successfully synced.
             $product->success = true;
+
             foreach ($product->variants as $variant) {
+
                 // Set product variants as successfully synced.
                 $variant->success = true;
+
             }
+
             foreach ($product->images as $image) {
+
                 // Set product images as successfully synced.
                 $image->success = true;
+
             }
 
         }
@@ -258,7 +230,6 @@ class Products implements ProductsInterface
         }
 
         return $channelProducts;
-
     }
 
     /**
@@ -282,7 +253,7 @@ class Products implements ProductsInterface
             // Get all product data from the channel.
             $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, 'products');
 
-            foreach ($currentFiles as $fileName => $obj) {
+            foreach ($currentFiles as $fileName => $channelObject) {
 
                 if ($fileName === $prefix . '.json') {
 
@@ -291,24 +262,25 @@ class Products implements ProductsInterface
                         'channel_product_code' => $fileName
                     ]);
 
+                    // Add product VO.
                     $channelProductsSync[$prefix] = $newSyncProduct;
 
                 } else {
 
                     // If the obj has a channel_image_code, then we can
                     // assume it is a product image.
-                    if(array_key_exists("channel_image_code", $obj)) {
+                    if(array_key_exists("channel_image_code", $channelObject)) {
                         $channelProductsSync[$prefix]->images[] = new vo\ChannelImage([
-                            "channel_image_code" => $obj["channel_image_code"]
+                            "channel_image_code" => $channelObject["channel_image_code"]
                         ]);
                     }
 
                     // For channel product variants, the sku and channel_variant_code are
                     // properties which must be set and are evaluated in the ChannelTest class.
-                    if (array_key_exists('channel_variant_code', $obj)) {
-                            $channelProductsSync[$prefix]->variants[] = new vo\ChannelVariant([
-                            "sku" => $obj["sku"],
-                            "channel_variant_code" => $obj["channel_variant_code"]
+                    if (array_key_exists("channel_variant_code", $channelObject)) {
+                        $channelProductsSync[$prefix]->variants[] = new vo\ChannelVariant([
+                            "sku" => $channelObject["sku"],
+                            "channel_variant_code" => $channelObject["channel_variant_code"]
                         ]);
                     }
 
@@ -318,6 +290,149 @@ class Products implements ProductsInterface
         }
 
         return $channelProductsSync;
+
+    }
+
+    /**
+     * Save Product
+     *
+     * This method adds a product to the channel.
+     *
+     * @param $productId
+     * @param $product
+     * @return bool $status
+     */
+    private function saveProduct($productId, $product): bool {
+
+        // This method makes it possible for Stock2Shop to add products to the channel.
+        // This is where you would send the product data to the system which this integration
+        // is being developed for.
+
+        // Here we are writing the product data to the local file system, but in a real-world
+        // example you would replace the following with an external API call using cURL/Guzzle
+        // or an API wrapper client (if available).
+
+        // You will probably need to transform the data from our Stock2Shop format into
+        // the format required by your system.
+
+        // [transform product logic]:
+        $transformedProductData = json_encode($product);
+
+        // [save product logic]:
+        file_put_contents($productId, $transformedProductData);
+
+        return true;
+
+    }
+
+    /**
+     * Delete Product
+     *
+     * Deletes a product from the channel.
+     *
+     * @param $productId
+     * @return bool $status
+     */
+    private function deleteProduct($productId): bool {
+
+        // This is where you would write the logic for deleting a product from a channel.
+        // In this example, the productId is the name of the file in the `data/products`
+        // directory.
+
+        // [delete product logic]:
+        unlink($productId);
+
+        // Return status.
+        return true;
+
+    }
+
+    /**
+     * Save Image
+     *
+     * Creates or updates the image on the channel.
+     *
+     * @param $imageId
+     * @param $imageData
+     * @return bool $status
+     */
+    private function saveImage($imageId, $imageData): bool {
+
+        // This is where you would write the logic for saving a product image
+        // to a channel. The image data is first transformed below and then
+        // saved to the channel endpoint.
+
+        // [transform product image logic]:
+        $transformedProductImageData = json_encode($imageData);
+
+        // [save product image logic]:
+        file_put_contents($imageId, $transformedProductImageData);
+
+        // Return status.
+        return true;
+
+    }
+
+    /**
+     * Delete Image
+     *
+     * Removes an image from the channel.
+     *
+     * @param $imageId
+     * @return bool $status
+     */
+    private function deleteImage($imageId): bool {
+
+        // [delete product image logic]:
+        unlink($imageId);
+
+        // Return status.
+        return true;
+
+    }
+
+    /**
+     * Save Variant
+     *
+     * Creates or updates the variant on the channel.
+     *
+     * @param $variantId
+     * @param $variantData
+     * @return bool $status
+     */
+    private function saveVariant($variantId, $variantData): bool {
+
+        // Product variants are saved to separate endpoints (files in this example).
+        // This is where you would code the logic for saving variants.
+
+        // [transform variant logic]:
+        $transformedVariantData = json_encode($variantData);
+
+        // [save variant logic]:
+        file_put_contents($variantId, $transformedVariantData);
+
+        // Return status.
+        return true;
+
+    }
+
+    /**
+     * Delete Variant
+     *
+     * Removes a variant from the channel.
+     *
+     * @param $variantId
+     * @return bool $status
+     */
+    private function deleteVariant($variantId): bool {
+
+        // This is where you would add the logic to delete a variant from the channel.
+
+        // [delete product variant logic]:
+        unlink($variantId);
+
+        // Return status.
+        return true;
 
     }
 

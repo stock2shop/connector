@@ -17,11 +17,6 @@ class Creator extends channel\Creator
      * This is an example of how to feed product data into
      * an implementation of the Data Access Layer.
      *
-     * The workflow is:
-     *
-     * 1. Get the products from the source.
-     * 2. Iterate through channel products.
-     *
      * @return channel\Products
      */
     public function createProducts(): channel\Products
