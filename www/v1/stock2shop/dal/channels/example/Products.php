@@ -91,12 +91,20 @@ class Products implements ProductsInterface
 
             // Check if the product has been flagged for delete.
             if ($product->delete === true) {
+
                 foreach ($currentFiles as $currentFileName => $obj) {
                     unlink(self::DATA_PATH . '/products/' . $currentFileName);
                 }
+
             } else {
 
-                // Create or update product by writing the product data to disk/file.
+                /**
+                 * SEND PRODUCT TO CHANNEL.
+                 * This is where the product is sent to the physical channel. If the
+                 * channel is an eCommerce website such as Magento or WooCommerce, then
+                 * you will do this over HTTP (using the corresponding API client library
+                 * or a client like Guzzle).
+                 */
                 file_put_contents(self::DATA_PATH . '/products/' . $product->channel_product_code, json_encode($product));
 
                 // ------------------------------------------------
@@ -106,31 +114,53 @@ class Products implements ProductsInterface
 
                 // Iterate through the product variants.
                 foreach ($product->variants as $variant) {
+
                     // This is the path to the source system storage for this file.
                     $filePath = self::DATA_PATH . '/products/' . $variant->channel_variant_code;
+
                     if ($product->delete) {
+
                         unlink($filePath);
+
                     } else {
+
+                        /**
+                         * SEND VARIANT TO CHANNEL.
+                         * This is where the variant is sent to the channel.
+                         */
                         file_put_contents($filePath, json_encode($variant));
+
+                        // ------------------------------------------------
+
                         $filesToKeep[] = $variant->channel_variant_code;
+
                     }
                 }
-
-                // ------------------------------------------------
 
                 // Iterate through the product images.
                 foreach ($product->images as $image) {
                     // This is the path to the source system storage for this file.
                     $filePath = self::DATA_PATH . '/products/' . $image->channel_image_code;
                     if ($product->delete) {
+
+                        /**
+                         * DELETE IMAGE ON CHANNEL.
+                         */
                         unlink($filePath);
+
                     } else {
+
+                        /**
+                         * SEND IMAGE TO CHANNEL.
+                         * This is where the image is sent to the channel.
+                         */
                         file_put_contents($filePath, json_encode($image));
+
+                        // ------------------------------------------------
+
                         $filesToKeep[] = $image->channel_image_code;
                     }
                 }
-
-                // ------------------------------------------------
 
                 // Remove old variants and images
                 foreach ($currentFiles as $fileName => $obj) {
@@ -195,6 +225,7 @@ class Products implements ProductsInterface
 
         $cnt = 0;
         $channelProducts = [];
+
         foreach ($currentFiles as $fileName => $fileData) {
 
             if (strcmp($token, $fileName) < 0) {
@@ -211,18 +242,23 @@ class Products implements ProductsInterface
 
                 // product prefix:   [^[0-9]{5}]   include all numbers up to 5 characters at the start of the string.
                 if(preg_match('/^[0-9]{5}.json/', $fileName)) {
+
                     // Check that we have not reached the limit.
                     if ($cnt > $limit) {
                         break;
                     }
+
                     // Create new vo\ChannelProduct using the VO and add to the array.
                     $channelProducts[$fileName] = new vo\ChannelProduct($fileData);
                     $cnt++;
+
                 }
 
             }
         }
+
         return $channelProducts;
+
     }
 
     /**
@@ -250,6 +286,7 @@ class Products implements ProductsInterface
 
                 if ($fileName === $prefix . '.json') {
 
+                    // Create product VO.
                     $newSyncProduct = new vo\ChannelProduct([
                         'channel_product_code' => $fileName
                     ]);
@@ -258,8 +295,8 @@ class Products implements ProductsInterface
 
                 } else {
 
-                    $extractedProductId = $prefix . ".json";
-
+                    // If the obj has a channel_image_code, then we can
+                    // assume it is a product image.
                     if(array_key_exists("channel_image_code", $obj)) {
                         $channelProductsSync[$prefix]->images[] = new vo\ChannelImage([
                             "channel_image_code" => $obj["channel_image_code"]
@@ -281,6 +318,7 @@ class Products implements ProductsInterface
         }
 
         return $channelProductsSync;
+
     }
 
 }
