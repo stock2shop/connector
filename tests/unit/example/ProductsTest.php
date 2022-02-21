@@ -37,7 +37,7 @@ class ProductsTest extends tests\TestCase
         $this->connector = $creator->createProducts();
 
         // Set tests to run in 'offline mode'.
-        $this->runOffline();
+//        $this->runOffline();
 
     }
 
@@ -52,7 +52,7 @@ class ProductsTest extends tests\TestCase
     public function testProductsInstantiateObject() {
 
         // Instantiate connector.
-        $connector = new example\Products();
+        $object = $this->connector;
 
         // Assert on class.
         $this->assertNotNull($object, " instantiating Products object returns null.");
@@ -125,13 +125,28 @@ class ProductsTest extends tests\TestCase
      */
     public function testProductsSaveProduct() {
 
+        // Channel product code
+        $productId = rand(1, 200);
+        $channelProductCode = $productId . ".json";
+
         // Mock vo\ChannelProduct object.
+        $_channelProduct = new vo\ChannelProduct([
+            "id" => $productId,
+            "channel_product_code" => $channelProductCode,
+            "channel_id" => "123",
+            "source_product_code" => "source_sku",
+            "variants" => [],
+            "images" => []
+        ]);
 
         // Instantiate the connector.
+        $connector = $this->connector;
 
         // Call saveProduct().
+        $result = $connector->saveProduct($productId, $_channelProduct);
 
         // Assert on response.
+        $this->assertTrue($result);
 
     }
 

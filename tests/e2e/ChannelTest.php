@@ -661,7 +661,7 @@ final class ChannelTest extends Framework\TestCase
      * @return void
      * @throws UnprocessableEntity
      */
-    public function testGetOrdersByCode()
+    public function _testGetOrdersByCode()
     {
         foreach (self::$channelTypes as $type) {
 
@@ -703,13 +703,13 @@ final class ChannelTest extends Framework\TestCase
      * - Must be of vo\ChannelOrder type.
      * - Must have 'channel_order_code' set.
      *
-     * @param $channelOrder
+     * @param vo\ChannelOrder $channelOrder
      * @return void
      */
-    public function verifyTransformOrder($channelOrder)
+    public function verifyTransformOrder(vo\ChannelOrder $channelOrder)
     {
         $this->assertInstanceOf("stock2shop\\vo\\ChannelOrder", $channelOrder);
-        $this->assertNotEmpty($channelOrder->channel_order_code);
+        $this->assertNotEmpty($channelOrder->system_order->channel_order_code);
     }
 
 }

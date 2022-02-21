@@ -37,6 +37,7 @@ class Orders implements OrdersInterface
         // storage location of the order data. (similarly to the implementation in
         // `example\Products`). A 'channel order file' is akin to a raw order posted
         // by your system's webhook mechanism.
+
         $channelOrderFiles = data\Helper::getJSONFiles('orders');
 
         // ---------------------------------------------------
@@ -46,6 +47,8 @@ class Orders implements OrdersInterface
 
         // Iterate over the order files.
         foreach ($channelOrderFiles as $fileName => $rawOrderFile) {
+
+            // ---------------------------------------------------
 
             // Filter By Token.
 
@@ -72,6 +75,8 @@ class Orders implements OrdersInterface
                 // passed to the transform() method because we may need the channel's
                 // metadata information in order to do the transformation.
                 $channelOrders[] = $this->transform($rawOrderFile, $channel);
+
+                // ---------------------------------------------------
 
                 // Increment counter.
                 $cnt++;
@@ -150,7 +155,7 @@ class Orders implements OrdersInterface
 
         // ---------------------------------------------------
 
-        // Customer.
+        // ChannelOrder Order
 
         // Inline a new vo\SystemCustomer object on the "customer" property. Create
         // vo\ChannelOrderOrder. The webhook order will always have customer data in it in some
@@ -161,7 +166,8 @@ class Orders implements OrdersInterface
             "customer" => new vo\SystemCustomer([
                 'first_name' => $webhookOrder['customer']['name'],
                 'email' => $webhookOrder['customer']['email'],
-            ])
+            ]),
+            "channel_order_code" => $webhookOrder["order_number"]
         ]);
 
         // ---------------------------------------------------
@@ -197,15 +203,17 @@ class Orders implements OrdersInterface
         // Iterate over the items in the webhook structure.
         foreach ($webhookOrder['items'] as $item) {
 
+            // TODO: Ask Chris if the calculations should be done here as well.
+
             // The vo\ChannelOrder class definition includes a 'line_items' array property which
             // you must use to populate the order with sold products. Please note that the line item's
             // 'channel_variant_code' property is being set to the webhook order's sku value (this
             // could also be the product ID on the system you are integrating with). In Stock2Shop,
             // `vo\OrderItem` objects are the same as product variants.
             $channelOrderOrder->line_items[] = new vo\OrderItem([
-                'sku'                  => $item['sku'],
-                'qty'                  => $item['qty'],
-                'price'                => $item['price'],
+                'sku' => $item['sku'],
+                'qty' => $item['qty'],
+                'price' => $item['price'],
                 'source_variant_code' => $item['sku']
             ]);
 
