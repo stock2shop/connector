@@ -24,9 +24,20 @@ class Creator extends channel\Creator
         return new Products();
     }
 
+    /**
+     * Create Orders
+     *
+     * This method returns the connector's Order class.
+     * The class must define all the methods present in
+     * the dal\channel\Orders interface and is concerned
+     * with processing of channel webhook data coming into
+     * Stock2Shop.
+     *
+     * @return channel\Orders
+     */
     public function createOrders(): channel\Orders
     {
-        throw new exceptions\NotImplemented();
+        return new Orders();
     }
 
     public function createFulfillments(): channel\Fulfillments

@@ -150,11 +150,8 @@ final class ChannelTest extends Framework\TestCase
             self::loadTestData($type);
             self::setFactory($type);
 
-            // Instantiate the Creator factory object.
-            $creator = self::$creator;
-
             // Get the products connector object.
-            $connector = $creator->createProducts();
+            $connector = self::$creator->createProducts();
             $this->assertInstanceOf("stock2shop\\dal\\channels\\" . $type . "\\Products", $connector);
 
             // Instantiate new channel object using the test channel meta data.
@@ -570,22 +567,34 @@ final class ChannelTest extends Framework\TestCase
      * Test Get Orders
      * @return void
      */
-    // TODO: Complete when interface is ready.
-//    public function testGetOrders()
-//    {
-//        foreach (self::$channelTypes as $type) {
-//
-//            // load test data and set channel
-//            self::loadTestData($type);
-//
-//            // Get orders (return 2)
-//            $fetchedOrders = self::$channel->getOrders("", 2, MetaItem::createArray(self::$channelMetaData));
-//            $this->assertEquals(2, count($fetchedOrders));
-//            foreach ($fetchedOrders as $order) {
-//                $this->verifyTransformOrder($order);
-//            }
-//        }
-//    }
+    public function testGetOrders()
+    {
+        foreach (self::$channelTypes as $type) {
+
+            // Configure the connector factory.
+            self::loadTestData($type);
+            self::setFactory($type);
+            $connector = self::$creator->createOrders();
+
+            // Create channel object.
+            $meta = vo\Meta::createArray(self::$channelMetaData);
+            $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
+            $channel = new vo\Channel($mergedChannelData);
+
+            // Use connector to get the orders.
+            $fetchedOrders = $connector->get("", 2, $channel);
+            $this->assertEquals(2, count($fetchedOrders));
+
+            // Iterate over fetched orders.
+            foreach ($fetchedOrders as $order) {
+
+                // Check each transform.
+                $this->verifyTransformOrder($order);
+
+            }
+
+        }
+    }
 
     /**
      * Test Get Orders By Code
@@ -627,28 +636,30 @@ final class ChannelTest extends Framework\TestCase
      *
      * @return void
      */
-    // TODO: Complete when interface is ready.
-//    public function testTransformOrder()
-//    {
-//        foreach (self::$channelTypes as $type) {
-//
-//            // load test data and set channel
-//            self::loadTestData($type);
-//            self::setChannel($type);
-//
-//            // Call the method to transform the order.
-//            // We are creating an array of vo\Order objects
-//            // and an array of vo\Meta objects and passing it
-//            // to the connector implementation.
-//            $channelOrder = self::$channel->transformOrder(
-//                vo\Order::createArray(self::$channelOrderData),
-//                vo\Meta::createArray(self::$channelMetaData)
-//            );
-//
-//            // Call the verify method to evaluate the transformation.
-//            $this->verifyTransformOrder($channelOrder);
-//        }
-//    }
+    public function testTransformOrder($order)
+    {
+        foreach (self::$channelTypes as $type) {
+
+            // Load test data and set channel.
+            self::loadTestData($type);
+            self::setFactory($type);
+
+            // Set up an object of the connector we are testing.
+            $connector  = self::$creator->createOrders();
+
+            // Call the method to transform the order.
+            // We are creating an array of vo\Order objects
+            // and an array of vo\Meta objects and passing it
+            // to the connector implementation.
+            $channelOrder = self::$channel->transformOrder(
+                vo\Order::createArray(self::$channelOrderData),
+                vo\Meta::createArray(self::$channelMetaData)
+            );
+
+            // Call the verify method to evaluate the transformation.
+            $this->verifyTransformOrder($channelOrder);
+        }
+    }
 
     /**
      * Verify Transform Order
