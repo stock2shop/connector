@@ -3,40 +3,42 @@ namespace stock2shop\dal\channel;
 
 use stock2shop\vo;
 
+/**
+ * Interface Orders
+ *
+ * @package stock2shop\dal\channel
+ */
 interface Orders {
 
     /**
-     * TODO TBC
+     * Get
      *
      * @param string $token
      * @param int $limit
      * @param vo\Channel $channel
      * @return array
      */
-//    public function getOrders(string $token, int $limit,  vo\Channel $channel): array;
+    public function get(string $token, int $limit, vo\Channel $channel): array;
 
     /**
+     * Get By Code
      *
-     * TODO TBC
-     *
-     * @param ChannelOrder[] $orders
-     * @param MetaItem[] $meta
-     * @return ChannelOrder[]
+     * @param vo\ChannelOrder[] $orders
+     * @param vo\Channel $channel
+     * @return vo\ChannelOrder[]
      */
-//    public function getOrdersByCode(array $orders, array $meta): array;
+    public function getByCode(array $orders, vo\Channel $channel): array;
 
     /**
+     * Transform
      *
-     * TODO TBC
-     *
-     * Transform should convert the order "webhook" sent by the
-     * channel into a vo\SystemOrder.
+     * This method should define the workflow for converting a "webhook" order
+     * coming into Stock2Shop into a vo\ChannelOrder object.
      *
      * @param mixed $webhookOrder
-     * @param MetaItem[] $meta
-     * @return ChannelOrder
+     * @param vo\Channel $channel
+     * @return vo\ChannelOrder
      */
-//    public function transformOrder($webhookOrder, array $meta): ChannelOrder;
+    public function transform($webhookOrder, vo\Channel $channel): vo\ChannelOrder;
 
 }
-

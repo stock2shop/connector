@@ -32,7 +32,7 @@ final class ChannelTest extends Framework\TestCase
     public static $channelMetaData;
 
     /** @var array $channelOrderData The raw testing data for orders. */
-    public static $channelOrderData;
+    public static $channelOrderTransform;
 
     /** @var string $currentChannelType The active channel type being tested. */
     public static $currentChannelType;
@@ -68,7 +68,7 @@ final class ChannelTest extends Framework\TestCase
         // Get data from JSON files.
         $channelDataJSON = file_get_contents(__DIR__ . '/data/channelData.json');
         $channelMetaJSON = file_get_contents(__DIR__ . '/data/channelMeta.json');
-        $channelOrderJSON = file_get_contents(__DIR__ . '/data/channels/' . $type . '/orderTransform.json');
+        $channelOrderTransformJSON = file_get_contents(__DIR__ . '/data/channels/' . $type . '/orderTransform.json');
         $channelFlagMapJSON = file_get_contents(__DIR__ . '/data/channelFlagMap.json');
         $channelProductsJSON = file_get_contents(__DIR__ . '/data/syncChannelProducts.json');
         $channelFulfillmentsJSON = file_get_contents(__DIR__ . '/data/syncChannelFulfillments.json');
@@ -77,7 +77,8 @@ final class ChannelTest extends Framework\TestCase
         self::$channelData = json_decode($channelDataJSON, true);
         self::$channelFlagMapData = json_decode($channelFlagMapJSON, true);
         self::$channelMetaData = json_decode($channelMetaJSON, true);
-        self::$channelOrderData = json_decode($channelOrderJSON, true);
+        self::$channelOrderTransform = json_decode($channelOrderTransformJSON, true);
+//        self::$channelOrderData = json_decode($channelOrderJSON, true);
         self::$channelProductsData = json_decode($channelProductsJSON, true);
         self::$channelFulfillmentsData = json_decode($channelFulfillmentsJSON, true);
     }
@@ -571,9 +572,13 @@ final class ChannelTest extends Framework\TestCase
     {
         foreach (self::$channelTypes as $type) {
 
-            // Configure the connector factory.
+            // Load test data.
             self::loadTestData($type);
+
+            // Configure the connector factory.
             self::setFactory($type);
+
+            // Get orders connector.
             $connector = self::$creator->createOrders();
 
             // Create channel object.
@@ -597,37 +602,6 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
-     * Test Get Orders By Code
-     *
-     * This test case evaluates the get() method from the dal\channel\Orders interface
-     * which is implemented in your connector.
-     *
-     * @return void
-     */
-    // TODO: Complete when interface is ready.
-//    public function testGetOrdersByCode()
-//    {
-//        foreach (self::$channelTypes as $type) {
-//
-//            // load test data and set channel
-//            self::loadTestData($type);
-//            self::setChannel($type);
-//
-//            $channelOrder = self::$channel->transformOrder(
-//                self::$channelOrderData,
-//                MetaItem::createArray(self::$channelMetaData)
-//            );
-//
-//            // Get orders (return 2)
-//            $fetchedOrders = self::$channel->getOrdersByCode([$channelOrder], MetaItem::createArray(self::$channelMetaData));
-//            $this->assertEquals(1, count($fetchedOrders));
-//            foreach ($fetchedOrders as $order) {
-//                $this->verifyTransformOrder($order);
-//            }
-//        }
-//    }
-
-    /**
      * Test Transform Order
      *
      * This method transforms an order of a specified connector type.
@@ -636,28 +610,74 @@ final class ChannelTest extends Framework\TestCase
      *
      * @return void
      */
-    public function testTransformOrder($order)
+    public function _testTransformOrder($order)
     {
         foreach (self::$channelTypes as $type) {
 
-            // Load test data and set channel.
+            // Load test data
             self::loadTestData($type);
+
+            // Set up the channel.
             self::setFactory($type);
 
             // Set up an object of the connector we are testing.
             $connector  = self::$creator->createOrders();
 
-            // Call the method to transform the order.
+            // Prepare the data we are going to be passing to the
+            // transform() method of the Orders connector implementation.
+
+
+
+            // Do the transform.
+//            $connector->
+
             // We are creating an array of vo\Order objects
             // and an array of vo\Meta objects and passing it
             // to the connector implementation.
-            $channelOrder = self::$channel->transformOrder(
+
+
+            $channelOrder = self::$channel->transform(
                 vo\Order::createArray(self::$channelOrderData),
                 vo\Meta::createArray(self::$channelMetaData)
             );
 
             // Call the verify method to evaluate the transformation.
             $this->verifyTransformOrder($channelOrder);
+        }
+    }
+
+    /**
+     * Test Get Orders By Code
+     *
+     * This test case evaluates the get() method from the dal\channel\Orders interface
+     * which is implemented in your connector.
+     *
+     * @return void
+     */
+    public function testGetOrdersByCode()
+    {
+        foreach (self::$channelTypes as $type) {
+
+            // Load test data.
+            self::loadTestData($type);
+
+            // Create channel object.
+            $meta = vo\Meta::createArray(self::$channelMetaData);
+            $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
+            $channel = new vo\Channel($mergedChannelData);
+
+
+            $channelOrder = self::$channel->transformOrder(
+                self::$channelOrderData,
+                MetaItem::createArray(self::$channelMetaData)
+            );
+
+            // Get orders (return 2)
+            $fetchedOrders = self::$channel->getOrdersByCode([$channelOrder], MetaItem::createArray(self::$channelMetaData));
+            $this->assertEquals(1, count($fetchedOrders));
+            foreach ($fetchedOrders as $order) {
+                $this->verifyTransformOrder($order);
+            }
         }
     }
 
