@@ -32,7 +32,7 @@ final class ChannelTest extends Framework\TestCase
     public static $channelMetaData;
 
     /** @var array $channelOrderData The raw testing data for orders. */
-    public static $channelOrderTransform;
+    public static $channelOrderData;
 
     /** @var string $currentChannelType The active channel type being tested. */
     public static $currentChannelType;
@@ -68,7 +68,7 @@ final class ChannelTest extends Framework\TestCase
         // Get data from JSON files.
         $channelDataJSON = file_get_contents(__DIR__ . '/data/channelData.json');
         $channelMetaJSON = file_get_contents(__DIR__ . '/data/channelMeta.json');
-        $channelOrderTransformJSON = file_get_contents(__DIR__ . '/data/channels/' . $type . '/orderTransform.json');
+        $channelOrderJSON = file_get_contents(__DIR__ . '/data/channels/' . $type . '/orderTransform.json');
         $channelFlagMapJSON = file_get_contents(__DIR__ . '/data/channelFlagMap.json');
         $channelProductsJSON = file_get_contents(__DIR__ . '/data/syncChannelProducts.json');
         $channelFulfillmentsJSON = file_get_contents(__DIR__ . '/data/syncChannelFulfillments.json');
@@ -77,8 +77,7 @@ final class ChannelTest extends Framework\TestCase
         self::$channelData = json_decode($channelDataJSON, true);
         self::$channelFlagMapData = json_decode($channelFlagMapJSON, true);
         self::$channelMetaData = json_decode($channelMetaJSON, true);
-        self::$channelOrderTransform = json_decode($channelOrderTransformJSON, true);
-//        self::$channelOrderData = json_decode($channelOrderJSON, true);
+        self::$channelOrderData = json_decode($channelOrderJSON, true);
         self::$channelProductsData = json_decode($channelProductsJSON, true);
         self::$channelFulfillmentsData = json_decode($channelFulfillmentsJSON, true);
     }
@@ -649,10 +648,18 @@ final class ChannelTest extends Framework\TestCase
     /**
      * Test Get Orders By Code
      *
-     * This test case evaluates the get() method from the dal\channel\Orders interface
-     * which is implemented in your connector.
+     * This test case evaluates the get() method from the dal\channel\Orders interface.
+     * It iterates over the available connectors in the 'dal/channels' directory and
+     * evaluates the functionality individually.
+     *
+     * The connector factory is used to generate the corresponding orders connector using
+     * createOrders(). The connector is then used to to get the orders by code using
+     * getByCode().
+     *
+     * Each order is passed to the verifyTransformOrder() method.
      *
      * @return void
+     * @throws UnprocessableEntity
      */
     public function testGetOrdersByCode()
     {
@@ -661,38 +668,48 @@ final class ChannelTest extends Framework\TestCase
             // Load test data.
             self::loadTestData($type);
 
+            // Setup factory.
+            self::setFactory($type);
+
+            // Connector.
+            $connector = self::$creator->createOrders();
+
             // Create channel object.
             $meta = vo\Meta::createArray(self::$channelMetaData);
             $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
             $channel = new vo\Channel($mergedChannelData);
 
-
-            $channelOrder = self::$channel->transformOrder(
-                self::$channelOrderData,
-                MetaItem::createArray(self::$channelMetaData)
-            );
+            // Run transform().
+            $channelOrder = $connector->transform(self::$channelOrderData, $channel);
 
             // Get orders (return 2)
             $fetchedOrders = self::$channel->getOrdersByCode([$channelOrder], MetaItem::createArray(self::$channelMetaData));
             $this->assertEquals(1, count($fetchedOrders));
+
+            // Iterate over fetched orders.
             foreach ($fetchedOrders as $order) {
                 $this->verifyTransformOrder($order);
             }
+
         }
     }
 
     /**
      * Verify Transform Order
      *
-     * Verifies the order transformation.
+     * Verifies the order transformation is valid.
+     * Criteria for a valid Stock2Shop Channel Orders is:
+     *
+     * - Must be of vo\ChannelOrder type.
+     * - Must have 'channel_order_code' set.
      *
      * @param $channelOrder
+     * @return void
      */
-    // TODO: Complete when interface is ready.
-//    public function verifyTransformOrder($channelOrder)
-//    {
-//        $this->assertInstanceOf("stock2shop\\vo\\ChannelOrder", $channelOrder);
-//        $this->assertNotEmpty($channelOrder->channel_order_code);
-//    }
+    public function verifyTransformOrder($channelOrder)
+    {
+        $this->assertInstanceOf("stock2shop\\vo\\ChannelOrder", $channelOrder);
+        $this->assertNotEmpty($channelOrder->channel_order_code);
+    }
 
 }
