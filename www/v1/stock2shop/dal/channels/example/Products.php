@@ -15,7 +15,6 @@ use stock2shop\helpers;
  */
 class Products implements ProductsInterface
 {
-
     /** @const string DATA_PATH */
     const DATA_PATH = __DIR__ . "/data";
 
@@ -28,9 +27,8 @@ class Products implements ProductsInterface
     /**
      * Sync
      *
-     * Creates a file for each product and for each product, variant
-     * and product image. This method illustrates the possible cleanup
-     * operations required for e-commerce channels.
+     * This method synchronises products, variants and images on the channel.
+     *
      *
      * - product.id is the file name for the product.
      * - product.variant[].channel_variant_code is the file name for a variant.
@@ -65,6 +63,7 @@ class Products implements ProductsInterface
             // system uses to uniquely identify the product.
             // i.e. in WooCommerce this would be the post ID of the product.
             $product->channel_product_code = $productFileName;
+
             foreach ($product->variants as $variant) {
 
                 // Create channel_variant_code for each product variant.
