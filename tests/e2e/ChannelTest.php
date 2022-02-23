@@ -3,9 +3,9 @@
 namespace tests\e2e;
 
 use PHPUnit\Framework;
-use stock2shop\vo;
 use stock2shop\dal;
 use stock2shop\exceptions\UnprocessableEntity;
+use stock2shop\vo;
 
 /**
  * This "end to end" test runs through all channel types.
@@ -460,6 +460,170 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
+     * Test Get Orders
+     * @return void
+     */
+    public function testGetOrders()
+    {
+        foreach (self::$channelTypes as $type) {
+
+            // Load test data.
+            self::loadTestData($type);
+
+            // Configure the connector factory.
+            self::setFactory($type);
+
+            // Get orders connector.
+            $connector = self::$creator->createOrders();
+
+            // Create channel object.
+            $meta = vo\Meta::createArray(self::$channelMetaData);
+            $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
+            $channel = new vo\Channel($mergedChannelData);
+
+            // Use connector to get the orders.
+            $fetchedOrders = $connector->get("", 2, $channel);
+            $this->assertEquals(2, count($fetchedOrders));
+
+            // Iterate over fetched orders.
+            foreach ($fetchedOrders as $order) {
+
+                // Check each transform.
+                $this->verifyTransformOrder($order);
+
+            }
+
+        }
+    }
+
+    /**
+     * Test Transform Order
+     *
+     * This method transforms an order of a specified connector type.
+     * It loops through the channel types configured in this e2e test
+     * and calls the corresponding method from the connector object.
+     *
+     * @return void
+     */
+    public function testTransformOrder()
+    {
+        foreach (self::$channelTypes as $type) {
+
+            // Load test data
+            self::loadTestData($type);
+
+            // Set up the channel.
+            self::setFactory($type);
+
+            // Set up an object of the connector we are testing.
+            $connector  = self::$creator->createOrders();
+
+            // Prepare the data we are going to be passing to the
+            // transform() method of the Orders connector implementation.
+
+            // Create channel object.
+            $meta = vo\Meta::createArray(self::$channelMetaData);
+            $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
+            $channel = new vo\Channel($mergedChannelData);
+
+            // We are creating an array of vo\Order objects
+            // and an array of vo\Meta objects and passing it
+            // to the connector implementation.
+            $channelOrder = $connector->transform(
+                self::$channelOrderData,
+                $channel
+            );
+
+            // Call the verify method to evaluate the transformation.
+            $this->verifyTransformOrder($channelOrder);
+        }
+    }
+
+    /**
+     * Test Get Orders By Code
+     *
+     * This test case evaluates the get() method from the dal\channel\Orders interface.
+     * It iterates over the available connectors in the 'dal/channels' directory and
+     * evaluates the functionality individually.
+     *
+     * The connector factory is used to generate the corresponding orders connector using
+     * createOrders(). The connector is then used to get the orders by code using
+     * getByCode().
+     *
+     * Each order is passed to the verifyTransformOrder() method.
+     *
+     * @return void
+     * @throws UnprocessableEntity
+     */
+    public function testGetOrdersByCode()
+    {
+        foreach (self::$channelTypes as $type) {
+
+            // Load test data.
+            self::loadTestData($type);
+
+            // Setup factory.
+            self::setFactory($type);
+
+            // Connector.
+            $connector = self::$creator->createOrders();
+
+            // Create channel object.
+            $meta = vo\Meta::createArray(self::$channelMetaData);
+            $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
+            $channel = new vo\Channel($mergedChannelData);
+
+            // ----------------------------------------------
+
+            $channelOrders = [];
+
+            $channelOrders[] = new vo\ChannelOrder([
+                "channel" => $channel,
+                "system_order" => new vo\ChannelOrderOrder([
+                    "channel_order_code" => self::$channelOrderData["order_number"]
+                ])
+            ]);
+
+            // ----------------------------------------------
+
+            $existingOrders = $connector->getByCode($channelOrders, $channel);
+
+            $this->assertNotNull($existingOrders);
+            $this->assertCount(1, $existingOrders);
+
+            foreach ($existingOrders as $order) {
+                $this->verifyTransformOrder($order);
+            }
+
+            // ----------------------------------------------
+
+            // Iterate over fetched orders.
+            foreach ($existingOrders as $order) {
+                $this->verifyTransformOrder($order);
+            }
+
+        }
+    }
+
+    /**
+     * Verify Transform Order
+     *
+     * Verifies the order transformation is valid.
+     * Criteria for a valid Stock2Shop Channel Orders is:
+     *
+     * - Must be of vo\ChannelOrder type.
+     * - Must have 'channel_order_code' set.
+     *
+     * @param vo\ChannelOrder $channelOrder
+     * @return void
+     */
+    public function verifyTransformOrder(vo\ChannelOrder $channelOrder)
+    {
+        $this->assertInstanceOf("stock2shop\\vo\\ChannelOrder", $channelOrder);
+        $this->assertNotEmpty($channelOrder->system_order->channel_order_code);
+    }
+
+    /**
      * Test Sync Fulfillments
      *
      * This method synchronizes the test data for fulfillments onto a channel.
@@ -562,154 +726,5 @@ final class ChannelTest extends Framework\TestCase
 //        }
 //
 //    }
-
-    /**
-     * Test Get Orders
-     * @return void
-     */
-    public function testGetOrders()
-    {
-        foreach (self::$channelTypes as $type) {
-
-            // Load test data.
-            self::loadTestData($type);
-
-            // Configure the connector factory.
-            self::setFactory($type);
-
-            // Get orders connector.
-            $connector = self::$creator->createOrders();
-
-            // Create channel object.
-            $meta = vo\Meta::createArray(self::$channelMetaData);
-            $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
-            $channel = new vo\Channel($mergedChannelData);
-
-            // Use connector to get the orders.
-            $fetchedOrders = $connector->get("", 2, $channel);
-            $this->assertEquals(2, count($fetchedOrders));
-
-            // Iterate over fetched orders.
-            foreach ($fetchedOrders as $order) {
-
-                // Check each transform.
-                $this->verifyTransformOrder($order);
-
-            }
-
-        }
-    }
-
-    /**
-     * Test Transform Order
-     *
-     * This method transforms an order of a specified connector type.
-     * It loops through the channel types configured in this e2e test
-     * and calls the corresponding method from the connector object.
-     *
-     * @return void
-     */
-    public function _testTransformOrder($order)
-    {
-        foreach (self::$channelTypes as $type) {
-
-            // Load test data
-            self::loadTestData($type);
-
-            // Set up the channel.
-            self::setFactory($type);
-
-            // Set up an object of the connector we are testing.
-            $connector  = self::$creator->createOrders();
-
-            // Prepare the data we are going to be passing to the
-            // transform() method of the Orders connector implementation.
-
-
-
-            // Do the transform.
-//            $connector->
-
-            // We are creating an array of vo\Order objects
-            // and an array of vo\Meta objects and passing it
-            // to the connector implementation.
-
-
-            $channelOrder = self::$channel->transform(
-                vo\Order::createArray(self::$channelOrderData),
-                vo\Meta::createArray(self::$channelMetaData)
-            );
-
-            // Call the verify method to evaluate the transformation.
-            $this->verifyTransformOrder($channelOrder);
-        }
-    }
-
-    /**
-     * Test Get Orders By Code
-     *
-     * This test case evaluates the get() method from the dal\channel\Orders interface.
-     * It iterates over the available connectors in the 'dal/channels' directory and
-     * evaluates the functionality individually.
-     *
-     * The connector factory is used to generate the corresponding orders connector using
-     * createOrders(). The connector is then used to to get the orders by code using
-     * getByCode().
-     *
-     * Each order is passed to the verifyTransformOrder() method.
-     *
-     * @return void
-     * @throws UnprocessableEntity
-     */
-    public function _testGetOrdersByCode()
-    {
-        foreach (self::$channelTypes as $type) {
-
-            // Load test data.
-            self::loadTestData($type);
-
-            // Setup factory.
-            self::setFactory($type);
-
-            // Connector.
-            $connector = self::$creator->createOrders();
-
-            // Create channel object.
-            $meta = vo\Meta::createArray(self::$channelMetaData);
-            $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
-            $channel = new vo\Channel($mergedChannelData);
-
-            // Run transform().
-            $channelOrder = $connector->transform(self::$channelOrderData, $channel);
-
-            // Get orders (return 2)
-            $fetchedOrders = self::$channel->getOrdersByCode([$channelOrder], MetaItem::createArray(self::$channelMetaData));
-            $this->assertEquals(1, count($fetchedOrders));
-
-            // Iterate over fetched orders.
-            foreach ($fetchedOrders as $order) {
-                $this->verifyTransformOrder($order);
-            }
-
-        }
-    }
-
-    /**
-     * Verify Transform Order
-     *
-     * Verifies the order transformation is valid.
-     * Criteria for a valid Stock2Shop Channel Orders is:
-     *
-     * - Must be of vo\ChannelOrder type.
-     * - Must have 'channel_order_code' set.
-     *
-     * @param vo\ChannelOrder $channelOrder
-     * @return void
-     */
-    public function verifyTransformOrder(vo\ChannelOrder $channelOrder)
-    {
-        $this->assertInstanceOf("stock2shop\\vo\\ChannelOrder", $channelOrder);
-        $this->assertNotEmpty($channelOrder->system_order->channel_order_code);
-    }
 
 }

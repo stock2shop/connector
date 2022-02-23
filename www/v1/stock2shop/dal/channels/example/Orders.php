@@ -3,6 +3,7 @@
 namespace stock2shop\dal\channels\example;
 
 use stock2shop\vo;
+use stock2shop\helpers;
 use stock2shop\exceptions;
 use stock2shop\dal\channel\Orders as OrdersInterface;
 
@@ -93,8 +94,12 @@ class Orders implements OrdersInterface
     /**
      * Get Orders By Code
      *
-     * This method returns orders from the channel.
-     * It is used in the
+     * This method returns the channel order data for items which match the
+     * `channel_order_code` which have been set on the $orders array items.
+     *
+     * NB: The `channel_order_code` property is always set to the value of the
+     * order ID which is used on your channel as a unique identifier for order
+     * items. (i.e. WooCommerce's post ID).
      *
      * @param vo\ChannelOrder[] $orders
      * @param vo\Channel $channel
@@ -102,7 +107,52 @@ class Orders implements OrdersInterface
      */
     public function getByCode(array $orders, vo\Channel $channel): array {
 
-        return [];
+        // Get Orders From Channel.
+
+        // The $orders parameter will contain vo\ChannelOrder objects with only
+        // their `channel_order_code` set. We have to get the order data for each item from the
+        // channel.
+
+        /** @var vo\ChannelOrder[] $channelOrders */
+        $channelOrders = [];
+
+        // -----------------------------------------
+
+        $orderItems = data\Helper::getJSONFiles("orders");
+
+        foreach($orders as $order) {
+
+            // Generate Prefix.
+
+            // The orders are saved to the channel using their IDs in encoded
+            // format as the identifier. In this example the encoded ID is the
+            // prefix for the filename the order is saved as.
+            $prefix = urlencode($order->system_order->channel_order_code);
+
+            // -----------------------------------------
+
+            // This gets the order data from the channel for the specific order.
+            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, "orders");
+
+            // -----------------------------------------
+
+            foreach($currentFiles as $fileName => $fileData) {
+
+                if($fileName === $prefix . ".json") {
+
+                    // Create VO.
+
+                    // The order ID matches the prefix / filename of the order on the channel.
+                    // Now we need to populate a `vo\ChannelOrder` object with the channel data.
+                    $channelOrders[$prefix] = $this->transform($fileData, $channel);
+
+                }
+
+            }
+
+        }
+
+        return $channelOrders;
 
     }
 
@@ -124,6 +174,8 @@ class Orders implements OrdersInterface
      * - Set the order number/reference code to the 'channel_order_code' property.
      * - Set the customer details (name, email, etc) to `vo\SystemCustomer` object and
      *   set this to the 'customer' property of the `vo\ChannelOrderOrder`.
+     * - Set the shipping and/or billing address data to the `vo\ChannelOrderOrder` object's
+     *   address properties (see `vo\Order`).
      * - Set the item(s) - products, services rendered, etc - to `vo\OrderItem` item(s).
      * - Set each `vo\OrderItem` to the 'line_items' property of the `vo\Order` object.
      * - Implement functionality for any custom channel meta configured for the order transform.
@@ -134,7 +186,7 @@ class Orders implements OrdersInterface
      */
     public function transform($webhookOrder, vo\Channel $channel): vo\ChannelOrder {
 
-        // Get meta from channel.
+        // Channel Meta.
         $meta = $channel->meta;
 
         // ---------------------------------------------------
@@ -142,12 +194,9 @@ class Orders implements OrdersInterface
         // Channel Order.
 
         // You will need to return a vo\ChannelOrder object (as per the method signature).
-        // This is where you add the logic to transform the raw order data received from the channel.
-        // The way this is done doesn't matter, although it is always better to segregate code
-        // sensibly.
+        // This is where you add the logic to transform the raw order data received from the
+        // channel.
 
-        // The system_order has been left out below because it is only added to the structure at the
-        // end of the workflow:
         $channelOrder = new vo\ChannelOrder([
             "channel" => $channel
 //            "system_order" => $channelOrderOrder
@@ -157,15 +206,22 @@ class Orders implements OrdersInterface
 
         // ChannelOrder Order
 
-        // Inline a new vo\SystemCustomer object on the "customer" property. Create
-        // vo\ChannelOrderOrder. The webhook order will always have customer data in it in some
-        // format or the other. This must be assigned to an object of the vo\Customer class. Set
-        // the 'first_name' and 'email' properties and any others for which there is data.
+        // Inline a new vo\SystemCustomer object on the "customer" property.
+        // The webhook order will always have customer data in it in some format or the other.
+        // This must be assigned to an object of the vo\Customer class. Set the 'first_name' and
+        // 'email' properties and any others for which there is data.
+
+        // TODO: Confirm that using the Customer class' meta property to add in any additional fields
+        //  with the Meta VO is acceptable.
+
+        $customerMeta = [];
+        $customerMeta[] = new vo\Meta([ "key" => "tel", "value" => $webhookOrder["customer"]["tel"]]);
 
         $channelOrderOrder = new vo\ChannelOrderOrder([
             "customer" => new vo\SystemCustomer([
                 'first_name' => $webhookOrder['customer']['name'],
                 'email' => $webhookOrder['customer']['email'],
+                "meta" => $customerMeta
             ]),
             "channel_order_code" => $webhookOrder["order_number"]
         ]);
@@ -175,7 +231,10 @@ class Orders implements OrdersInterface
         // Address(es).
 
         // In this example, there are two addresses for physical and postal locations which must
-        // be mapped onto Stock2Shop Value Objects. The process follows:
+        // be mapped onto Stock2Shop Value Objects.
+
+        // TODO: Confirm how the addresses are to be mapped. Onto the `vo\ChannelOrderOrder`
+        //  as well as the customer addresses[] property?
 
         // - postal_address
         $channelOrderOrder->customer->addresses[] = new vo\Address([

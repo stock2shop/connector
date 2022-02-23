@@ -12,6 +12,8 @@ use stock2shop\helpers;
  * This class is where the Data Access Layer is mapped onto
  * the Stock2Shop Value Objects from the source system you are
  * integrating with.
+ *
+ * @package stock2shop\dal\example
  */
 class Products implements ProductsInterface
 {
@@ -28,7 +30,6 @@ class Products implements ProductsInterface
      * Sync
      *
      * This method synchronises products, variants and images on the channel.
-     *
      *
      * - product.id is the file name for the product.
      * - product.variant[].channel_variant_code is the file name for a variant.
@@ -234,7 +235,7 @@ class Products implements ProductsInterface
     /**
      * Get By Code
      *
-     * This method returns ChannelProduct items by code.
+     * This method returns vo\ChannelProduct items by code.
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
@@ -247,10 +248,26 @@ class Products implements ProductsInterface
 
         foreach ($channelProducts as $product) {
 
+            // -----------------------------------------------
+
+            // Generate Prefix.
+
+            // These products have only their product IDs set.
+            // The product ID is used in the processing below to determine which of the
+            // products to add to the '$channelProductsSync' array.
+
             $prefix = urlencode($product->id);
 
-            // Get all product data from the channel.
+            // -----------------------------------------------
+
+            // Get Product Files.
+
+            // Next we get the products from the channel. This is where you will use an API
+            // client or helper class of some sort to access the product data on the channel.
+
             $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, 'products');
+
+            // -----------------------------------------------
 
             foreach ($currentFiles as $fileName => $channelObject) {
 
@@ -266,22 +283,37 @@ class Products implements ProductsInterface
 
                 } else {
 
-                    // If the obj has a channel_image_code, then we can
-                    // assume it is a product image.
+                    // -----------------------------------------------
+
+                    // Channel Image
+
+                    // If the obj has a channel_image_code, then we can assume it is a
+                    // product image. As per Stock2Shop requirements:
+                    // - 'channel_image_code' must be set.
+
                     if(array_key_exists("channel_image_code", $channelObject)) {
                         $channelProductsSync[$prefix]->images[] = new vo\ChannelImage([
                             "channel_image_code" => $channelObject["channel_image_code"]
                         ]);
                     }
 
+                    // -----------------------------------------------
+
+                    // Channel Variant
+
                     // For channel product variants, the sku and channel_variant_code are
                     // properties which must be set and are evaluated in the ChannelTest class.
+                    // - 'channel_variant_code' must be set.
+                    // - variant 'sku' must be set.
+
                     if (array_key_exists("channel_variant_code", $channelObject)) {
                         $channelProductsSync[$prefix]->variants[] = new vo\ChannelVariant([
                             "sku" => $channelObject["sku"],
                             "channel_variant_code" => $channelObject["channel_variant_code"]
                         ]);
                     }
+
+                    // -----------------------------------------------
 
                 }
 
@@ -301,7 +333,7 @@ class Products implements ProductsInterface
      * @param $product
      * @return bool $status
      */
-    private function saveProduct($productId, $product): bool {
+    public function saveProduct($productId, $product): bool {
 
         // This method makes it possible for Stock2Shop to add products to the channel.
         // This is where you would send the product data to the system which this integration
@@ -320,7 +352,7 @@ class Products implements ProductsInterface
         // [save product logic]:
         file_put_contents($productId, $transformedProductData);
 
-        return true;
+        return $productId;
 
     }
 
@@ -332,7 +364,7 @@ class Products implements ProductsInterface
      * @param $productId
      * @return bool $status
      */
-    private function deleteProduct($productId): bool {
+    public function deleteProduct($productId): bool {
 
         // This is where you would write the logic for deleting a product from a channel.
         // In this example, the productId is the name of the file in the `data/products`
@@ -355,7 +387,7 @@ class Products implements ProductsInterface
      * @param $imageData
      * @return bool $status
      */
-    private function saveImage($imageId, $imageData): bool {
+    public function saveImage($imageId, $imageData): bool {
 
         // This is where you would write the logic for saving a product image
         // to a channel. The image data is first transformed below and then
@@ -380,7 +412,7 @@ class Products implements ProductsInterface
      * @param $imageId
      * @return bool $status
      */
-    private function deleteImage($imageId): bool {
+    public function deleteImage($imageId): bool {
 
         // [delete product image logic]:
         unlink($imageId);
@@ -399,7 +431,7 @@ class Products implements ProductsInterface
      * @param $variantData
      * @return bool $status
      */
-    private function saveVariant($variantId, $variantData): bool {
+    public function saveVariant($variantId, $variantData): bool {
 
         // Product variants are saved to separate endpoints (files in this example).
         // This is where you would code the logic for saving variants.
@@ -423,7 +455,7 @@ class Products implements ProductsInterface
      * @param $variantId
      * @return bool $status
      */
-    private function deleteVariant($variantId): bool {
+    public function deleteVariant($variantId): bool {
 
         // This is where you would add the logic to delete a variant from the channel.
 
