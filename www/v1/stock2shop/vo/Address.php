@@ -6,6 +6,9 @@ use stock2shop\base\ValueObject;
 
 class Address extends ValueObject
 {
+    /** @var int|null $customer_id */
+    public $customer_id;
+
     /** @var string|null $address1 */
     public $address1;
 
@@ -42,6 +45,18 @@ class Address extends ValueObject
     /** @var string|null $province_code */
     public $province_code;
 
+    /** @var int|null $client_id */
+    public $client_id;
+
+    /** @var string|null $address_code */
+    public $address_code;
+
+    /** @var string|null $type */
+    public $type;
+
+    /** @var bool|null $default */
+    public $default;
+
     /**
      * Address constructor.
      * @param array $data
@@ -49,6 +64,7 @@ class Address extends ValueObject
      */
     public function __construct(array $data)
     {
+        $this->customer_id   = self::intFrom($data, 'customer_id');
         $this->address1      = self::stringFrom($data, 'address1');
         $this->address2      = self::stringFrom($data, 'address2');
         $this->city          = self::stringFrom($data, 'city');
@@ -61,6 +77,10 @@ class Address extends ValueObject
         $this->zip           = self::stringFrom($data, 'zip');
         $this->country_code  = self::stringFrom($data, 'country_code');
         $this->province_code = self::stringFrom($data, 'province_code');
+        $this->client_id     = self::intFrom($data, 'client_id');
+        $this->address_code  = self::stringFrom($data, 'address_code');
+        $this->type          = self::stringFrom($data, 'type');
+        $this->default       = self::boolFrom($data, 'default');
     }
 
     /**
