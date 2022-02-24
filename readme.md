@@ -102,6 +102,28 @@ the test on your local environment.
 The test output will be displayed in your console.
 If there are errors - it indicates an issue with your connector integration.
 
+## Folder Structure
+
+The following serves to give you an overview of the folder structure for the connector you will be adding to the 
+[channels directory](www/v1/stock2shop/dal/channels/). The example below is the structure of the 'example' directory:
+
+    .
+    ├── data                    # The connector writes and reads data from this directory. 
+    │   │                       # NB: This is a flat-file connector.
+    │   ├── products            # products storage
+    │   │   ..
+    │   ├── orders              # orders storage
+    │   │   ..
+    │   ├── fulfillments        # fulfillments storage
+    │   │   ..
+    │   ├── Helper.php          # Provides methods which are used to access the data from disk.
+    │
+    ├── Creator.php             # Concrete factory class of the abstract Creator class.
+    ├── Products.php            # Products channel type class.
+    ├── Orders.php              # Orders channel type class.
+    ├── Fulfillments.php        # Fulfillments channel type class.
+    ├── LICENSE                 # Any license information which may be relevant to the code.
+    └── README                  # An overview of the implementation and any notes.
 
 ## Frequently Asked Questions
 

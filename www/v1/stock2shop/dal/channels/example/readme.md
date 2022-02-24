@@ -23,25 +23,3 @@ the file naming conventions:
 2. [Orders Storage](data/orders/readme.md)
 3. [Fulfillments Storage](data/fulfillments/readme.md)
 
-## Folder Structure
-
-The file and folder structure consists of:
-
-    .
-    ├── data                    # The connector writes and reads data from this directory. 
-    │   │                       # NB: This is a flat-file connector.
-    │   ├── products            # products storage
-    │   │   ..
-    │   ├── orders              # orders storage
-    │   │   ..
-    │   ├── fulfillments        # fulfillments storage
-    │   │   ..
-    │   ├── Helper.php          # Provides methods which are used to access the data from disk.
-    │
-    ├── Creator.php             # Concrete factory class of the abstract Creator class.
-    ├── Products.php            # Products channel type class.
-    ├── Orders.php              # Orders channel type class.
-    ├── Fulfillments.php        # Fulfillments channel type class.
-    ├── LICENSE
-    └── README
-
