@@ -26,6 +26,9 @@ class Products implements ProductsInterface
     /** @const string CHANNEL_SEPARATOR_IMAGE */
     const CHANNEL_SEPARATOR_IMAGE = "image_separator";
 
+    /** @var string CHANNEL_ENDPOINT_PRODUCTS */
+    const CHANNEL_ENDPOINT_PRODUCTS = "products_endpoint";
+
     /**
      * Sync
      *
@@ -48,6 +51,9 @@ class Products implements ProductsInterface
 
         /** @var string $variantSeparator Channel separator meta for variants. */
         $variantSeparator = helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_VARIANT);
+
+        /** @var string $productsEndpoint Channel products endpoint. */
+        $productsEndpoint = helpers\Meta::get($channel->meta, self::CHANNEL_ENDPOINT_PRODUCTS);
 
         // ------------------------------------------------
 
@@ -87,26 +93,26 @@ class Products implements ProductsInterface
             // ------------------------------------------------
 
             // Fetch the current files from the source (in this case, flat-file).
-            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, "products");
+            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, $productsEndpoint);
 
             // Check if the product has been flagged for delete.
             if ($product->delete === true) {
 
                 foreach ($currentFiles as $currentFileName => $obj) {
 
-                    $this->deleteProduct(self::DATA_PATH . '/products/' . $currentFileName);
+                    $this->deleteProduct(self::DATA_PATH . '/' . $productsEndpoint . '/' . $currentFileName);
 
                 }
 
             } else {
 
-                $this->saveProduct(self::DATA_PATH . '/products/' . $product->channel_product_code, $product);
+                $this->saveProduct(self::DATA_PATH . '/' . $productsEndpoint . '/' . $product->channel_product_code, $product);
 
                 // Iterate through the product variants.
                 foreach ($product->variants as $variant) {
 
                     // This is the path to the source system storage for this file.
-                    $filePath = self::DATA_PATH . '/products/' . $variant->channel_variant_code;
+                    $filePath = self::DATA_PATH . '/' . $productsEndpoint . '/' . $variant->channel_variant_code;
 
                     if ($product->delete) {
 
@@ -122,7 +128,7 @@ class Products implements ProductsInterface
                 // Iterate through the product images.
                 foreach ($product->images as $image) {
 
-                    $filePath = self::DATA_PATH . '/products/' . $image->channel_image_code;
+                    $filePath = self::DATA_PATH . '/' . $productsEndpoint . '/' . $image->channel_image_code;
 
                     if ($product->delete) {
 
@@ -186,19 +192,53 @@ class Products implements ProductsInterface
      */
     public function get(string $token, int $limit, vo\Channel $channel): array
     {
+        // Channel Meta.
+
+        // The following two variables '$imageSeparator' and '$variantSeparator' are an example
+        // of how Channel Meta may be used to assist with processing the data for product images
+        // and product variants received from a channel.
+
+        // The aforementioned separator values are used to define the storage naming conventions
+        // of `vo\ChannelImage` and `vo\ChannelVariant` objects on the channel. In this example,
+        // the flat-file connector's target is the local file system and the separators are used in
+        // the sync() method above and in the get() method (the current method) to indicate how
+        // the entities must be saved to disk.
+
         /** @var string $imageSeparator Channel separator meta for images. */
         $imageSeparator = helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_IMAGE);
 
         /** @var string $variantSeparator Channel separator meta for variants. */
         $variantSeparator = helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_VARIANT);
 
+        // ------------------------------------------------
+
+        // Get Products From Channel.
+
+        // In your integration, you should use the channel meta to make the process of mapping
+        // products, variants and images onto Stock2Shop and back to the channel-supported format
+        // logical, easy-to-understand and suitable for the target system you are working on.
+
+        // Another example of using configurable channel meta to define the endpoint path for
+        // getting products from the channel:
+
+        $productsEndpointMeta = helpers\Meta::get($channel->meta, self::CHANNEL_ENDPOINT_PRODUCTS);
+        $currentFiles = data\Helper::getJSONFiles($productsEndpointMeta);
+
+        // ------------------------------------------------
+
         /** @var  $currentFiles */
-        $currentFiles = data\Helper::getJSONFiles("products");
 
         $cnt = 0;
         $channelProducts = [];
 
         foreach ($currentFiles as $fileName => $fileData) {
+
+            // ------------------------------------------------
+
+            // Compare Products With Token
+
+            // The token is used to determine which products to add.
+            // We use strcm() below to do the comparison.
 
             if (strcmp($token, $fileName) < 0) {
 

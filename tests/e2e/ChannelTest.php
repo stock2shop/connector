@@ -66,17 +66,20 @@ final class ChannelTest extends Framework\TestCase
     public function loadTestData(string $type)
     {
         // Get data from JSON files.
-        $channelDataJSON = file_get_contents(__DIR__ . '/data/channelData.json');
-        $channelMetaJSON = file_get_contents(__DIR__ . '/data/channelMeta.json');
-        $channelOrderJSON = file_get_contents(__DIR__ . '/data/channels/' . $type . '/orderTransform.json');
         $channelFlagMapJSON = file_get_contents(__DIR__ . '/data/channelFlagMap.json');
         $channelProductsJSON = file_get_contents(__DIR__ . '/data/syncChannelProducts.json');
         $channelFulfillmentsJSON = file_get_contents(__DIR__ . '/data/syncChannelFulfillments.json');
 
+        // Load the custom order transform and the channel data.
+        // Each connector type (such as the one in the 'example' directory) will require
+        // custom config which must be mocked in JSON files and added to the 'data/[type]/'
+        // directory for the E2E test to import and use.
+        $channelDataJSON = file_get_contents(__DIR__ . '/data/channels/' . $type . '/channelData.json');
+        $channelOrderJSON = file_get_contents(__DIR__ . '/data/channels/' . $type . '/orderTransform.json');
+
         // Decode into arrays.
         self::$channelData = json_decode($channelDataJSON, true);
         self::$channelFlagMapData = json_decode($channelFlagMapJSON, true);
-        self::$channelMetaData = json_decode($channelMetaJSON, true);
         self::$channelOrderData = json_decode($channelOrderJSON, true);
         self::$channelProductsData = json_decode($channelProductsJSON, true);
         self::$channelFulfillmentsData = json_decode($channelFulfillmentsJSON, true);
@@ -155,9 +158,7 @@ final class ChannelTest extends Framework\TestCase
             $this->assertInstanceOf("stock2shop\\dal\\channels\\" . $type . "\\Products", $connector);
 
             // Instantiate new channel object using the test channel meta data.
-            $meta = vo\Meta::createArray(self::$channelMetaData);
-            $mergedChannelData = array_merge(self::$channelData, ["meta" => $meta]);
-            $channel = new vo\Channel($mergedChannelData);
+            $channel = new vo\Channel(self::$channelData);
 
             // Create flag map array.
             $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
@@ -361,10 +362,8 @@ final class ChannelTest extends Framework\TestCase
             $connector = $creator->createProducts();
 
             // Instantiate new channel object using the test channel meta data.
-            $meta = vo\Meta::createArray(self::$channelMetaData);
-            $mergedChannelData = array_merge(self::$channelData, ["meta" => $meta]);
-            $channel = new vo\Channel($mergedChannelData);
             $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
+            $channel = new vo\Channel(self::$channelData);
 
             // --------------------------------------------------------
 
@@ -477,9 +476,7 @@ final class ChannelTest extends Framework\TestCase
             $connector = self::$creator->createOrders();
 
             // Create channel object.
-            $meta = vo\Meta::createArray(self::$channelMetaData);
-            $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
-            $channel = new vo\Channel($mergedChannelData);
+            $channel = new vo\Channel(self::$channelData);
 
             // Use connector to get the orders.
             $fetchedOrders = $connector->get("", 2, $channel);
@@ -522,9 +519,7 @@ final class ChannelTest extends Framework\TestCase
             // transform() method of the Orders connector implementation.
 
             // Create channel object.
-            $meta = vo\Meta::createArray(self::$channelMetaData);
-            $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
-            $channel = new vo\Channel($mergedChannelData);
+            $channel = new vo\Channel(self::$channelData);
 
             // We are creating an array of vo\Order objects
             // and an array of vo\Meta objects and passing it
@@ -569,9 +564,7 @@ final class ChannelTest extends Framework\TestCase
             $connector = self::$creator->createOrders();
 
             // Create channel object.
-            $meta = vo\Meta::createArray(self::$channelMetaData);
-            $mergedChannelData = array_merge(self::$channelData, ['meta' => $meta]);
-            $channel = new vo\Channel($mergedChannelData);
+            $channel = new vo\Channel(self::$channelData);
 
             // ----------------------------------------------
 

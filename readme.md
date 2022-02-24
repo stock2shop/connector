@@ -57,18 +57,33 @@ See [architecture](architecture.md) about the channel interface.
 ## Tests
 
 An End-To-End or E2E test is included. End-to-end testing is a technique which is used to test software from
-beginning to end. It is an overall test which defines all dependencies in a system. We ask that you do not modify
-our e2e test - although you may read through it to gain a better understanding of how your connector integration
-will fit into the Stock2Shop system.
+beginning to end.
 
-There is one E2E test in the `e2e` directory in the root of this repository: `ChannelTest.php`.
-The test has been designed to evaluate the connector implementations you have added in the `www/v1/dal/channels/`
-directory.
+### Unit Tests
+
+Your implementation will most likely require additional methods, transforms and other helper classes such as an API 
+Client to access the data. Please see the example we have provided for unit testing of helper classes in 
+[tests/unit/www/v1/stock2shop/dal/channels/example](tests/unit/www/v1/stock2shop/dal/channels/example/HelperTest.php) 
+for an example of a unit test which evaluates the methods of the Helper class in the example connector that is 
+provided.
+
+Your unit tests must extend the [TestCase](tests/TestCase.php) class.
+There is no need to add tests for the methods which are already evaluated in the E2E test (see below).
+
+### E2E Test
+
+This is an overall test which defines all dependencies in our system. We ask that you do not modify our e2e test - 
+although you may read through it to gain a better understanding of how your connector integration
+will fit into the Stock2Shop system when it is completed.
 
 The primary objective of the tests is to test whether your connector integration is working correctly.
-Use it whilst you implement the Products, Orders and Fulfillments concrete classes. Please note that there is mock 
-product, order, fulfillment and Stock2Shop channel "metadata" in the `tests/e2e/data` directory which the test uses to 
+Use it whilst you implement the Products, Orders and Fulfillments concrete classes. Please note that there is mock
+product, order, fulfillment and Stock2Shop channel "metadata" in the `tests/e2e/data` directory which the test uses to
 simulate synchronization of data onto our system.
+
+Please mock the channel data and order transform (if implemented) for your target channel by adding JSON files to the 
+[tests/e2e/data/channels](tests/e2e/data/channels/) directory. Have a look at the example provided for guidance and the 
+loadTestData() method in the test itself.
 
 ### Run Tests
 
@@ -86,3 +101,8 @@ the test on your local environment.
 
 The test output will be displayed in your console.
 If there are errors - it indicates an issue with your connector integration.
+
+
+## Frequently Asked Questions
+
+TBC
