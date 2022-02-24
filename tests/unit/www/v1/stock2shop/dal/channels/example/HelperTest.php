@@ -34,37 +34,9 @@ class HelperTest extends tests\TestCase
     }
 
     /**
-     * Test Instantiated Object
-     *
-     * Creates a new Products() object and checks the object
-     * definition.
-     *
-     * @return void
-     */
-    public function testInstantiatedObject() {
-
-        $object = $this->helper;
-
-        $this->assertNotNull($object, " instantiating object returns null.");
-        $this->assertEquals(self::CLASS_NAME, get_class($object), " invalid class.");
-
-    }
-
-    /**
      * Test Get JSON Files By Prefix
      */
     public function testGetJSONFilesByPrefix() {
-
-        // Offline Mode.
-
-        // If we're accessing an external source or system in the test
-        // then we need to uncomment the following method:
-//
-//        if ($this->runOffline()) {
-//            return;
-//        }
-
-        // Testing Criteria.
 
         // We'll loop through 3 times and check each possible storage
         // type in the test: orders, products and fulfillments.
@@ -89,6 +61,26 @@ class HelperTest extends tests\TestCase
             $this->assertCount($_count, $result);
 
         }
+
+    }
+
+    /**
+     * Test Get JSON Files
+     */
+    public function testGetJSONFiles()
+    {
+
+        // This test case evaluates whether the getJSONFiles() method
+        // of the data\Helper class is working correctly.
+        $_type  = "fulfillments";
+        $_count = 22;
+
+        // We are expecting an array of JSON files to be returned.
+        $result = $this->helper->getJSONFiles($_type);
+
+        $this->assertNotNull($result);
+        $this->assertEquals('array', gettype($result));
+        $this->assertCount($_count, $result);
 
     }
 
