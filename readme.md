@@ -25,7 +25,7 @@ You can read more about PHP-FIG and PSRs [here](https://www.php-fig.org/psr/psr-
 
 If you use PhpStorm, you can configure your IDE to analyze your code and assist you in conforming to PSR-12.
 
-### Setup
+### Installation
 
 The recommended way of setting up the repository:
 

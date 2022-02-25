@@ -49,51 +49,39 @@ You must not edit anything in this directory. The classes in the `stock2shop\vo`
 our Domain Model and you are required to transform the data coming into your connector implementation 
 as required to match our specifications.
 
-Use the following helper class to generate JSON documents for each Value Object:
-
-Run the following from your command line:
-
-```bash
-php ${S2S_PATH}/connector/www/v1/stock2shop/scripts/stock2shop/voJson.php
-```
-
-If you want to view a specific VO, use this.
-
-```bash
-php ${S2S_PATH}/connector/www/v1/stock2shop/scripts/stock2shop/voJson.php --class=Variant
-```
-
-This is useful for quickly viewing classes which may extend multiple parents.
-For more information read the [README.md](www/v1/stock2shop/vo/README.md) file in the `/www/v1/stock2shop/vo` directory.
+Refer to the [readme file](./www/v1/stock2shop/vo/README.md) in the `www/v1/stock2shop/vo` directory for specific use of
+each of the Value Object classes.
 
 ### /www/v1/stock2shop/dal
 
-DAL stands for "Data Access Layer".
-The purpose of this directory is to separate logic related 
-to different systems.
+DAL stands for "Data Access Layer". The purpose of this directory is to separate logic related to different systems.
+
+### /www/v1/stock2shop/dal/channel
 
 The `channel` directory contains the interfaces which describe our system and must not be modified.
 
 ### /www/v1/stock2shop/dal/channels
 
-A channel is usually a e-commerce shopping cart or a market place.
+A channel is usually a e-commerce shopping cart or a market-place.
 Think of channel as in "sales channel".
 If you have been commissioned to integrate code into a specific
 shopping cart, then you will create a directory here.
 
 Each channel must have these classes:-
 
-`Creator.php` is used to create a new instance of the Factory class which dynamically instantiates the required channel type from the following three options:
+`Creator.php` is used to create a new instance of the Factory class which dynamically instantiates the required channel 
+type from the following three channel types:
 
 1. Products
 2. Orders
 3. Fulfillments
 
 As a starting point, you may copy the Creator.php file found in `example` and adjust it accordingly. 
-If the service you are coding the connector integration for does not require any of the aforementioned channel types, then you must throw 
-a custom exception from our exceptions namespace.
+If the service you are coding the connector integration for does not require any of the aforementioned channel types, 
+then you must throw a custom exception from our exceptions namespace.
 
-For example, if your shopping cart does not need to sync fulfillment data (i.e. shipping information/logistics) then add the following to your Creator.php file in the `channels/[yourconnector]` directory: 
+For example, if your shopping cart does not need to sync fulfillment data (i.e. shipping information/logistics) then 
+add the following to your Creator.php file in the `channels/[yourconnector]` directory: 
 
 ```php
 public function createFulfillments(): channel\Fulfillments
@@ -102,10 +90,8 @@ public function createFulfillments(): channel\Fulfillments
 }
 ```
 
-`connector.php` implements the `channel/Connector.php` interface.
-It must therefore include all methods and have the same method signatures.
+### /www/v1/stock2shop/dal/channels/example
 
-## How To Use Value Objects
-
-Refer to the [readme file](./www/v1/stock2shop/vo/README.md) in the `www/v1/stock2shop/vo` directory for specific use of
-each of the Value Object classes.
+The 'example' directory contains an example of a flat-file connector to a channel.
+The channel in this example writes to your local file sytem - but in a real-world scenario it will most likely save
+the products, variants and images to the channel over REST-like HTTP interface.
