@@ -54,13 +54,15 @@ interface Orders {
      * Transform
      *
      * This method should define the workflow for converting a "webhook" order
-     * coming into Stock2Shop into a `vo\ChannelOrder` object.
+     * coming into Stock2Shop into a `vo\SystemOrder` object.
+     *
+     * - Set the `system_order_code` to the ID of the order in the webhook.
+     * - Set the `id` of `vo\SystemOrder` to the ID of the order in the webhook.
      *
      * @param mixed $webhookOrder
      * @param vo\Channel $channel
-     * @return vo\ChannelOrder
+     * @return vo\SystemOrder
      */
-    public function transform($webhookOrder, vo\Channel $channel): vo\ChannelOrder;
+    public function transform($webhookOrder, vo\Channel $channel): vo\SystemOrder;
 
 }
-

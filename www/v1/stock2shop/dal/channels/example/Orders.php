@@ -172,6 +172,7 @@ class Orders implements OrdersInterface
      *
      * - Set the order notes/comments/instructions/details to the 'notes' property.
      * - Set the order number/reference code to the 'channel_order_code' property.
+     * - Set the order number/reference code to the 'id' property.
      * - Set the customer details (name, email, etc) to `vo\SystemCustomer` object and
      *   set this to the 'customer' property of the `vo\ChannelOrderOrder`.
      * - Set the shipping and/or billing address data to the `vo\ChannelOrderOrder` object's
@@ -182,7 +183,8 @@ class Orders implements OrdersInterface
      *
      * @param mixed $webhookOrder
      * @param vo\Channel $channel
-     * @return vo\ChannelOrder
+     * @return vo\SystemOrder $systemOrder
+     * @throws exceptions\UnprocessableEntity
      */
     public function transform($webhookOrder, vo\Channel $channel): vo\ChannelOrder {
 
@@ -197,7 +199,7 @@ class Orders implements OrdersInterface
         // This is where you add the logic to transform the raw order data received from the
         // channel.
 
-        $channelOrder = new vo\ChannelOrder([
+        $systemOrder = new vo\SystemOrder([
             "channel" => $channel
 //            "system_order" => $channelOrderOrder
         ]);
@@ -223,7 +225,7 @@ class Orders implements OrdersInterface
                 'email' => $webhookOrder['customer']['email'],
                 "meta" => $customerMeta
             ]),
-            "channel_order_code" => $webhookOrder["order_number"]
+            "channel_order_code" => $webhookOrder["order_number"],
         ]);
 
         // ---------------------------------------------------
@@ -281,10 +283,14 @@ class Orders implements OrdersInterface
         // ---------------------------------------------------
 
         // Attach `vo\ChannelOrderOrder` to `vo\ChannelOrder` object.
-        $channelOrder->system_order = $channelOrderOrder;
+        $systemOrder->system_order = $channelOrderOrder;
+
+        // TODO: Update this as per discussion in standup 28/02/2022.
+//        $channelOrder->system_order->id = $webhookOrder["order_no];
+//        $channelOrder->system_order->channel_order_code = $webhookOrder["order_no];
 
         // Return populated channel order.
-        return $channelOrder;
+        return $systemOrder;
 
     }
 
