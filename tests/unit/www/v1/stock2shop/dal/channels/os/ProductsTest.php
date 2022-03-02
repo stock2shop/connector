@@ -1,32 +1,32 @@
 <?php
 
-namespace tests\v1\stock2shop\dal\channels\example;
+namespace tests\v1\stock2shop\dal\channels\os;
 
 use tests;
 use stock2shop\vo;
-use stock2shop\dal\channels\example;
+use stock2shop\dal\channels\os;
 
 /**
  * Products Test
  *
  * All unit test classes must extend the tests\TestCase base class.
- * This class unit tests the functionality in the example\Products
+ * This class unit tests the functionality in the os\Products
  * connector.
  */
 class ProductsTest extends tests\TestCase
 {
 
-    /** @var example\Products $connector */
+    /** @var os\Products $connector */
     public $connector = null;
 
     /**
      * Setup
      * @return void
      */
-    public function setUp() {
+    public function setUp(): void {
 
         // Call creator factory.
-        $creator = new example\Creator();
+        $creator = new os\Creator();
 
         // Create new connector instance for Products.
         $this->connector = $creator->createProducts();

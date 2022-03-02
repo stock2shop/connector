@@ -1,13 +1,10 @@
 <?php
 
-namespace stock2shop\dal\channels\example;
+namespace stock2shop\dal\channels\os;
 
 use stock2shop\dal\channel;
 use stock2shop\exceptions;
 
-/**
- * Creator
- */
 class Creator extends channel\Creator
 {
 
@@ -23,16 +20,15 @@ class Creator extends channel\Creator
     /**
      * Create Orders
      * @return channel\Orders
-     * @throws exceptions\NotImplemented
      */
     public function createOrders(): channel\Orders
     {
-        throw new exceptions\NotImplemented();
+        return new Orders();
     }
 
     /**
      * Create Fulfillments
-     * @return channel\Orders
+     * @return channel\Fulfillments
      * @throws exceptions\NotImplemented
      */
     public function createFulfillments(): channel\Fulfillments

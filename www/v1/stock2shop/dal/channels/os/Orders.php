@@ -1,6 +1,6 @@
 <?php
 
-namespace stock2shop\dal\channels\example;
+namespace stock2shop\dal\channels\os;
 
 use stock2shop\vo;
 use stock2shop\helpers;

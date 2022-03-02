@@ -8,7 +8,7 @@ class TestCase extends Framework\TestCase
 {
     var $S2S_TEST_MODE = null;
 
-    function setUp()
+    function setUp(): void
     {
         // Some test cases require an internet connection,
         // or they must be run manually for once-off scripts,
@@ -21,11 +21,11 @@ class TestCase extends Framework\TestCase
         return $this->S2S_TEST_MODE === 'offline';
     }
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
     }
 }

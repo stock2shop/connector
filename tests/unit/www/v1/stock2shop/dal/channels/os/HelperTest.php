@@ -1,35 +1,35 @@
 <?php
 
-namespace tests\v1\stock2shop\dal\channels\example;
+namespace tests\v1\stock2shop\dal\channels\os;
 
 use tests;
 use stock2shop\vo;
-use stock2shop\dal\channels\example;
+use stock2shop\dal\channels\os;
 
 /**
  * Helper Test
  *
  * All unit test classes must extend the tests\TestCase base class.
- * This class unit tests the functionality in the example\data\Helper
+ * This class unit tests the functionality in the os\data\Helper
  * class.
  */
 class HelperTest extends tests\TestCase
 {
 
-    /** @var example\data\Helper $helper */
+    /** @var os\data\Helper $helper */
     public $helper = null;
 
     /** @var const string CLASS_NAME */
-    const CLASS_NAME = "stock2shop\\dal\\channels\\example\\data\\Helper";
+    const CLASS_NAME = "stock2shop\\dal\\channels\\os\\data\\Helper";
 
     /**
      * Setup
      * @return void
      */
-    public function setUp() {
+    public function setUp(): void {
 
         // Create an instance of the Helper class which is being tested.
-        $this->helper = new example\data\Helper();
+        $this->helper = new os\data\Helper();
 
     }
 

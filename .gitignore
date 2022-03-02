@@ -1,3 +1,4 @@
+tests/.phpunit.result.cache
 www/composer.phar
 .idea
 .run

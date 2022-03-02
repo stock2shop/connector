@@ -1,0 +1,11 @@
+{
+  "channel_synced": "2022-01-27 14:04:59",
+  "channel_order_code": "2",
+  "channel_fulfillment_code": "1895702449.json",
+  "state": "open",
+  "status": "Awaiting Stock",
+  "tracking_number": "123",
+  "tracking_company": "courier it",
+  "tracking_url": "http:\/\/example.com",
+  "notes": "delivering"
+}
