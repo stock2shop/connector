@@ -81,6 +81,15 @@ public function createFulfillments(): channel\Fulfillments
 ### /www/v1/stock2shop/dal/channels/example
 
 The 'example' directory contains an example of a channel connector.
-Instead of updating some 3rd party system, this channel writes to your local file system.
-In a real-world scenario code in this connector would most likely save
-products, variants and images to the channel over REST-like HTTP interface.
+It is the bare minimum or boilerplate for starting a connector project.
+
+### /www/v1/stock2shop/dal/channels/os
+
+The 'os' directory contains the code for a channel which is served from the local file system.
+
+In a real-world scenario code in this connector would most likely save products, variants and 
+images to the channel over a REST-like HTTP interface.
+
+### /www/v1/stock2shop/dal/channels/os/data
+
+This connector writes to your local file system in the [data directory](www/v1/stock2shop/dal/channels/os/data).

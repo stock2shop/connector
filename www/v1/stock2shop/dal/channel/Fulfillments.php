@@ -6,25 +6,25 @@ use stock2shop\vo;
 interface Fulfillments {
 
     /**
-     * TODO TBC
+     * Sync
      *
-     * Syncs fulfillments from S2S to channel
+     * This method synchronises Fulfillments from Stock2Shop to the channel.
      *
      * @param ChannelFulfillmentsSync $ChannelFulfillmentsSync
-     * @return ChannelFulfillmentsSync
+     * @return vo\Fulfillment[]
      */
-//    public function syncFulfillments(ChannelFulfillments $ChannelFulfillments, vo\Channel $channel): ChannelFulfillmentsSync;
+//    public function sync(vo\Fulfillment $ChannelFulfillments, vo\Channel $channel): array;
 
     /**
-     *
-     * TODO TBC
+     * Get By Order Code
      *
      * The following properties must be set:-
      * - channel_fulfillment_code
      *
-     * @param ChannelFulfillmentsSync $ChannelFulfillmentsSync
-     * @return ChannelFulfillment[]
+     * @param vo\Fulfillment[] $channelFulfillments
+     * @param array $channelOrderCodes
+     * @return vo\Fulfillment[]
      */
-//    public function getFulfillmentsByOrderCode(ChannelFulfillmentsSync $ChannelFulfillmentsSync): array;
+//    public function getFulfillmentsByOrderCode(array $channelOrderCodes, vo\Channel $channel): array;
 }
 
