@@ -40,16 +40,39 @@ git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 
 ### Copy example channel
 
+Copy the channel source files:
+
 ```bash
-cp -r $S2S_PATH/connector/www/v1/dal/channels/example $S2S_PATH/connector/www/v1/dal/channels/$CHANNEL_NAME 
+cp -r $S2S_PATH/connector/www/v1/stock2shop/dal/channels/example $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$CHANNEL_NAME 
+```
+
+Substitute 'example' in the classes for your CHANNEL_NAME:
+
+Replace 
+```php
+namespace stock2shop\dal\channels\example;
+```
+
+with your channel name:
+```php
+namespace stock2shop\dal\channels\$CHANNEL_NAME;
+```
+
+### Copy example test data for new channel
+
+```bash
+cp -r $S2S_PATH/connector/tests/e2e/data/channels/example $S2S_PATH/connector/tests/e2e/data/channels/$CHANNEL_NAME 
 ```
 
 ### Run tests for channel
 
 ```bash
-cd $S2S_PATH/tests
+cd $S2S_PATH/connector/tests
 php ./phpunit-4.8.phar ./
 ```
+
+The tests should now run correctly for both the example and the new channel you've created.
+You can now start by editing the channel and coding your integration.
 
 ## Submission Guidelines
 
