@@ -33,14 +33,23 @@ export CHANNEL_NAME=your_channel_name
 ```
 
 ### Clone the repo
+
 ```bash
-export S2S_PATH=/your/path/for/stock2shop
 git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 ```
 
 ### Copy example channel
 
+```bash
+cp -r $S2S_PATH/connector/www/v1/dal/channels/example $S2S_PATH/connector/www/v1/dal/channels/$CHANNEL_NAME 
+```
+
 ### Run tests for channel
+
+```bash
+cd $S2S_PATH/tests
+php ./phpunit-4.8.phar ./
+```
 
 ## Submission Guidelines
 
@@ -73,8 +82,6 @@ git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 Add your custom libraries through composer.
 Please check if the library has not already been added to the composer.json file and
 do not update the versions of libraries included in this libary.
-
-
 
 ### New Connector Setup
 
