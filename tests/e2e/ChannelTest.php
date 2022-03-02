@@ -50,7 +50,7 @@ final class ChannelTest extends Framework\TestCase
      * cases. The integrations are loaded into $channelTypes by
      * getChannelTypes().
      */
-    public function setUp()
+    public function setUp(): void
     {
         self::$channelTypes = self::getChannelTypes();
     }
@@ -63,7 +63,7 @@ final class ChannelTest extends Framework\TestCase
      * @param string $type
      * @return void
      */
-    public function loadTestData(string $type)
+    public function loadTestData(string $type): void
     {
         // Get data from JSON files.
         $channelFlagMapJSON = file_get_contents(__DIR__ . '/data/channelFlagMap.json');
@@ -113,8 +113,9 @@ final class ChannelTest extends Framework\TestCase
      * valid implementation is not found.
      *
      * @param $type
+     * @return void
      */
-    public function setFactory($type)
+    public function setFactory($type): void
     {
         // Instantiate factory creator object.
         $creatorNameSpace = "stock2shop\\dal\\channels\\" . $type . "\\Creator";
@@ -143,8 +144,11 @@ final class ChannelTest extends Framework\TestCase
      * deconstructed and asserted on in a separate method called verifyTestSync().
      * You may expect the outcomes to indicate issues, bugs and logic problems in specific
      * areas of code in the integration you are working on.
+     *
+     * @return void
+     * @throws UnprocessableEntity
      */
-    public function testSyncProducts()
+    public function testSyncProducts(): void
     {
         // Loop through the channel types found in the dal/channels/directory.
         foreach (self::$channelTypes as $type) {
@@ -237,7 +241,7 @@ final class ChannelTest extends Framework\TestCase
      * @param vo\Channel $channel
      * @return void
      */
-    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel)
+    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel): void
     {
 
         // Check against existing products on channel by fetching them first
@@ -347,7 +351,7 @@ final class ChannelTest extends Framework\TestCase
      * @return void
      * @throws UnprocessableEntity
      */
-    public function testGetProducts()
+    public function testGetProducts(): void
     {
         foreach (self::$channelTypes as $type) {
 
@@ -424,7 +428,7 @@ final class ChannelTest extends Framework\TestCase
      * @param ChannelProduct[] $fetchedProducts
      * @return void
      */
-    public function verifyGetProducts(string $token, int $limit, array $fetchedProducts)
+    public function verifyGetProducts(string $token, int $limit, array $fetchedProducts): void
     {
         // Assert on the limit.
         $this->assertLessThanOrEqual(count($fetchedProducts), $limit);
