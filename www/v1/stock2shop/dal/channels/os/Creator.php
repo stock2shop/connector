@@ -29,7 +29,6 @@ class Creator extends channel\Creator
     /**
      * Create Fulfillments
      * @return channel\Fulfillments
-     * @throws exceptions\NotImplemented
      */
     public function createFulfillments(): channel\Fulfillments
     {

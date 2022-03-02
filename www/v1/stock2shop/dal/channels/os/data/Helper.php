@@ -53,10 +53,8 @@ class Helper
                 // Update the json_decode to decode each file into an array
                 // instead of a \stdClass object.
                 $files[$file] = json_decode($contents, true);
-
             }
         }
-
         return $files;
     }
 

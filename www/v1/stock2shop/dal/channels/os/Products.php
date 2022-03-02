@@ -59,7 +59,6 @@ class Products implements ProductsInterface
 
         // Iterate through the channel products.
         foreach ($channelProducts as &$product) {
-
             $prefix = urlencode($product->id);
             $productFileName = $prefix . '.json';
 
@@ -70,7 +69,6 @@ class Products implements ProductsInterface
             // system uses to uniquely identify the product.
             // i.e. in WooCommerce this would be the post ID of the product.
             $product->channel_product_code = $productFileName;
-
             foreach ($product->variants as $variant) {
 
                 // Create channel_variant_code for each product variant.
@@ -79,7 +77,6 @@ class Products implements ProductsInterface
                 // + the url encoded variant SKU code.
                 $encodedVariantSku = urlencode($variant->sku);
                 $variant->channel_variant_code = $prefix . $variantSeparator . $encodedVariantSku . '.json';
-
             }
 
             // ------------------------------------------------
@@ -97,15 +94,10 @@ class Products implements ProductsInterface
 
             // Check if the product has been flagged for delete.
             if ($product->delete === true) {
-
                 foreach ($currentFiles as $currentFileName => $obj) {
-
                     $this->deleteProduct(self::DATA_PATH . '/' . $productsEndpoint . '/' . $currentFileName);
-
                 }
-
             } else {
-
                 $this->saveProduct(self::DATA_PATH . '/' . $productsEndpoint . '/' . $product->channel_product_code, $product);
 
                 // Iterate through the product variants.
@@ -113,34 +105,22 @@ class Products implements ProductsInterface
 
                     // This is the path to the source system storage for this file.
                     $filePath = self::DATA_PATH . '/' . $productsEndpoint . '/' . $variant->channel_variant_code;
-
                     if ($product->delete) {
-
                         $this->deleteVariant($filePath);
-
                     } else {
-
                         $this->saveVariant($filePath, $variant);
-
                     }
                 }
 
                 // Iterate through the product images.
                 foreach ($product->images as $image) {
-
                     $filePath = self::DATA_PATH . '/' . $productsEndpoint . '/' . $image->channel_image_code;
-
                     if ($product->delete) {
-
                         $this->deleteImage($filePath);
-
                     } else {
-
                         $this->saveImage($filePath, $image);
-
                     }
                 }
-
             }
 
             // Mark products, images and variants as successfully synced.
@@ -150,25 +130,19 @@ class Products implements ProductsInterface
 
             // Mark product as successfully synced.
             $product->success = true;
-
             foreach ($product->variants as $variant) {
 
                 // Set product variants as successfully synced.
                 $variant->success = true;
-
             }
 
             foreach ($product->images as $image) {
 
                 // Set product images as successfully synced.
                 $image->success = true;
-
             }
-
         }
-
         return $channelProducts;
-
     }
 
     /**
@@ -230,7 +204,6 @@ class Products implements ProductsInterface
 
         $cnt = 0;
         $channelProducts = [];
-
         foreach ($currentFiles as $fileName => $fileData) {
 
             // ------------------------------------------------
@@ -263,12 +236,9 @@ class Products implements ProductsInterface
                     // Create new vo\ChannelProduct using the VO and add to the array.
                     $channelProducts[$fileName] = new vo\ChannelProduct($fileData);
                     $cnt++;
-
                 }
-
             }
         }
-
         return $channelProducts;
     }
 
@@ -285,7 +255,6 @@ class Products implements ProductsInterface
     {
         /** @var vo\ChannelProduct[] $channelProductsSync */
         $channelProductsSync = [];
-
         foreach ($channelProducts as $product) {
 
             // -----------------------------------------------
@@ -310,7 +279,6 @@ class Products implements ProductsInterface
             // -----------------------------------------------
 
             foreach ($currentFiles as $fileName => $channelObject) {
-
                 if ($fileName === $prefix . '.json') {
 
                     // Create product VO.
@@ -352,16 +320,10 @@ class Products implements ProductsInterface
                             "channel_variant_code" => $channelObject["channel_variant_code"]
                         ]);
                     }
-
-                    // -----------------------------------------------
-
                 }
-
             }
         }
-
         return $channelProductsSync;
-
     }
 
     /**
@@ -391,7 +353,6 @@ class Products implements ProductsInterface
 
         // [save product logic]:
         file_put_contents($productId, $transformedProductData);
-
         return $productId;
 
     }
@@ -412,10 +373,7 @@ class Products implements ProductsInterface
 
         // [delete product logic]:
         unlink($productId);
-
-        // Return status.
         return true;
-
     }
 
     /**
@@ -438,10 +396,7 @@ class Products implements ProductsInterface
 
         // [save product image logic]:
         file_put_contents($imageId, $transformedProductImageData);
-
-        // Return status.
         return true;
-
     }
 
     /**
@@ -456,10 +411,7 @@ class Products implements ProductsInterface
 
         // [delete product image logic]:
         unlink($imageId);
-
-        // Return status.
         return true;
-
     }
 
     /**
@@ -481,10 +433,7 @@ class Products implements ProductsInterface
 
         // [save variant logic]:
         file_put_contents($variantId, $transformedVariantData);
-
-        // Return status.
         return true;
-
     }
 
     /**
@@ -501,10 +450,7 @@ class Products implements ProductsInterface
 
         // [delete product variant logic]:
         unlink($variantId);
-
-        // Return status.
         return true;
-
     }
 
 }

@@ -47,7 +47,6 @@ class Products implements ProductsInterface
                 $channelProducts[$key]->images[$ki]->success            = true;
             }
         }
-
         return $channelProducts;
 
     }

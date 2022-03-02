@@ -42,7 +42,6 @@ interface Products {
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
      * @return vo\ChannelProduct[]
-     * @throws exceptions\NotImplemented
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array;
 
@@ -64,7 +63,6 @@ interface Products {
      * @param int $limit max records to return
      * @param vo\Channel $channel
      * @return vo\ChannelProduct[]
-     * @throws exceptions\NotImplemented
      */
     public function get(string $token, int $limit, vo\Channel $channel): array;
 

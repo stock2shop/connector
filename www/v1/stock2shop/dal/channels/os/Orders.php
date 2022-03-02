@@ -137,7 +137,6 @@ class Orders implements OrdersInterface
             // -----------------------------------------
 
             foreach($currentFiles as $fileName => $fileData) {
-
                 if($fileName === $prefix . ".json") {
 
                     // Create VO.
@@ -145,15 +144,10 @@ class Orders implements OrdersInterface
                     // The order ID matches the prefix / filename of the order on the channel.
                     // Now we need to populate a `vo\ChannelOrder` object with the channel data.
                     $channelOrders[$prefix] = $this->transform($fileData, $channel);
-
                 }
-
             }
-
         }
-
         return $channelOrders;
-
     }
 
     /**
@@ -201,7 +195,6 @@ class Orders implements OrdersInterface
 
         $systemOrder = new vo\SystemOrder([
             "channel" => $channel
-//            "system_order" => $channelOrderOrder
         ]);
 
         // ---------------------------------------------------
@@ -218,7 +211,6 @@ class Orders implements OrdersInterface
 
         $customerMeta = [];
         $customerMeta[] = new vo\Meta([ "key" => "tel", "value" => $webhookOrder["customer"]["tel"]]);
-
         $channelOrderOrder = new vo\ChannelOrderOrder([
             "customer" => new vo\SystemCustomer([
                 'first_name' => $webhookOrder['customer']['name'],
@@ -277,7 +269,6 @@ class Orders implements OrdersInterface
                 'price' => $item['price'],
                 'source_variant_code' => $item['sku']
             ]);
-
         }
 
         // ---------------------------------------------------
@@ -285,7 +276,7 @@ class Orders implements OrdersInterface
         // Attach `vo\ChannelOrderOrder` to `vo\ChannelOrder` object.
         $systemOrder->system_order = $channelOrderOrder;
 
-        // TODO: Update this as per discussion in standup 28/02/2022.
+        // TODO: Update this as per discussion 28/02/2022.
 //        $channelOrder->system_order->id = $webhookOrder["order_no];
 //        $channelOrder->system_order->channel_order_code = $webhookOrder["order_no];
 
