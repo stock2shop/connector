@@ -1,29 +1,29 @@
 # Stock2Shop - PHP Connectors
 
-Stock2Shop connectors connect ERP accounting systems with sales channels, 
-such as ecommerce shopping carts and market-places.
+The purpose of this repository is to allow you, the 3rd party developer, to create connector code
+which we can use to synchronize data between Stock2Shop and a channel.
 
-The purpose of this repository is to allow you, the 3rd party developer, to create 
-sales channels we can use.
+A channel is an online shop, a marketplace or a website that has shopping cart functionality, where 
+a business trades products and customers place orders.
 
-## Data flow for a sales channel connector
+## Data Flow
 
 [Channel Product data](www/v1/stock2shop/vo/ChannelProduct.php) is sent in batches to your
-connector. The connector then sends this data to your channel and marks each product if successfully or not.
+connector. The connector then sends this data to your channel and marks each product if successful or not.
 
 To verify the product has been updated to the channel we have methods to fetch data from your connector
 and your code needs to return a [Channel Product](www/v1/stock2shop/vo/ChannelProduct.php) 
 with the `channel_product_code` set, if it exists on the channel.
 
-Orders are sent from the channel to your connector, your connector needs to transform
-the order into a [Stock2Shop order](www/v1/stock2shop/vo/Order.php).
+By the use of webhooks Orders are sent from the channel to your connector, your connector needs to transform the order into a 
+[Stock2Shop order](www/v1/stock2shop/vo/SystemOrder.php).
 
 Fulfillments (logistic information) is sent in batches to your connector.
 The connector then sends this data to your channel, much the same as products above.
 
 ## Setup
 
-This setup assumes you already have an environment created to run PHP.
+This setup assumes you already have an environment which is able to run PHP applications.
 
 ### Set Environment Variables
 
@@ -68,7 +68,7 @@ cp -r $S2S_PATH/connector/tests/e2e/data/channels/example $S2S_PATH/connector/te
 
 ```bash
 cd $S2S_PATH/connector/tests
-php ./phpunit-4.8.phar ./
+php ./phpunit-8.phar ./
 ```
 
 The tests should now run correctly for both the example and the new channel you've created.
@@ -78,7 +78,7 @@ You can now start by editing the channel and coding your integration.
 
 ### PHP Version
 
-PHP 7.3
+PHP 7.4
 
 ### Coding Style
 
@@ -104,7 +104,7 @@ git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 
 Add your custom libraries through composer.
 Please check if the library has not already been added to the composer.json file and
-do not update the versions of libraries included in this libary.
+do not update the versions of libraries included in this library.
 
 ### New Connector Setup
 
