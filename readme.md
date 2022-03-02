@@ -5,8 +5,13 @@ which we can use to synchronize data between Stock2Shop and a channel.
 
 ## Overview
 
-A channel is an online shop, a marketplace or a website that has shopping cart functionality, where
-a business trades products and customers place orders.
+A "channel" is an online shop, a marketplace or a website that has shopping cart functionality, where
+a business trades products and customers place orders. A "connector" is code which makes it possible
+for synchronization of data between a channel and Stock2Shop.
+
+For more information on the aforementioned concepts and Stock2Shop, please visit the "Integrations" section 
+on our website at [https://www.stock2shop.com](https://www.stock2shop.com) or our 
+[developer documentation](https://docs.stock2shop.com).
 
 ### Data Flow
 
@@ -25,7 +30,7 @@ The connector then sends this data to your channel, much the same as products ab
 
 ### Tests
 
-An End-To-End or E2E test is included.
+An end-to-end test is included. Do not modify this.
 Tests use [phpunit](https://devdocs.io/phpunit~8/) version 8.
 
 #### Unit Tests
@@ -52,7 +57,7 @@ simulate synchronization of data onto our system.
 
 Please mock the channel data and order transform (if implemented) for your target channel by adding JSON files to the
 [tests/e2e/data/channels](tests/e2e/data/channels/) directory. Have a look at the example provided for guidance and the
-loadTestData() method in the test itself.
+`loadTestData()` method in the [ChannelTest](./tests/e2e/ChannelTest.php) class.
 
 ### Folder Structure
 
@@ -90,27 +95,30 @@ This setup assumes you already have an environment which is able to run PHP appl
 See the section on "Submission Guidelines" in this readme file for specific information regarding your 
 environment.
 
-### Set Environment Variables
+1. Set Environment Variables
 
 ```bash
 export S2S_PATH=/your/path/for/stock2shop
 export CHANNEL_NAME=your_channel_name
 ```
 
-### Clone the repo
+The S2S_PATH variable must be the absolute path to the directory where this repository is located. 
+For example:
+
+On Mac OSX:
+/Users/yourUsername/stock2shop
+On Ubuntu: 
+/home/yourUsername/stock2shop
+
+The `CHANNEL_NAME` variable must be a lowercase string with no spaces.
+
+2. Clone this repository.
 
 ```bash
 git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 ```
 
-### Copy Example Channel
-
-Creating a new connector means adding a directory to:
-
-`${S2S_PATH}/connector/www/v1/stock2shop/dal/channels`
-
-Once you have added this directory, the E2E tests will automatically call the appropriate methods with test data.
-The following steps are
+3. Copy Example Channel
 
 Copy the channel source files:
 
@@ -118,7 +126,9 @@ Copy the channel source files:
 cp -r $S2S_PATH/connector/www/v1/stock2shop/dal/channels/example $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$CHANNEL_NAME 
 ```
 
-Substitute 'example' in the PHP classes in the example directory with your CHANNEL_NAME.
+4. Substitute Namespaces. 
+
+Substitute 'example' in the PHP classes in the directory with your `CHANNEL_NAME`.
 
 Replace 
 ```php
@@ -130,13 +140,24 @@ With your CHANNEL_NAME:
 namespace stock2shop\dal\channels\$CHANNEL_NAME;
 ```
 
-### Copy example test data for new channel
+5. Copy Sample Channel Data.
 
-```bash
-cp -r $S2S_PATH/connector/tests/e2e/data/channels/example $S2S_PATH/connector/tests/e2e/data/channels/$CHANNEL_NAME 
-```
+You will most likely want to make your connector configurable per channel. 
+How you do this is up to the constraints of the system you are coding the integration for.
 
-### Run Tests For Channel
+To make your channel connector code as extensible as possible, start by copying the 
+[channelData.json](tests/e2e/data/channels/os/channelData.json) file in the [tests/e2e/data/channels/os](./tests/e2e/data/channels/os)
+directory into a new directory in the [tests/e2e/data/channels](./tests/e2e/data/channels) directory. 
+You must name this directory the same as your `CHANNEL_NAME` variable. 
+
+Your implementation in `www/v1/stock2shop/dal/channels/${CHANNEL_NAME}/Products` may make use of the sample meta data
+configured in the `channelData.json`. Please refer to the `os` [connector](./www/v1/stock2shop/dal/channels/os) for an 
+example of using channel meta data for storage path separators. 
+
+If your channel uses the HTTP protocol, then you might want to use channel meta data to configure your connector with 
+your channel's API credentials (secret, client_id), endpoint URLs, etc.
+
+7. Run Tests for your `CHANNEL_NAME`.
 
 ```bash
 cd $S2S_PATH/connector/tests
@@ -144,39 +165,33 @@ php ./phpunit-8.phar ./
 ```
 
 The tests should now run correctly for all channels and the new channel you've created.
-You can now start by editing the channel Products.php file and coding your integration.
+You can now start by editing the `Products.php` file integration.
 
 ## Submission Guidelines
 
-### PHP Version
+### General
 
-PHP 7.4
-
-### Coding Style
-
-This project conforms to the PSR-12 style recommendation. 
-You can read more about PHP-FIG and PSRs [here](https://www.php-fig.org/psr/psr-12/).
-
-### Architecture
-[See architecture.md](architecture.md). Please read this before writing code.
+- PHP version 7.4.
+- PHPUnit 8.0.0.
+- This project conforms to the PSR-12 style recommendation. 
+- You can read more about it [here](https://www.php-fig.org/psr/psr-12/).
+- Please read the [architecture.md](./architecture.md) file before starting.
 
 ### Github
 
-You will be assigned a branch, commit code to your branch.
-Once the E2E tests pass (see testing), create a pull request and code review.
+- You will be assigned a branch.
+- Commit code to your branch.
+- Make sure your code passes the E2E test.
+- Add detailed notes on your implementation.
+- Any relevant configuration instructions must be included in the readme in your `CHANNEL_NAME` directory.
+- When you are ready, create a pull request and request a code review.
 
-### Installation
+### 3rd Party Libraries
 
-The recommended way of setting up the repository:
-
-```bash
-export S2S_PATH=/your/path/for/stock2shop
-git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
-```
-
-Add your custom libraries through composer.
-Please check if the library has not already been added to the composer.json file and
-do not update the versions of libraries included in this library.
+- Add your custom libraries through composer.
+- Please check if the library has not already been added to the composer.json file.
+- Do not update the versions of libraries included in this repository. 
+- We have included Guzzle for HTTP requests which is locked at version 6.2.3.
 
 ## Frequently Asked Questions
 
