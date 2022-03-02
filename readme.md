@@ -1,29 +1,65 @@
 # Stock2Shop - PHP Connectors
 
 Stock2Shop connectors connect ERP accounting systems with sales channels, 
-such as ecommerce shopping carts, market-places and our B2B trade store.
+such as ecommerce shopping carts and market-places.
 
-The purpose of this repository is to allow 3rd party developers to contribute 
-connectors to our ecosystem.
+The purpose of this repository is to allow you, the 3rd party developer, to create 
+sales channels we can use.
 
-This repository is a bare bones interface to guide you on what we require.
-It includes an example channel connector, to illustrate data structures 
-and our workflow.  
+## Data flow for a sales channel connector
+
+[Channel Product data](www/v1/stock2shop/vo/ChannelProduct.php) is sent in batches to your
+connector. The connector then sends this data to your channel and marks each product if successfully or not.
+
+To verify the product has been updated to the channel we have methods to fetch data from your connector
+and your code needs to return a [Channel Product](www/v1/stock2shop/vo/ChannelProduct.php) 
+with the `channel_product_code` set, if it exists on the channel.
+
+Orders are sent from the channel to your connector, your connector needs to transform
+the order into a [Stock2Shop order](www/v1/stock2shop/vo/Order.php).
+
+Fulfillments (logistic information) is sent in batches to your connector.
+The connector then sends this data to your channel, much the same as products above.
+
+## Setup
+
+This setup assumes you already have an environment created to run PHP.
+
+### Set Environment Variables
+
+```bash
+export S2S_PATH=/your/path/for/stock2shop
+export CHANNEL_NAME=your_channel_name
+```
+
+### Clone the repo
+```bash
+export S2S_PATH=/your/path/for/stock2shop
+git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
+```
+
+### Copy example channel
+
+### Run tests for channel
 
 ## Submission Guidelines
 
 ### PHP Version
 
-We support PHP 7.1 at this stage.
-You can read more about the features and changes that came with this version 
-in the [PHP Manual](https://www.php.net/manual/en/migration71.new-features.php)
+PHP 7.3
 
 ### Coding Style
 
 This project conforms to the PSR-12 style recommendation. 
 You can read more about PHP-FIG and PSRs [here](https://www.php-fig.org/psr/psr-12/).
 
-If you use PhpStorm, you can configure your IDE to analyze your code and assist you in conforming to PSR-12.
+### Architecture
+[See architecture.md](architecture.md). Please read this before writing code.
+
+### Github
+
+You will be assigned a branch, commit code to your branch.
+Once the E2E tests pass (see testing), create a pull request and code review.
 
 ### Installation
 
@@ -38,10 +74,7 @@ Add your custom libraries through composer.
 Please check if the library has not already been added to the composer.json file and
 do not update the versions of libraries included in this libary.
 
-### Github
 
-You will be assigned a branch, commit code to your branch.
-Once the E2E tests pass (see testing), create a pull request and code review.
 
 ### New Connector Setup
 
