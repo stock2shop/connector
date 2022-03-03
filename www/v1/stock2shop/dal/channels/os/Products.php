@@ -248,77 +248,130 @@ class Products implements ProductsInterface
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
-        /** @var vo\ChannelProduct[] $channelProductsSync */
-        $channelProductsSync = [];
-        foreach ($channelProducts as $product) {
-
-            // -----------------------------------------------
-
-            // Generate Prefix.
-
-            // These products have only their product IDs set.
-            // The product ID is used in the processing below to determine which of the
-            // products to add to the '$channelProductsSync' array.
-
-            $prefix = urlencode($product->id);
-
-            // -----------------------------------------------
-
-            // Get Product Files.
-
-            // Next we get the products from the channel. This is where you will use an API
-            // client or helper class of some sort to access the product data on the channel.
-
-            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, 'products');
-
-            // -----------------------------------------------
-
-            foreach ($currentFiles as $fileName => $channelObject) {
-                if ($fileName === $prefix . '.json') {
-
-                    // Create product VO.
-                    $newSyncProduct = new vo\ChannelProduct([
-                        'channel_product_code' => $fileName
-                    ]);
-
-                    // Add product VO.
-                    $channelProductsSync[$prefix] = $newSyncProduct;
-
-                } else {
-
-                    // -----------------------------------------------
-
-                    // Channel Image
-
-                    // If the obj has a channel_image_code, then we can assume it is a
-                    // product image. As per Stock2Shop requirements:
-                    // - 'channel_image_code' must be set.
-
-                    if(array_key_exists("channel_image_code", $channelObject)) {
-                        $channelProductsSync[$prefix]->images[] = new vo\ChannelImage([
-                            "channel_image_code" => $channelObject["channel_image_code"]
-                        ]);
-                    }
-
-                    // -----------------------------------------------
-
-                    // Channel Variant
-
-                    // For channel product variants, the sku and channel_variant_code are
-                    // properties which must be set and are evaluated in the ChannelTest class.
-                    // - 'channel_variant_code' must be set.
-                    // - variant 'sku' must be set.
-
-                    if (array_key_exists("channel_variant_code", $channelObject)) {
-                        $channelProductsSync[$prefix]->variants[] = new vo\ChannelVariant([
-                            "sku" => $channelObject["sku"],
-                            "channel_variant_code" => $channelObject["channel_variant_code"]
-                        ]);
-                    }
+        foreach ($channelProducts as $key => $product) {
+            $channelProducts[$key]->channel_product_code = (string)$product->id;
+            $channelProducts[$key]->success              = true;
+            if ($channelProducts[$key]->delete === true) {
+                $channelProducts[$key]->success = false;
+            }
+            foreach ($product->variants as $vKey => $variant) {
+                $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
+                $channelProducts[$key]->variants[$vKey]->success              = true;
+                if ($channelProducts[$key]->variants[$vKey]->delete === true) {
+                    $channelProducts[$key]->variants[$vKey]->success = false;
+                }
+            }
+            foreach ($product->images as $ki => $img) {
+                $channelProducts[$key]->images[$ki]->channel_image_code = (string)$img->id;
+                $channelProducts[$key]->images[$ki]->success            = true;
+                if ($channelProducts[$key]->images[$ki]->delete === true) {
+                    $channelProducts[$key]->images[$ki]->success = false;
                 }
             }
         }
-        return $channelProductsSync;
+        return $channelProducts;
+
+        foreach($channelProducts as $product) {
+
+            // Get the product files from disk.
+            $productFiles = data\Helper::getJSONFilesByPrefix(urlencode($product->id), 'products');
+
+                foreach($productFiles as $channelProductCode => $productFile) {
+
+                    // - Product channel_product_code
+                    // - Product success
+
+                    if($product->id . ".json" === $channelProductCode) {
+                        $channelProductsFound[$product->id . ".json"] = new vo\ChannelProduct([
+                            "channel_product_code" => $channelProductCode,
+                            "success" => true
+                        ]);
+                    } else {
+
+                        // - Variant channel_variant_code
+                        // - Variant success
+                        // - Variant sku
+
+                        if(strcmp(helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_VARIANT)) > 0) {
+                            $channelProductsFound[$product->id . ".json"]->variants[] = new vo\ChannelVariant([
+                                'channel_variant_code' => $productFile["channel_variant_code"],
+                                'sku' => $productFile['sku'],
+                                'success' => true
+                            ]);
+                        }
+
+                        // - Image channel_image_code
+                        // - Image success
+
+                        if (strcmp(helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_IMAGE)) > 0) {
+                            $channelProductsFound[$product->id . '.json']->images[] = new vo\ChannelImage([
+                                'channel_variant_code' => $productFile['channel_image_code'],
+                                'success' => true
+                            ]);
+                        }
+
+                    }
+                }
+
+        }
+
+        return $channelProductsFound;
+
+//        $channelProductsSync = [];
+//        foreach ($channelProducts as $product) {
+//
+//            $prefix = urlencode($product->id);
+//            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, 'products');
+//
+//            // -----------------------------------------------
+//
+//            foreach ($currentFiles as $fileName => $channelObject) {
+//                if ($fileName === $prefix . '.json') {
+//
+//                    // Create product VO.
+//                    $newSyncProduct = new vo\ChannelProduct([
+//                        'channel_product_code' => $fileName
+//                    ]);
+//
+//                    // Add product VO.
+//                    $channelProductsSync[$prefix] = $newSyncProduct;
+//
+//                } else {
+//
+//                    // -----------------------------------------------
+//
+//                    // Channel Image
+//
+//                    // If the obj has a channel_image_code, then we can assume it is a
+//                    // product image. As per Stock2Shop requirements:
+//                    // - 'channel_image_code' must be set.
+//
+//                    if(array_key_exists("channel_image_code", $channelObject)) {
+//                        $channelProductsSync[$prefix]->images[] = new vo\ChannelImage([
+//                            "channel_image_code" => $channelObject["channel_image_code"]
+//                        ]);
+//                    }
+//
+//                    // -----------------------------------------------
+//
+//                    // Channel Variant
+//
+//                    // For channel product variants, the sku and channel_variant_code are
+//                    // properties which must be set and are evaluated in the ChannelTest class.
+//                    // - 'channel_variant_code' must be set.
+//                    // - variant 'sku' must be set.
+//
+//                    if (array_key_exists("channel_variant_code", $channelObject)) {
+//                        $channelProductsSync[$prefix]->variants[] = new vo\ChannelVariant([
+//                            "sku" => $channelObject["sku"],
+//                            "channel_variant_code" => $channelObject["channel_variant_code"]
+//                        ]);
+//                    }
+//                }
+//            }
+//        }
+//        return $channelProductsSync;
+
     }
 
     /**
