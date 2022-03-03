@@ -82,8 +82,6 @@ provides a working example of using channel meta data for storage path separator
 Another potential use is if your channel uses the HTTP protocol, then you might want to use channel meta data to 
 configure your API client with your channel's API credentials (secret, client_id), endpoint URLs, etc.
 
-Please refer to [our online documentation](https://www.stock2shop.com/docs) for a greater understanding of how to use the Channel and Channel Meta.
-
 ## Tests
 
 Unit tests have been added to [tests/unit](../../../../../../tests/unit/www/v1/stock2shop/dal/channels/os) to evaluate 
