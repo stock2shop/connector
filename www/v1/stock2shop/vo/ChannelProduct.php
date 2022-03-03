@@ -66,13 +66,22 @@ class ChannelProduct extends Product
      *
      * @return bool
      */
-    public function valid():bool {
+//    public function valid():bool {
+//        return (
+//            is_bool($this->success) &&
+//            !is_null($this->channel_product_code) &&
+//            $this->channel_product_code !== "" &&
+//            is_string($this->synced) && // TODO we could add n date format check to see if has milliseconds?
+//            $this->synced !== ""
+//        );
+//    }
+
+    public function isSyncedToChannel():bool {
         return (
             is_bool($this->success) &&
+            $this->success &&
             !is_null($this->channel_product_code) &&
-            $this->channel_product_code !== "" &&
-            is_string($this->synced) && // TODO we could add n date format check to see if has milliseconds?
-            $this->synced !== ""
+            $this->channel_product_code !== ""
         );
     }
 

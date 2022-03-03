@@ -37,7 +37,7 @@ class Products implements ProductsInterface
     {
         foreach ($channelProducts as $key => $product) {
             $channelProducts[$key]->channel_product_code = (string)$product->id;
-            $channelProducts[$key]->success              = true;
+            $channelProducts[$key]->success              = false;
             foreach ($product->variants as $vKey => $variant) {
                 $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
                 $channelProducts[$key]->variants[$vKey]->success              = true;
@@ -83,7 +83,28 @@ class Products implements ProductsInterface
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
-        throw new exceptions\NotImplemented();
+        foreach ($channelProducts as $key => $product) {
+            $channelProducts[$key]->channel_product_code = (string)$product->id;
+            $channelProducts[$key]->success              = true;
+            if ($channelProducts[$key]->delete) {
+                $channelProducts[$key]->success = false;
+            }
+            foreach ($product->variants as $vKey => $variant) {
+                $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
+                $channelProducts[$key]->variants[$vKey]->success              = true;
+                if ($channelProducts[$key]->variants[$vKey]->delete) {
+                    $channelProducts[$key]->variants[$vKey]->success = false;
+                }
+            }
+            foreach ($product->images as $ki => $img) {
+                $channelProducts[$key]->images[$ki]->channel_image_code = (string)$img->id;
+                $channelProducts[$key]->images[$ki]->success            = true;
+                if ($channelProducts[$key]->images[$ki]->delete) {
+                    $channelProducts[$key]->images[$ki]->success = false;
+                }
+            }
+        }
+        return $channelProducts;
     }
 
 }

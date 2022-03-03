@@ -300,9 +300,8 @@ final class ChannelTest extends Framework\TestCase
 
                 // Check product.
                 $this->assertTrue($product instanceof vo\ChannelProduct, ' variant is not a valid vo\ChannelProduct object.');
-                $this->assertTrue($product->valid(), ' product->valid() is FALSE.');
+                $this->assertTrue($product->isSyncedToChannel(), ' isSyncedToChannel');
                 $this->assertTrue($product->success, ' product->success NOT set to TRUE.');
-                $this->assertNotEmpty($product->synced, ' product->synced NOT set to date/time synchronised.');
                 $this->assertNotEmpty($product->channel_product_code, ' product->channel_product_code is empty.');
 
                 // Check product variant count.
@@ -329,7 +328,7 @@ final class ChannelTest extends Framework\TestCase
                     $image = $responseImageMap[$existingImage->channel_image_code];
 
                     $this->assertTrue($image instanceof vo\ChannelImage, ' image is not a valid vo\ChannelImage object.');
-                    $this->assertTrue($image->valid(), ' channel image->valid() is FALSE.');
+                    $this->assertTrue($image->isSyncedToChannel(), ' isSyncedToChannel');
                     $this->assertTrue($image->success, ' channel image success property NOT set.');
                     $this->assertNotEmpty($image->channel_image_code, ' channel_image_code not set.');
 

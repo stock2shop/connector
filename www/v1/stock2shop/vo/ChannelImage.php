@@ -47,10 +47,19 @@ class ChannelImage extends ValueObject
      *
      * @return bool
      */
-    public function valid():bool {
+//    public function valid():bool {
+//        return (
+//            is_bool($this->success) &&
+//            is_string($this->channel_image_code) &&
+//            $this->channel_image_code !== ""
+//        );
+//    }
+
+    public function isSyncedToChannel():bool {
         return (
             is_bool($this->success) &&
-            is_string($this->channel_image_code) &&
+            $this->success &&
+            !is_null($this->channel_image_code) &&
             $this->channel_image_code !== ""
         );
     }

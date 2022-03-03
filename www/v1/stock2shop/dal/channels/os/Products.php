@@ -123,11 +123,6 @@ class Products implements ProductsInterface
                 }
             }
 
-            // Mark products, images and variants as successfully synced.
-            // TODO: Shouldn't this be in the Value Object itself? Something like $product->setSynced();
-            $date = new \DateTime();
-            $product->synced = $date->format('Y-m-d H:i:s');
-
             // Mark product as successfully synced.
             $product->success = true;
             foreach ($product->variants as $variant) {
