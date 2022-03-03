@@ -4,6 +4,7 @@ namespace stock2shop\dal\channels\example;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
 use stock2shop\vo;
+use stock2shop\lib;
 use stock2shop\helpers;
 use stock2shop\exceptions;
 
@@ -23,10 +24,8 @@ class Products implements ProductsInterface
      * Sync
      *
      * This method synchronises products, variants and images on the channel.
-     *
-     * - product.id is the file name for the product.
-     * - product.variant[].channel_variant_code is the file name for a variant.
-     * - product.image[].channel_image_code is the file name for an image.
+     * This is a simple example for marking entities after they have been
+     * synchronised to meet Stock2Shop's requirements.
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
@@ -36,19 +35,38 @@ class Products implements ProductsInterface
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
         foreach ($channelProducts as $key => $product) {
+
+            // Mark Product As Synced.
+
+            // - 'channel_product_code' to the product ID.
+            // - 'success' to true.
+            // - 'synced' to the current timestamp.
+
             $channelProducts[$key]->channel_product_code = (string)$product->id;
-            $channelProducts[$key]->success              = false;
+            $channelProducts[$key]->success = true;
+            $channelProducts[$key]->synced = lib\Utils::getMySqlDateMicroseconds();
+
+            // Mark Variants As Synced.
+
+            // - 'channel_variant_code' to the variant ID.
+            // - 'success' to true.
+
             foreach ($product->variants as $vKey => $variant) {
                 $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
-                $channelProducts[$key]->variants[$vKey]->success              = true;
+                $channelProducts[$key]->variants[$vKey]->success = true;
             }
+
+            // Mark Images As Synced.
+
+            // - 'channel_image_code' to the image ID.
+            // - 'success' to true.
+
             foreach ($product->images as $ki => $img) {
                 $channelProducts[$key]->images[$ki]->channel_image_code = (string)$img->id;
-                $channelProducts[$key]->images[$ki]->success            = true;
+                $channelProducts[$key]->images[$ki]->success = true;
             }
         }
         return $channelProducts;
-
     }
 
     /**
@@ -83,24 +101,29 @@ class Products implements ProductsInterface
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
+        // Products.
         foreach ($channelProducts as $key => $product) {
-            $channelProducts[$key]->channel_product_code = (string)$product->id;
-            $channelProducts[$key]->success              = true;
-            if ($channelProducts[$key]->delete) {
-                $channelProducts[$key]->success = false;
+            $product->channel_product_code = (string)$product->id;
+            $product->success  = true;
+            if ($product->delete === true) {
+                $product->success = false;
             }
+
+            // Variants.
             foreach ($product->variants as $vKey => $variant) {
-                $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
-                $channelProducts[$key]->variants[$vKey]->success              = true;
-                if ($channelProducts[$key]->variants[$vKey]->delete) {
-                    $channelProducts[$key]->variants[$vKey]->success = false;
+                $variant->channel_variant_code = (string)$variant->id;
+                $variant->success  = true;
+                if ($variant->delete === true) {
+                    $variant->success = false;
                 }
             }
+
+            // Images.
             foreach ($product->images as $ki => $img) {
-                $channelProducts[$key]->images[$ki]->channel_image_code = (string)$img->id;
-                $channelProducts[$key]->images[$ki]->success            = true;
-                if ($channelProducts[$key]->images[$ki]->delete) {
-                    $channelProducts[$key]->images[$ki]->success = false;
+                $img->channel_image_code = (string)$img->id;
+                $img->success = true;
+                if ($img->delete === true) {
+                    $img->success = false;
                 }
             }
         }
