@@ -66,35 +66,28 @@ final class ChannelTest extends Framework\TestCase
      */
     public function loadTestData(string $type): void
     {
-        // Get data from JSON files.
-        $channelFlagMapJSON = file_get_contents(__DIR__ . '/data/channelFlagMap.json');
-        $channelProductsJSON = file_get_contents(__DIR__ . '/data/syncChannelProducts.json');
-        $channelFulfillmentsJSON = file_get_contents(__DIR__ . '/data/syncChannelFulfillments.json');
+        self::$channelData             = $this->loadJSON('channel.json', $type);
+        self::$channelFlagMapData      = $this->loadJSON('channelFlagMap.json', $type);
+        self::$channelOrderData        = $this->loadJSON('orderTransform.json', $type);
+        self::$channelProductsData     = $this->loadJSON('channelProducts.json', $type);
+        self::$channelFulfillmentsData = $this->loadJSON('channelFulfillments.json', $type);
+    }
 
-        // Load the custom order transform and the channel data.
-        // Each connector type (such as the one in the 'example' directory) will require
-        // custom config which must be mocked in JSON files and added to the 'data/[type]/'
-        // directory for the E2E test to import and use.
-
-        $typeChannelDataPath = __DIR__ . '/data/channels/' . $type . '/channelData.json';
-        $typeChannelOrderDataPath = __DIR__ . '/data/channels/' . $type . '/orderTransform.json';
-        if(!file_exists($typeChannelDataPath)) {
-            // Set the default JSON file for channel data.
-            $typeChannelDataPath = __DIR__ . '/data/channelData.json';
+    /**
+     * Checks if custom json file exists for channel otherwise loads default.
+     *
+     * @param string $filename
+     * @param string $type
+     * @return array
+     */
+    function loadJSON(string $filename, string $type): array
+    {
+        $custom = __DIR__ . '/data/channels/' . $type . '/' . $filename;
+        $path   = __DIR__ . '/data/' . $filename;
+        if (file_exists($custom)) {
+            $path = $custom;
         }
-        if(!file_exists($typeChannelOrderDataPath)) {
-            // Set the default JSON file for channel data.
-            $typeChannelOrderDataPath = __DIR__ . '/data/orderTransform.json';
-        }
-        $channelDataJSON = file_get_contents($typeChannelDataPath);
-        $channelOrderJSON = file_get_contents($typeChannelOrderDataPath);
-
-        // Decode into arrays.
-        self::$channelData = json_decode($channelDataJSON, true);
-        self::$channelFlagMapData = json_decode($channelFlagMapJSON, true);
-        self::$channelOrderData = json_decode($channelOrderJSON, true);
-        self::$channelProductsData = json_decode($channelProductsJSON, true);
-        self::$channelFulfillmentsData = json_decode($channelFulfillmentsJSON, true);
+        return json_decode(file_get_contents($path), true);
     }
 
     /**
