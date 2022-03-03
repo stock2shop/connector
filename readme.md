@@ -59,36 +59,6 @@ Please mock the channel data and order transform (if implemented) for your targe
 [tests/e2e/data/channels](tests/e2e/data/channels/) directory. Have a look at the example provided for guidance and the
 `loadTestData()` method in the [ChannelTest](./tests/e2e/ChannelTest.php) class.
 
-### Folder Structure
-
-The following serves to give you an overview of the folder structure for the connector you will be adding to the
-[channels directory](www/v1/stock2shop/dal/channels/). The example below is the structure of the 'os' directory:
-
-    .
-    ├── data                    # The connector writes and reads data from this directory. 
-    │   │                       # NB: This is a flat-file connector.
-    │   ├── products            # products storage
-    │   │   ..
-    │   ├── orders              # orders storage
-    │   │   ..
-    │   ├── fulfillments        # fulfillments storage
-    │   │   ..
-    │   ├── Helper.php          # Provides methods which are used to access the data from disk.
-    │
-    ├── Creator.php             # Concrete factory class of the abstract Creator class.
-    ├── Products.php            # Products channel type class.
-    ├── Orders.php              # Orders channel type class.
-    ├── Fulfillments.php        # Fulfillments channel type class.
-    └── README                  # An overview of the implementation and any notes.
-
-The folder structure above is for a channel connector which implements all of the interfaces in [dal\channel](www/v1/stock2shop/dal/channel).
-Your code might not implement all of these, but you may refer to the code in the [os](www/v1/stock2shop/dal/channels/os) directory
-for an example.
-
-The [example](www/v1/stock2shop/dal/channels/example) folder structure omits the data directory and the Orders and Fulfillments
-classes. Please refer to the [readme](www/v1/stock2shop/dal/channels/example/readme.md) in the example folder for more
-information.
-
 ## Creating A Channel Connector
 
 This setup assumes you already have an environment which is able to run PHP applications.
@@ -118,7 +88,7 @@ The `CHANNEL_NAME` variable must be a lowercase string with no spaces.
 git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 ```
 
-3. Copy Example Channel
+3. Copy Example Channel.
 
 Copy the channel source files:
 
@@ -140,24 +110,7 @@ With your CHANNEL_NAME:
 namespace stock2shop\dal\channels\$CHANNEL_NAME;
 ```
 
-5. Copy Sample Channel Data.
-
-You will most likely want to make your connector configurable per channel. 
-How you do this is up to the constraints of the system you are coding the integration for.
-
-To make your channel connector code as extensible as possible, start by copying the 
-[channelData.json](tests/e2e/data/channels/os/channelData.json) file in the [tests/e2e/data/channels/os](./tests/e2e/data/channels/os)
-directory into a new directory in the [tests/e2e/data/channels](./tests/e2e/data/channels) directory. 
-You must name this directory the same as your `CHANNEL_NAME` variable. 
-
-Your implementation in `www/v1/stock2shop/dal/channels/${CHANNEL_NAME}/Products` may make use of the sample meta data
-configured in the `channelData.json`. Please refer to the `os` [connector](./www/v1/stock2shop/dal/channels/os) for an 
-example of using channel meta data for storage path separators. 
-
-If your channel uses the HTTP protocol, then you might want to use channel meta data to configure your connector with 
-your channel's API credentials (secret, client_id), endpoint URLs, etc.
-
-7. Run Tests for your `CHANNEL_NAME`.
+5. Run Tests for your `CHANNEL_NAME`.
 
 ```bash
 cd $S2S_PATH/connector/tests
