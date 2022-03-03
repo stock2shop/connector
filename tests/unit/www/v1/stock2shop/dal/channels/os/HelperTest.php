@@ -23,17 +23,6 @@ class HelperTest extends tests\TestCase
     const CLASS_NAME = "stock2shop\\dal\\channels\\os\\data\\Helper";
 
     /**
-     * Setup
-     * @return void
-     */
-    public function setUp(): void {
-
-        // Create an instance of the Helper class which is being tested.
-        $this->helper = new os\data\Helper();
-
-    }
-
-    /**
      * Test Get JSON Files By Prefix
      */
     public function testGetJSONFilesByPrefix() {
@@ -54,7 +43,8 @@ class HelperTest extends tests\TestCase
             $_count  = $_testCase[2];
 
             // We are expecting an array of JSON files to be returned.
-            $result = $this->helper->getJSONFilesByPrefix($_prefix, $_type);
+            $helper = new os\data\Helper();
+            $result = $helper->getJSONFilesByPrefix($_prefix, $_type);
 
             $this->assertNotNull($result);
             $this->assertEquals("array", gettype($result));
@@ -76,7 +66,8 @@ class HelperTest extends tests\TestCase
         $_count = 22;
 
         // We are expecting an array of JSON files to be returned.
-        $result = $this->helper->getJSONFiles($_type);
+        $helper = new os\data\Helper();
+        $result = $helper->getJSONFiles($_type);
 
         $this->assertNotNull($result);
         $this->assertEquals('array', gettype($result));

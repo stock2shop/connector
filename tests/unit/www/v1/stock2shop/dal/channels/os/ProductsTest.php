@@ -20,20 +20,6 @@ class ProductsTest extends tests\TestCase
     public $connector = null;
 
     /**
-     * Setup
-     * @return void
-     */
-    public function setUp(): void {
-
-        // Call creator factory.
-        $creator = new os\Creator();
-
-        // Create new connector instance for Products.
-        $this->connector = $creator->createProducts();
-
-    }
-
-    /**
      * Save Product
      */
     public function testProductsSaveProduct() {
@@ -52,8 +38,9 @@ class ProductsTest extends tests\TestCase
             "images" => []
         ]);
 
-        // Instantiate the connector.
-        $connector = $this->connector;
+        // Call creator factory.
+        $creator = new os\Creator();
+        $connector = $creator->createProducts();
 
         // Call saveProduct().
         $result = $connector->saveProduct($_channelProduct->channel_product_code, $_channelProduct);
@@ -72,8 +59,9 @@ class ProductsTest extends tests\TestCase
         $productId = "5000";
         $channelProductCode = $productId . ".json";
 
-        // Instantiate the connector.
-        $connector = $this->connector;
+        // Call creator factory.
+        $creator = new os\Creator();
+        $connector = $creator->createProducts();
 
         // Call deleteProduct().
         $result = $connector->deleteProduct($channelProductCode);
@@ -102,8 +90,9 @@ class ProductsTest extends tests\TestCase
             'images' => []
         ]);
 
-        // Instantiate the connector.
-        $connector = $this->connector;
+        // Call creator factory.
+        $creator = new os\Creator();
+        $connector = $creator->createProducts();
 
         // Call saveProduct().
         $result = $connector->saveVariant($_channelVariant->channel_variant_code, $_channelVariant);
@@ -122,8 +111,9 @@ class ProductsTest extends tests\TestCase
         $productId = '5000';
         $channelVariantCode = $productId . "~" . "VARIANT001" . ".json";
 
-        // Instantiate the connector.
-        $connector = $this->connector;
+        // Call creator factory.
+        $creator = new os\Creator();
+        $connector = $creator->createProducts();
 
         // Call deleteVariant().
         $result = $connector->deleteVariant($channelVariantCode);
@@ -149,8 +139,9 @@ class ProductsTest extends tests\TestCase
             'channel_id' => '123'
         ]);
 
-        // Instantiate the connector.
-        $connector = $this->connector;
+        // Call creator factory.
+        $creator = new os\Creator();
+        $connector = $creator->createProducts();
 
         // Call saveProduct().
         $result = $connector->saveImage($_channelImage->channel_image_code, $_channelImage);
@@ -170,8 +161,9 @@ class ProductsTest extends tests\TestCase
         $productId = '5000';
         $channelImageCode = $productId . '=' . 'IMAGE001' . '.json';
 
-        // Instantiate the connector.
-        $connector = $this->connector;
+        // Call creator factory.
+        $creator = new os\Creator();
+        $connector = $creator->createProducts();
 
         // Call deleteVariant().
         $result = $connector->deleteImage($channelImageCode);

@@ -45,18 +45,6 @@ final class ChannelTest extends Framework\TestCase
     public static $channelFlagMapData;
 
     /**
-     * Set Up
-     *
-     * Executes the code which sets up the test before running the test
-     * cases. The integrations are loaded into $channelTypes by
-     * getChannelTypes().
-     */
-    public function setUp(): void
-    {
-        self::$channelTypes = self::getChannelTypes();
-    }
-
-    /**
      * Load Test Data
      *
      * This function gets the test data from the JSON files in the /data directory.
@@ -64,7 +52,7 @@ final class ChannelTest extends Framework\TestCase
      * @param string $type
      * @return void
      */
-    public function loadTestData(string $type): void
+    public function loadTestData(string $type)
     {
         self::$channelData             = $this->loadJSON('channel.json', $type);
         self::$channelFlagMapData      = $this->loadJSON('channelFlagMap.json', $type);
@@ -120,7 +108,7 @@ final class ChannelTest extends Framework\TestCase
      * @param $type
      * @return void
      */
-    public function setFactory($type): void
+    public function setFactory($type)
     {
         // Instantiate factory creator object.
         $creatorNameSpace = "stock2shop\\dal\\channels\\" . $type . "\\Creator";
@@ -153,10 +141,12 @@ final class ChannelTest extends Framework\TestCase
      * @return void
      * @throws UnprocessableEntity
      */
-    public function testSyncProducts(): void
+    public function testSyncProducts()
     {
+        $channelTypes = self::getChannelTypes();
+
         // Loop through the channel types found in the dal/channels/directory.
-        foreach (self::$channelTypes as $type) {
+        foreach ($channelTypes as $type) {
 
             // Load test data and set channel
             self::loadTestData($type);
@@ -246,7 +236,7 @@ final class ChannelTest extends Framework\TestCase
      * @param vo\Channel $channel
      * @return void
      */
-    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel): void
+    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel)
     {
 
         try {
@@ -366,9 +356,10 @@ final class ChannelTest extends Framework\TestCase
      * @return void
      * @throws UnprocessableEntity
      */
-    public function testGetProducts(): void
+    public function testGetProducts()
     {
-        foreach (self::$channelTypes as $type) {
+        $channelTypes = self::getChannelTypes();
+        foreach ($channelTypes as $type) {
 
             // Load test data.
             self::loadTestData($type);
@@ -459,7 +450,7 @@ final class ChannelTest extends Framework\TestCase
      * @param ChannelProduct[] $fetchedProducts
      * @return void
      */
-    public function verifyGetProducts(string $token, int $limit, array $fetchedProducts): void
+    public function verifyGetProducts(string $token, int $limit, array $fetchedProducts)
     {
         // Assert on the limit.
         $this->assertLessThanOrEqual(count($fetchedProducts), $limit);
@@ -500,7 +491,7 @@ final class ChannelTest extends Framework\TestCase
     // TODO: Complete when interface is ready.
 //    public function _testGetOrders()
 //    {
-//        foreach (self::$channelTypes as $type) {
+//        foreach ($channelTypes as $type) {
 //
 //            // Load test data.
 //            self::loadTestData($type);
@@ -541,7 +532,7 @@ final class ChannelTest extends Framework\TestCase
     // TODO: Complete when interface is ready.
 //    public function _testTransformOrder()
 //    {
-//        foreach (self::$channelTypes as $type) {
+//        foreach ($channelTypes as $type) {
 //
 //            // Load test data
 //            self::loadTestData($type);
@@ -590,7 +581,7 @@ final class ChannelTest extends Framework\TestCase
     // TODO: Complete when interface is ready.
 //    public function _testGetOrdersByCode()
 //    {
-//        foreach (self::$channelTypes as $type) {
+//        foreach ($channelTypes as $type) {
 //
 //            // Load test data.
 //            self::loadTestData($type);
@@ -682,7 +673,7 @@ final class ChannelTest extends Framework\TestCase
     // TODO: Complete when interface is ready.
 //    public function testSyncFulfillments()
 //    {
-//        foreach (self::$channelTypes as $type) {
+//        foreach ($channelTypes as $type) {
 //
 //            // load test data and set channel
 //            self::loadTestData($type);
