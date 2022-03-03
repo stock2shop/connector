@@ -76,12 +76,28 @@ class ChannelProduct extends Product
 //        );
 //    }
 
+    /**
+     * Is Synced To Channel
+     *
+     * This method returns true if the product has been synchronized
+     * to a channel successfully. The conditions for this include:
+     *
+     * - The 'success' property must be a boolean and set to 'true'.
+     * - The 'channel_product_code' must not be null or an empty "".
+     * - The 'synced' property must be a string and not equal to "".
+     *
+     * NB: A product may be 'valid' without having been 'synced'.
+     *
+     * @return bool
+     */
     public function isSyncedToChannel():bool {
         return (
             is_bool($this->success) &&
             $this->success &&
             !is_null($this->channel_product_code) &&
-            $this->channel_product_code !== ""
+            $this->channel_product_code !== "" &&
+            is_string($this->synced) &&
+            $this->synced !== ""
         );
     }
 

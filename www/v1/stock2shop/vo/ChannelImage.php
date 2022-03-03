@@ -55,7 +55,21 @@ class ChannelImage extends ValueObject
 //        );
 //    }
 
-    public function isSyncedToChannel():bool {
+    /**
+     * Is Synced To Channel
+     *
+     * This method checks whether this object has been synced to
+     * a channel. When this returns true, then all the conditions
+     * for synchronization have been met:
+     *
+     * - the 'channel_image_code' property is not "" or null.
+     * - the 'channel_image_code' has been set to the ID of the image
+     *   on the channel.
+     * - the 'success' property is boolean and has been set to 'true'.
+     *
+     * @return bool
+     */
+    public function isSyncedToChannel(): bool {
         return (
             is_bool($this->success) &&
             $this->success &&
