@@ -3,8 +3,9 @@
 namespace stock2shop\dal\channels\os;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
-use stock2shop\helpers;
 use stock2shop\vo;
+use stock2shop\helpers;
+use stock2shop\exceptions;
 
 /**
  * Products
@@ -240,15 +241,22 @@ class Products implements ProductsInterface
     /**
      * Get By Code
      *
-     * This method defines the process flow for checking whether a list of products 
+     * This method defines the process flow for checking whether a list of products
      * is found on a channel. The products are checked by their 'channel_product_code'
      * property - as this is the ID associated with the channel for the product.
      *
-     *
+     * - Product channel_product_code
+     * - Product success
+     * - Variant channel_variant_code
+     * - Variant success
+     * - Variant sku
+     * - Image channel_image_code
+     * - Image success
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
      * @return vo\ChannelProduct[]
+     * @throws exceptions\UnprocessableEntity
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
@@ -259,70 +267,29 @@ class Products implements ProductsInterface
 
             // Get the product files from disk.
             $productFiles = data\Helper::getJSONFilesByPrefix(urlencode($product->id), 'products');
-
             foreach ($productFiles as $fileChannelCode => $productFile) {
+                $product->success = true;
+                $product->source_product_code = $fileChannelCode;
+                $channelProductsFound[$product->id . ".json"] = $product;
 
-                // - Product channel_product_code
-                // - Product success
+                $variantOrImage = $fileChannelCode;
+                if (strpos($fileChannelCode, helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_VARIANT)) !== false) {
+                    $channelProductsFound[$product->id . ".json"]->variants[] = new vo\ChannelVariant([
+                        'channel_variant_code' => $productFile['channel_variant_code'],
+                        'sku' => $productFile['sku'],
+                        'success' => true
+                    ]);
+                }
 
-                    $product->success = true;
-                    $product->source_product_code = $fileChannelCode;
-                    $channelProductsFound[$product->id . ".json"] = $product;
-
-
-                    // - Variant channel_variant_code
-                    // - Variant success
-                    // - Variant sku
-
-                    $variantOrImage = $fileChannelCode;
-
-                    if (strpos($fileChannelCode, helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_VARIANT)) !== false) {
-                        $channelProductsFound[$product->id . ".json"]->variants[] = new vo\ChannelVariant([
-                            'channel_variant_code' => $productFile['channel_variant_code'],
-                            'sku' => $productFile['sku'],
-                            'success' => true
-                        ]);
-                    }
-
-                    // - Image channel_image_code
-                    // - Image success
-
-                    if (strpos($fileChannelCode, helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_IMAGE)) !== false) {
-                        $channelProductsFound[$product->id . '.json']->images[] = new vo\ChannelImage([
-                            'channel_variant_code' => $productFile['channel_image_code'],
-                            'success' => true
-                        ]);
-                    }
-
+                if (strpos($fileChannelCode, helpers\Meta::get($channel->meta, self::CHANNEL_SEPARATOR_IMAGE)) !== false) {
+                    $channelProductsFound[$product->id . '.json']->images[] = new vo\ChannelImage([
+                        'channel_variant_code' => $productFile['channel_image_code'],
+                        'success' => true
+                    ]);
+                }
             }
         }
-
-            return $channelProductsFound;
-//
-//        foreach ($channelProducts as $key => $product) {
-//            $channelProducts[$key]->channel_product_code = (string)$product->id;
-//            $channelProducts[$key]->success              = true;
-//            if ($channelProducts[$key]->delete === true) {
-//                $channelProducts[$key]->success = false;
-//            }
-//            foreach ($product->variants as $vKey => $variant) {
-//                $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
-//                $channelProducts[$key]->variants[$vKey]->success              = true;
-//                if ($channelProducts[$key]->variants[$vKey]->delete === true) {
-//                    $channelProducts[$key]->variants[$vKey]->success = false;
-//                }
-//            }
-//            foreach ($product->images as $ki => $img) {
-//                $channelProducts[$key]->images[$ki]->channel_image_code = (string)$img->id;
-//                $channelProducts[$key]->images[$ki]->success            = true;
-//                if ($channelProducts[$key]->images[$ki]->delete === true) {
-//                    $channelProducts[$key]->images[$ki]->success = false;
-//                }
-//            }
-//        }
-//        return $channelProducts;
-
-
+        return $channelProductsFound;
 
 //        $channelProductsSync = [];
 //        foreach ($channelProducts as $product) {

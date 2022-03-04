@@ -45,7 +45,19 @@ class TestPrinter
         if(!array_key_exists($section, $this->lines)) {
             $this->lines[$section] = [];
         }
-        $this->lines[$section][$name] = $value;
+        $this->lines[$section][$name] = (is_array($value) ? json_encode($value) : $value);
+    }
+
+    /**
+     * Add Line To Section
+     *
+     * @param string $name
+     * @param $value
+     * @return void
+     */
+    public function addLineToSection(string $name, $value=null) {
+        $section = array_keys($this->lines[count($this->lines) - 1])[0];
+        $this->addLine($section, $name, $value);
     }
 
     /**
@@ -70,14 +82,21 @@ class TestPrinter
      * @return void
      */
     private function outputLine(string $name, $value) {
-        $this->output .= str_pad($name, $this->defaultPadding) . ' ' . $this->defaultPadString . ' ' . $value . PHP_EOL;
+        $outputValue = $value;
+        if(is_bool($value)) {
+            if($value === true) {
+                $outputValue = "true";
+            } else {
+                $outputValue = "false";
+            }
+        }
+        $this->output .= str_pad($name, $this->defaultPadding) . ' ' . $this->defaultPadString . ' ' . $outputValue . PHP_EOL;
     }
 
     /**
      * Prepare
      *
      * Prints the content for a section to the terminal/stdout.
-     * If a section is specified, then only that section is printed.
      * The output format is defined by the constants in this class.
      *
      * @return void
