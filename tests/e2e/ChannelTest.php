@@ -3,11 +3,12 @@
 namespace tests\e2e;
 
 use PHPUnit\Framework;
+use tests\printer\TestPrinter;
 use stock2shop\dal;
+use stock2shop\vo;
+use stock2shop\helpers;
 use stock2shop\exceptions\NotImplemented;
 use stock2shop\exceptions\UnprocessableEntity;
-use stock2shop\vo;
-use tests\printer\TestPrinter;
 
 /**
  * This "end to end" test runs through all channel types.
@@ -75,19 +76,6 @@ final class ChannelTest extends Framework\TestCase
     public static function setUpBeforeClass()
     {
         self::$printer = new TestPrinter();
-    }
-
-    /**
-     * Tear Down After Class
-     *
-     * This event hook is used to output the test printer
-     * content to stdout.
-     *
-     * @return void
-     */
-    public static function tearDownAfterClass()
-    {
-        self::$printer->print();
     }
 
     /**
@@ -197,7 +185,8 @@ final class ChannelTest extends Framework\TestCase
 
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $channel);
+            self::$printer->addHeading('[' . $type . ']' . 'Sync - Create All Products');
+            self::verifyProductSync($request, $response, $connector, $channel);
 
             // --------------------------------------------------------
 
@@ -206,6 +195,7 @@ final class ChannelTest extends Framework\TestCase
             unset(self::$channelProductsData[1]["variants"][1]);
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
+            self::$printer->addHeading('[' . $type . ']' . ' Sync - Delete A Product Variant');
             self::verifyProductSync($request, $response, $connector, $channel);
 
             // --------------------------------------------------------
@@ -217,6 +207,7 @@ final class ChannelTest extends Framework\TestCase
             }
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
+            self::$printer->addHeading('[' . $type . ']' . ' Sync - Remove All Products');
             self::verifyProductSync([], $response, $connector, $channel);
 
             // --------------------------------------------------------
@@ -225,9 +216,12 @@ final class ChannelTest extends Framework\TestCase
 
             $response = $connector->sync([], $channel, $flagMap);
             $request = vo\ChannelProduct::createArray([]);
+            self::$printer->addHeading('[' . $type . ']' . ' Sync - Empty Payload');
             self::verifyProductSync($request, $response, $connector, $channel);
 
         }
+
+        self::$printer->print();
 
     }
 
@@ -253,27 +247,7 @@ final class ChannelTest extends Framework\TestCase
     public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel)
     {
 
-        // Check against existing products on channel by fetching them first
-
-        // TODO: Ask Chris about this.
-        //  If the purpose of the 'verifyProductSync()' method is to evaluate the 'sync()' implementation of a
-        //  connector's Products implementation - then how can we assume that the following 'getByCode()' method
-        //  will work and provide the required data which is currently on the channel? The 'verifyProductSync()'
-        //  method depends on untested code and I feel this is a major point of concern.
-        //  My understanding is that unit test cases must not be dependent on factors which we as developers do
-        //  not have completed control over. Hence why it is good practice to mock objects instead of using the
-        //  actual class.
-
-        // $existingProducts = $connector->getByCode($request, $channel);
-
-        // TODO: Confirm whether this is correct?
-        //  The static class property '$channelProductData' is where the products which are literally ON
-        //  the channel are kept. Every time we remove a product using the channel connector code, we will also
-        //  remove it from this variable. The same for product variants and product images as well as adding,
-        //  removing or editing a product. This is to keep track of the channel's state alongside the proposed
-        //  changes we are trying to synchronize to the channel using the connector.
-
-        $existingProducts = vo\ChannelProduct::createArray(self::$channelProductsData);
+        $existingProducts = $connector->getByCode($request, $channel);
 
         // Product, image and variant counters for existing and request products.
         $requestProductCnt  = 0;
@@ -333,12 +307,12 @@ final class ChannelTest extends Framework\TestCase
 
         // -----------------------------------------
 
-        self::$printer->addLine('Product Sync', 'requestProductCnt', $requestProductCnt);
-        self::$printer->addLine('Product Sync', 'existingProductCnt', $existingProductCnt);
-        self::$printer->addLine('Product Sync', 'requestVariantCnt', $requestVariantCnt);
-        self::$printer->addLine('Product Sync', 'existingVariantCnt', $existingVariantCnt);
-        self::$printer->addLine('Product Sync', 'requestImageCnt', $requestImageCnt);
-        self::$printer->addLine('Product Sync', 'existingImageCnt', $existingImageCnt);
+        self::$printer->addLine('requestProductCnt', $requestProductCnt);
+        self::$printer->addLine('existingProductCnt', $existingProductCnt);
+        self::$printer->addLine('requestVariantCnt', $requestVariantCnt);
+        self::$printer->addLine('existingVariantCnt', $existingVariantCnt);
+        self::$printer->addLine('requestImageCnt', $requestImageCnt);
+        self::$printer->addLine('existingImageCnt', $existingImageCnt);
 
         // -----------------------------------------
 
@@ -353,10 +327,10 @@ final class ChannelTest extends Framework\TestCase
             $this->assertNotEmpty($product->channel_product_code);
 
             // Print product.
-            self::$printer->addLine('Product Sync', 'product->id', $product->id);
-            self::$printer->addLine('Product Sync', 'product->channel_product_code', $product->channel_product_code);
-            self::$printer->addLine('Product Sync', 'product->success', $product->success);
-            self::$printer->addLine('Product Sync', 'product->delete', $product->delete);
+            self::$printer->addLine('product[' . $product->id . ']->id', $product->id);
+            self::$printer->addLine('product[' . $product->id . ']->channel_product_code', $product->channel_product_code);
+            self::$printer->addLine('product[' . $product->id . ']->success', $product->success);
+            self::$printer->addLine('product[' . $product->id . ']->delete', $product->delete);
 
             // -----------------------------------------
 
@@ -373,10 +347,10 @@ final class ChannelTest extends Framework\TestCase
                 $this->assertNotEmpty($variant->sku);
 
                 // Print variant.
-                self::$printer->addLine('Product Sync', 'variant->id', $variant->id);
-                self::$printer->addLine('Product Sync', 'variant->channel_variant_code', $variant->channel_variant_code);
-                self::$printer->addLine('Product Sync', 'variant->success', $variant->success);
-                self::$printer->addLine('Product Sync', 'variant->valid()', $variant->valid());
+                self::$printer->addLine('variant[' . $variant->id . ']->id', $variant->id);
+                self::$printer->addLine('variant[' . $variant->id . ']->channel_variant_code', $variant->channel_variant_code);
+                self::$printer->addLine('variant[' . $variant->id . ']->success', $variant->success);
+                self::$printer->addLine('variant[' . $variant->id . ']->valid()', $variant->valid());
 
             }
 
@@ -392,14 +366,15 @@ final class ChannelTest extends Framework\TestCase
 //                $this->assertTrue($image->isSyncedToChannel());
                 $this->assertNotEmpty($image->channel_image_code);
 
-                // Print images.
-                self::$printer->addLine('Product Sync', 'image->id', $image->id);
-                self::$printer->addLine('Product Sync', 'image->channel_image_code', $image->channel_image_code);
-                self::$printer->addLine('Product Sync', 'image->success', $image->success);
+                // Print image.
+                self::$printer->addLine('image[' . $image->id . ']->id', $image->id);
+                self::$printer->addLine('image[' . $image->id . ']->channel_image_code', $image->channel_image_code);
+                self::$printer->addLine('image[' . $image->id . ']->success', $image->success);
 //                self::$printer->addLineToSection('image->isSyncedToChannel()', $image->isSyncedToChannel());
 
             }
         }
+
     }
 
     /**
@@ -411,7 +386,7 @@ final class ChannelTest extends Framework\TestCase
      * @return void
      * @throws UnprocessableEntity
      */
-    public function testGetProducts()
+    public function _testGetProducts()
     {
         $channelTypes = self::getChannelTypes();
         foreach ($channelTypes as $type) {

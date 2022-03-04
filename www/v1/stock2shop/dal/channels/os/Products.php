@@ -260,6 +260,7 @@ class Products implements ProductsInterface
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
+        return $channelProducts;
         /** @var vo\ChannelProduct[] $channelProductsFound */
         $channelProductsFound = [];
 

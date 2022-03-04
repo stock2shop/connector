@@ -33,6 +33,9 @@ class TestPrinter
     /** @var string $output */
     public $output = "";
 
+    /** @var string $section */
+    public $section = "";
+
     /**
      * Add Line
      *
@@ -41,11 +44,19 @@ class TestPrinter
      * @param string $value
      * @return void
      */
-    public function addLine(string $section, string $name, $value=null) {
-        if(!array_key_exists($section, $this->lines)) {
-            $this->lines[$section] = [];
-        }
-        $this->lines[$section][$name] = (is_array($value) ? json_encode($value) : $value);
+    public function addLine(string $name, $value=null) {
+        $this->lines[$this->section][$name] = (is_array($value) ? json_encode($value) : $value);
+    }
+
+    /**
+     * Add Heading
+     *
+     * @param string $name
+     * @return void
+     */
+    public function addHeading(string $name) {
+        $this->lines[$name] = [];
+        $this->section = $name;
     }
 
     /**
