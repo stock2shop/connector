@@ -103,27 +103,27 @@ class Products implements ProductsInterface
     {
         // Products.
         foreach ($channelProducts as $key => $product) {
-            $product->channel_product_code = (string)$product->id;
-            $product->success  = true;
-            if ($product->delete === true) {
-                $product->success = false;
+            $channelProducts[$key]->channel_product_code = (string)$product->id;
+            $channelProducts[$key]->success = true;
+            if ($channelProducts[$key]->delete === true) {
+                $channelProducts[$key]->success = false;
             }
 
             // Variants.
             foreach ($product->variants as $vKey => $variant) {
-                $variant->channel_variant_code = (string)$variant->id;
-                $variant->success  = true;
-                if ($variant->delete === true) {
-                    $variant->success = false;
+                $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
+                $channelProducts[$key]->variants[$vKey]->success = true;
+                if ($channelProducts[$key]->variants[$vKey]->delete === true) {
+                    $channelProducts[$key]->variants[$vKey]->success = false;
                 }
             }
 
             // Images.
             foreach ($product->images as $ki => $img) {
-                $img->channel_image_code = (string)$img->id;
-                $img->success = true;
-                if ($img->delete === true) {
-                    $img->success = false;
+                $channelProducts[$key]->images[$ki]->channel_image_code = (string)$img->id;
+                $channelProducts[$key]->images[$ki]->success = true;
+                if ($channelProducts[$key]->images[$ki]->delete === true) {
+                    $channelProducts[$key]->images[$ki]->success = false;
                 }
             }
         }

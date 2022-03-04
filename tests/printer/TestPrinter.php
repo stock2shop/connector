@@ -49,18 +49,6 @@ class TestPrinter
     }
 
     /**
-     * Add Line To Section
-     *
-     * @param string $name
-     * @param $value
-     * @return void
-     */
-    public function addLineToSection(string $name, $value=null) {
-        $section = array_keys($this->lines[count($this->lines) - 1])[0];
-        $this->addLine($section, $name, $value);
-    }
-
-    /**
      * Output Heading
      *
      * @param string $heading
