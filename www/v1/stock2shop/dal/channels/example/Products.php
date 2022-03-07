@@ -34,7 +34,7 @@ class Products implements ProductsInterface
      */
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
-        foreach ($channelProducts as $key => &$product) {
+        foreach ($channelProducts as $key => $product) {
 
             // Mark Product As Synced.
 
@@ -43,7 +43,7 @@ class Products implements ProductsInterface
             // - 'synced' to the current timestamp.
 
             $channelProducts[$key]->channel_product_code = (string)$product->id;
-            $channelProducts[$key]->success = true;
+            $channelProducts[$key]->success = false;
 
             // Mark Variants As Synced.
 

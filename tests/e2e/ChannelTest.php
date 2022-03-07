@@ -187,7 +187,7 @@ final class ChannelTest extends Framework\TestCase
             $response = $connector->sync($request, $channel, $flagMap);
 
             $result = self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($result, 'TEST CASE 1 - Create All Products On Channel [' . $type . ']');
+            self::$printer->sendProductsToPrinter($result, 'TEST CASE xxxx - Create All Products On Channel [' . $type . ']');
             self::$printer->print();
 
             // --------------------------------------------------------
@@ -199,7 +199,7 @@ final class ChannelTest extends Framework\TestCase
             $response = $connector->sync($request, $channel, $flagMap);
 
             $result = self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($result, 'TEST CASE 2 - Delete A Variant');
+            self::$printer->sendProductsToPrinter($result, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
             self::$printer->print();
 
             // --------------------------------------------------------
@@ -213,7 +213,7 @@ final class ChannelTest extends Framework\TestCase
             $response = $connector->sync($request, $channel, $flagMap);
 
             $result = self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($result, 'TEST CASE 3 - Remove All Products');
+            self::$printer->sendProductsToPrinter($result, 'TEST CASE 3 - Remove All Products [' . $type . ']');
             self::$printer->print();
 
             // --------------------------------------------------------
@@ -224,7 +224,7 @@ final class ChannelTest extends Framework\TestCase
             $response = $connector->sync($request, $channel, $flagMap);
 
             $result = self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($result, 'TEST CASE 4 - Sync Empty Payload');
+            self::$printer->sendProductsToPrinter($result, 'TEST CASE 4 - Sync Empty Payload [' . $type . ']');
             self::$printer->print();
 
         }
