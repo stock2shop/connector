@@ -34,7 +34,7 @@ class Products implements ProductsInterface
      */
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
-        foreach ($channelProducts as $key => $product) {
+        foreach ($channelProducts as $key => &$product) {
 
             // Mark Product As Synced.
 

@@ -172,6 +172,7 @@ class TestPrinter
                 $this->addLine('product[' . $product->id . ']->image[' . $image->id . ']->success', $image->success);
                 $this->addLine('product[' . $product->id . ']->image[' . $image->id . ']->channel_image_code', $image->channel_image_code);
             }
+            $this->addLine('', '');
         }
     }
 

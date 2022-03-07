@@ -187,7 +187,7 @@ final class ChannelTest extends Framework\TestCase
             $response = $connector->sync($request, $channel, $flagMap);
 
             $result = self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($result, 'TEST CASE 1 - Create All Products On Channel');
+            self::$printer->sendProductsToPrinter($result, 'TEST CASE 1 - Create All Products On Channel [' . $type . ']');
             self::$printer->print();
 
             // --------------------------------------------------------
@@ -220,16 +220,14 @@ final class ChannelTest extends Framework\TestCase
 
             // Synchronize an empty payload of data from Stock2Shop.
 
-            $response = $connector->sync([], $channel, $flagMap);
             $request = vo\ChannelProduct::createArray([]);
+            $response = $connector->sync($request, $channel, $flagMap);
 
             $result = self::verifyProductSync($request, $response, $connector, $channel);
             self::$printer->sendProductsToPrinter($result, 'TEST CASE 4 - Sync Empty Payload');
             self::$printer->print();
 
         }
-
-
 
     }
 
@@ -267,13 +265,17 @@ final class ChannelTest extends Framework\TestCase
 
         // Loop through the request products and add to productCnt and variantCnt.
         foreach ($request as $key => $product) {
-            if (!$product->delete === true) {
+            if (!$product->delete) {
                 $requestProductCnt++;
                 foreach ($product->variants as $variant) {
-                    $requestVariantCnt++;
+                    if(!$variant->delete) {
+                        $requestVariantCnt++;
+                    }
                 }
                 foreach($product->images as $image) {
-                    $requestImageCnt++;
+                    if(!$image->delete) {
+                        $requestImageCnt++;
+                    }
                 }
             }
         }
@@ -348,13 +350,7 @@ final class ChannelTest extends Framework\TestCase
                 $this->assertNotEmpty($image->channel_image_code);
             }
         }
-
-        // ---------------------------------------------
-
         return $response;
-
-        // ---------------------------------------------
-
     }
 
     /**
