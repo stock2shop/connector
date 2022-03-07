@@ -1,12 +1,11 @@
 <?php
 
-namespace stock2shop\dal\channels\example;
+namespace example;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
-use stock2shop\vo;
-use stock2shop\lib;
-use stock2shop\helpers;
 use stock2shop\exceptions;
+use stock2shop\lib;
+use stock2shop\vo;
 
 /**
  * See comments in ProductsInterface

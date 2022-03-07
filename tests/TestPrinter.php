@@ -207,7 +207,6 @@ class TestPrinter
                 $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->active', $products[$pKey]->images[$iKey]->active, $responses[$pKey]->images[$iKey]->active);
             }
             unset($iKey);
-
             $this->addLine('', '');
         }
         unset($pKey);
