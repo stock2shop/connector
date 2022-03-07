@@ -28,7 +28,6 @@ class ProductsTest extends tests\TestCase
      *
      * Would mean creating this file
      * ${S2S_PATH}/connector/tests/www/v1/stock2shop/dal/channels/os/ProductsTest.php
-     *
      */
     public function testSaveProduct()
     {
@@ -42,7 +41,7 @@ class ProductsTest extends tests\TestCase
         // Make sure previous test data removed
         unlink($filename);
 
-        // call method to test
+        // Call method to test
         $osProducts     = new os\Products();
         $osProducts->saveProduct($channelProduct);
 
