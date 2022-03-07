@@ -2,6 +2,8 @@
 
 namespace tests;
 
+use stock2shop\vo;
+
 /**
  * Test Printer
  *
@@ -16,10 +18,10 @@ class TestPrinter
     const DEBUG_ENV_VAR = 'S2S_TEST_DEBUG'; // if set to 'true' will print data objects
 
     /** @var int $defaultPadding */
-    public $defaultPadding = 60;
+    public $defaultPadding = 55;
 
     /** @var int $headingPadding */
-    public $headingPadding = 120;
+    public $headingPadding = 135;
 
     /** @var string $headingPadString */
     public $headingPadString = "-";
@@ -80,8 +82,9 @@ class TestPrinter
      * @param string $value
      * @return void
      */
-    private function outputLine(string $name, $value) {
+    private function outputLine(string $name, $value, $value2=null) {
         $outputValue = $value;
+        $outputValue2 = $value2;
         if(is_bool($value)) {
             if($value === true) {
                 $outputValue = "true";
@@ -92,7 +95,29 @@ class TestPrinter
         if(is_null($value)) {
             $outputValue = "null";
         }
-        $this->output .= str_pad($name, $this->defaultPadding) . ' ' . $this->defaultPadString . ' ' . $outputValue . PHP_EOL;
+        if(is_null($value2)) {
+            $outputValue2 = "null";
+        }
+
+
+
+        $this->output .= str_pad($name, $this->defaultPadding) . ' ' . $this->defaultPadString . ' ' . str_pad($this->prepareValue($outputValue), $this->defaultPadding) . ' ' . $this->defaultPadString . ' ' . $this->prepareValue($outputValue2) . PHP_EOL;
+    }
+
+    /**
+     * Prepare Value
+     *
+     * Used to shorten a string if necessary, otherwise
+     * returns the variable as is.
+     *
+     * @param mixed $value
+     * @return mixed The shortened string or the original value.
+     */
+    private function prepareValue($value) {
+        if(is_string($value) && strlen($value) >= $this->defaultPadding) {
+            $value = substr($value,0, ($this->defaultPadding - 10)) . "..";
+        }
+        return $value;
     }
 
     /**
@@ -129,7 +154,7 @@ class TestPrinter
     public function print($return=false) {
 
         $debug = getenv(self::DEBUG_ENV_VAR);
-        if($debug === 'true') {
+        if($debug !== 'true') {
             $this->prepare();
 
             // Register filter.
@@ -152,30 +177,40 @@ class TestPrinter
     /**
      * Send Products To Printer
      *
-     * @param vo\ChannelProduct[] $productsToPrint
+     * @param vo\ChannelProduct[] $products
+     * @param vo\ChannelProduct[] $responses
      * @return void
      */
-    public function sendProductsToPrinter(array $productsToPrint, string $heading) {
+    public function sendProductsToPrinter(array $products, array $responses, string $heading) {
         $this->addHeading($heading);
-        $this->addLine('Products in response: ', count($productsToPrint));
-        foreach ($productsToPrint as $product) {
-            $this->addLine('product[' . $product->id . ']->id', $product->id);
-            $this->addLine('product[' . $product->id . ']->channel_product_code', $product->channel_product_code);
-            $this->addLine('product[' . $product->id . ']->success', $product->success);
-            $this->addLine('product[' . $product->id . ']->delete', $product->delete);
-            foreach ($product->variants as $variant) {
-                $this->addLine('product[' . $product->id . ']->variant[' . $variant->id . ']->id', $variant->id);
-                $this->addLine('product[' . $product->id . ']->variant[' . $variant->id . ']->channel_variant_code', $variant->channel_variant_code);
-                $this->addLine('product[' . $product->id . ']->variant[' . $variant->id . ']->success', $variant->success);
-                $this->addLine('product[' . $product->id . ']->variant[' . $variant->id . ']->sku', $variant->sku);
+        for($pKey=0; $pKey!==count($products); $pKey++) {
+            $this->addLine('product[' . $pKey . ']->id', $products[$pKey]->id, $responses[$pKey]->id);
+            $this->addLine('product[' . $pKey . ']->channel_product_code', $products[$pKey]->channel_product_code, $responses[$pKey]->channel_product_code);
+            $this->addLine('product[' . $pKey . ']->success', $products[$pKey]->success, $responses[$pKey]->success);
+            $this->addLine('product[' . $pKey . ']->delete', $products[$pKey]->delete, $responses[$pKey]->delete);
+
+            for($vKey=0; $vKey!==count($products[$pKey]->variants); $vKey++) {
+                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->id', $products[$pKey]->variants[$vKey]->id, $responses[$pKey]->variants[$vKey]->id);
+                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->channel_variant_code', $products[$pKey]->variants[$vKey]->channel_variant_code, $responses[$pKey]->variants[$vKey]->channel_variant_code);
+                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->success', $products[$pKey]->variants[$vKey]->success, $responses[$pKey]->variants[$vKey]->success);
+                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->delete', $products[$pKey]->variants[$vKey]->delete, $responses[$pKey]->variants[$vKey]->delete);
+                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->sku', $products[$pKey]->variants[$vKey]->sku, $responses[$pKey]->variants[$vKey]->sku);
             }
-            foreach ($product->images as $image) {
-                $this->addLine('product[' . $product->id . ']->image[' . $image->id . ']->id', $image->id);
-                $this->addLine('product[' . $product->id . ']->image[' . $image->id . ']->success', $image->success);
-                $this->addLine('product[' . $product->id . ']->image[' . $image->id . ']->channel_image_code', $image->channel_image_code);
+            unset($vKey);
+
+            for($iKey=0; $iKey!==count($products[$pKey]->images); $iKey++) {
+                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->id', $products[$pKey]->images[$iKey]->id, $responses[$pKey]->images[$iKey]->id);
+                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->success', $products[$pKey]->images[$iKey]->success, $responses[$pKey]->images[$iKey]->success);
+                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->delete', $products[$pKey]->images[$iKey]->delete, $responses[$pKey]->images[$iKey]->delete);
+                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->channel_image_code', $products[$pKey]->images[$iKey]->channel_image_code, $responses[$pKey]->images[$iKey]->channel_image_code);
+                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->src', $products[$pKey]->images[$iKey]->src, $responses[$pKey]->images[$iKey]->src);
+                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->active', $products[$pKey]->images[$iKey]->active, $responses[$pKey]->images[$iKey]->active);
             }
+            unset($iKey);
+
             $this->addLine('', '');
         }
+        unset($pKey);
     }
 
 }

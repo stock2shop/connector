@@ -1,11 +1,12 @@
 <?php
 
-namespace stock2shop\dal\channels\os;
+namespace os;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
-use stock2shop\vo;
-use stock2shop\helpers;
+use stock2shop\dal\channels\os\ChannelProduct;
 use stock2shop\exceptions;
+use stock2shop\helpers;
+use stock2shop\vo;
 
 /**
  * Products
@@ -91,7 +92,7 @@ class Products implements ProductsInterface
             // ------------------------------------------------
 
             // Fetch the current files from the source (in this case, flat-file).
-            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, $productsEndpoint);
+            $currentFiles = \os\data\Helper::getJSONFilesByPrefix($prefix, $productsEndpoint);
 
             // Check if the product has been flagged for delete.
             if ($product->delete === true) {
@@ -192,7 +193,7 @@ class Products implements ProductsInterface
         // getting products from the channel:
 
         $productsEndpointMeta = helpers\Meta::get($channel->meta, self::CHANNEL_ENDPOINT_PRODUCTS);
-        $currentFiles = data\Helper::getJSONFiles($productsEndpointMeta);
+        $currentFiles = \os\data\Helper::getJSONFiles($productsEndpointMeta);
 
         // ------------------------------------------------
 
@@ -267,7 +268,7 @@ class Products implements ProductsInterface
         foreach ($channelProducts as $product) {
 
             // Get the product files from disk.
-            $productFiles = data\Helper::getJSONFilesByPrefix(urlencode($product->id), 'products');
+            $productFiles = \os\data\Helper::getJSONFilesByPrefix(urlencode($product->id), 'products');
             foreach ($productFiles as $fileChannelCode => $productFile) {
                 $product->success = true;
                 $product->source_product_code = $fileChannelCode;
@@ -312,7 +313,7 @@ class Products implements ProductsInterface
 
         // You will probably need to transform the data from our Stock2Shop format into
         // the format required by your system.
-        $filename = data\Helper::getDataPath() . '/products/' .$product->id . '.json';
+        $filename = \os\data\Helper::getDataPath() . '/products/' .$product->id . '.json';
 
         // Transform vo\ChannelProduct to json:
         $transformedProductData = json_encode($product);
