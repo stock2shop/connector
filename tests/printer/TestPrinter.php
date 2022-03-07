@@ -155,8 +155,7 @@ class TestPrinter
      */
     public function sendProductsToPrinter(array $productsToPrint, string $heading) {
         $this->addHeading($heading);
-        $this->addLine(' ', ' ');
-        $this->addLine('Products in response: ', ' ');
+        $this->addLine('Products in response: ', count($productsToPrint));
         foreach ($productsToPrint as $product) {
             $this->addLine('product[' . $product->id . ']->id', $product->id);
             $this->addLine('product[' . $product->id . ']->channel_product_code', $product->channel_product_code);

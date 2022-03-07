@@ -435,7 +435,6 @@ final class ChannelTest extends Framework\TestCase
                 $fetchedProductGet = $connector->get('', $limit, $channel);
                 self::verifyGetProducts('', $limit, $fetchedProductGet);
                 $cnt++;
-                self::$printer->addLine(" ", " ");
             }
 
             // Assert on the product count.
@@ -503,9 +502,7 @@ final class ChannelTest extends Framework\TestCase
                 $this->assertNotEmpty($image->channel_image_code);
             }
         }
-
-        self::$printer->sendProductsToPrinter($fetchedProducts);
-
+        self::$printer->sendProductsToPrinter($fetchedProducts, "Verify Get Products");
     }
 
     /**
