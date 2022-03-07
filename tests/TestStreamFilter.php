@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\printer;
+namespace tests;
 
 /**
  * Test Stream Filter

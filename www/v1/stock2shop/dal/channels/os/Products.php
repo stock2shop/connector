@@ -99,7 +99,7 @@ class Products implements ProductsInterface
                     $this->deleteProduct(self::DATA_PATH . '/' . $productsEndpoint . '/' . $currentFileName);
                 }
             } else {
-                $this->saveProduct(self::DATA_PATH . '/' . $productsEndpoint . '/' . $product->channel_product_code, $product);
+                $this->saveProduct($product);
 
                 // Iterate through the product variants.
                 foreach ($product->variants as $variant) {
@@ -298,11 +298,9 @@ class Products implements ProductsInterface
      *
      * This method adds a product to the channel.
      *
-     * @param $productId
-     * @param $product
-     * @return bool $status
+     * @param vo\ChannelProduct $product
      */
-    public function saveProduct($productId, $product): bool {
+    public function saveProduct(vo\ChannelProduct $product) {
 
         // This method makes it possible for Stock2Shop to add products to the channel.
         // This is where you would send the product data to the system which this integration
@@ -314,13 +312,13 @@ class Products implements ProductsInterface
 
         // You will probably need to transform the data from our Stock2Shop format into
         // the format required by your system.
+        $filename = data\Helper::getDataPath() . '/products/' .$product->id . '.json';
 
-        // [transform product logic]:
+        // Transform vo\ChannelProduct to json:
         $transformedProductData = json_encode($product);
 
-        // [save product logic]:
-        file_put_contents($productId, $transformedProductData);
-        return $productId;
+        // Save product json disk:
+        file_put_contents($filename, $transformedProductData);
 
     }
 

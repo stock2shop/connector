@@ -3,7 +3,7 @@
 namespace tests\e2e;
 
 use PHPUnit\Framework;
-use tests\printer\TestPrinter;
+use tests\TestPrinter;
 use stock2shop\dal;
 use stock2shop\vo;
 use stock2shop\helpers;

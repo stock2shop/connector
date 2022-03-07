@@ -58,4 +58,8 @@ class Helper
         return $files;
     }
 
+    static function getDataPath() {
+        return self::DATA_PATH;
+    }
+
 }

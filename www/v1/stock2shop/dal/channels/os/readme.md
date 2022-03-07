@@ -2,70 +2,17 @@
 
 ## Overview
 
-This folder contains the files which make up a connector library for a hypothetical system.
+This folder contains the files which make up a connector for a hypothetical system
+which writes and reads data to the OS.
 
-The three main classes of this connector each implement the Data Access Layer specifications defined in `stock2shop\dal\channel`.
-Data structures are represented by objects from `stock2shop\vo`. 
-For more information on what the specifications are please refer to [Value Objects](../../../vo) and the [Interfaces](../../channel).
-
-This example scaffolds the minimum code required to turn a basic flat-file system into a Stock2Shop channel.
-Data is read, written and removed from the flat-file system's [data](./data) directory.
-
-### Folder Structure
-
-The example below is the structure of the 'os' directory:
-
-    .
-    ├── data                    # The connector writes and reads data from this directory. 
-    │   │                       # NB: This is a flat-file connector.
-    │   ├── products            # products storage
-    │   │   ..
-    │   ├── orders              # orders storage
-    │   │   ..
-    │   ├── fulfillments        # fulfillments storage
-    │   │   ..
-    │   ├── Helper.php          # Provides methods which are used to access the data from disk.
-    │
-    ├── Creator.php             # Concrete factory class of the abstract Creator class.
-    ├── Products.php            # Products channel type class.
-    ├── Orders.php              # Orders channel type class.
-    ├── Fulfillments.php        # Fulfillments channel type class.
-    └── README                  # An overview of the implementation and any notes.
-
-The folder structure above is for a channel connector which implements all of the interfaces in [dal\channel](www/v1/stock2shop/dal/channel).
-Your code might not implement all of these, but you may refer to the code in the [os](www/v1/stock2shop/dal/channels/os) directory
-for an example.
+This example connector, instead of reading to some 3rd party platform via an API it uses the
+file system to store the data. It is here purely as a guide for you.
 
 ## Storage
 
-The system stores Product, Order and Fulfillment data on disk.
-Objects are persisted in JSON format in `.json` files.
- 
-Please refer to the README files found in each one of the three subdirectories of `data` for a detailed explanation of 
-the file naming conventions:
-
-1. [Products Storage](data/products/readme.md)
-2. [Orders Storage](data/orders/readme.md)
-3. [Fulfillments Storage](data/fulfillments/readme.md)
+JSON data created by this channel is stored in the [data directory](data)
 
 ## Classes
-
-*Creator*
-
-- This class is the concrete implementation of the [dal\channel\Creator](../../channel/Creator.php) abstract class.
-- The Creator returns instances of [Products](../../channels/os/Products.php) class in the `createProducts()` 
-- And [Orders](../../channels/os/Orders.php) class in the `createOrders()` method.
-- [Fulfillments](../../channel/Fulfillments.php) is not implemented.
-
-*Products* 
-
-- This class defines the synchronization workflow for the 'os' connector between the channel and Stock2Shop.
-- The `sync()` method uses channel meta data (for separators- and storage location) to configure the connector dynamically.
-- The `getByCode()` method uses the [data/Helper](./data/Helper.php) class to get Products from the channel by code.
-- The storage prefix is used to get the products which match the provided string.
-- The `get()` method returns all products from a specific position by use of the '$token' variable. 
-- Stock2Shop uses this mechanism to filter through records during synchronization.
-- A value of an empty string ("") will return all products from the channel.
 
 ## Custom Channel Data
 

@@ -1,3 +1,10 @@
+1. Overview
+2. Data Flow
+3. Getting started setup.
+4.  running the tests (talk about test framework)
+5. Create channel connector (concepts related to the actual connector)
+6. submission guidelines and stuff below that
+
 # Stock2Shop - PHP Connectors
 
 The purpose of this repository is to allow you, the 3rd party developer, to create connector code
@@ -31,6 +38,9 @@ The connector then sends this data to your channel, much the same as products ab
 ### Tests
 
 An end-to-end test is included. Do not modify this.
+```shell
+export S2S_TEST_DEBUG=false && ${S2S_PATH}/phpunit-4.8.phar ./
+```
 Tests use [phpunit](https://devdocs.io/phpunit~8/) version 8.
 
 #### Unit Tests

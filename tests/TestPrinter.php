@@ -1,8 +1,6 @@
 <?php
 
-namespace tests\printer;
-
-use tests\printer\TestStreamFilter;
+namespace tests;
 
 /**
  * Test Printer
@@ -15,6 +13,8 @@ use tests\printer\TestStreamFilter;
  */
 class TestPrinter
 {
+    const DEBUG_ENV_VAR = 'S2S_TEST_DEBUG'; // if set to 'true' will print data objects
+
     /** @var int $defaultPadding */
     public $defaultPadding = 60;
 
@@ -128,23 +128,25 @@ class TestPrinter
      */
     public function print($return=false) {
 
-        $this->prepare();
+        $debug = getenv(self::DEBUG_ENV_VAR);
+        if($debug === 'true') {
+            $this->prepare();
 
-        // Register filter.
-        stream_filter_register("TestPrinterStream", "tests\printer\TestStreamFilter");
-        $stdout = fopen('php://stdout', 'w');
+            // Register filter.
+            stream_filter_register("TestPrinterStream", "tests\TestStreamFilter");
+            $stdout = fopen('php://stdout', 'w');
 
-        // Append stream to stdout.
-        stream_filter_append($stdout, 'TestPrinterStream');
+            // Append stream to stdout.
+            stream_filter_append($stdout, 'TestPrinterStream');
 
-        // Write content.
-        fwrite($stdout, $this->output);
+            // Write content.
+            fwrite($stdout, $this->output);
 
-        // Output.
-        print(TestStreamFilter::$cache);
-        unset($this->output);
-        $this->output = "";
-
+            // Output.
+            print(TestStreamFilter::$cache);
+            unset($this->output);
+            $this->output = "";
+        }
     }
 
     /**

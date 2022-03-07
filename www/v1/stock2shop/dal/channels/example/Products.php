@@ -9,11 +9,7 @@ use stock2shop\helpers;
 use stock2shop\exceptions;
 
 /**
- * Products
- *
- * This class is where the Data Access Layer is mapped onto
- * the Stock2Shop Value Objects from the source system you are
- * integrating with.
+ * See comments in ProductsInterface
  *
  * @package stock2shop\dal\example
  */
@@ -21,11 +17,7 @@ class Products implements ProductsInterface
 {
 
     /**
-     * Sync
-     *
-     * This method synchronises products, variants and images on the channel.
-     * This is a simple example for marking entities after they have been
-     * synchronised to meet Stock2Shop's requirements.
+     * See comments in ProductsInterface::sync
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
@@ -37,29 +29,24 @@ class Products implements ProductsInterface
         foreach ($channelProducts as $key => $product) {
 
             // Mark Product As Synced.
-
-            // - 'channel_product_code' to the product ID.
+            // - 'channel_product_code' in this example is the product ID
+            //    but this would be the unique identifier in your channel for the product.
             // - 'success' to true.
-            // - 'synced' to the current timestamp.
-
             $channelProducts[$key]->channel_product_code = (string)$product->id;
             $channelProducts[$key]->success = false;
 
             // Mark Variants As Synced.
-
-            // - 'channel_variant_code' to the variant ID.
+            // - 'channel_variant_code' in this example is the variant ID.
+            //   but this would be the unique identifier in your channel for the variant (e.g. sku).
             // - 'success' to true.
-
             foreach ($product->variants as $vKey => $variant) {
                 $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
                 $channelProducts[$key]->variants[$vKey]->success = true;
             }
 
             // Mark Images As Synced.
-
-            // - 'channel_image_code' to the image ID.
+            // - 'channel_image_code'.
             // - 'success' to true.
-
             foreach ($product->images as $ki => $img) {
                 $channelProducts[$key]->images[$ki]->channel_image_code = (string)$img->id;
                 $channelProducts[$key]->images[$ki]->success = true;
@@ -69,20 +56,13 @@ class Products implements ProductsInterface
     }
 
     /**
-     * Get
-     *
-     * This method implements the get() method from the dal\channel\Products interface class.
-     * Use this method to structure the integration you are coding according to Stock2Shop's
-     * requirements.
-     *
-     * You will use the vo\ChannelProductGet class here to associate a token value with each
-     * product. We use the tokens in our system to determine the last product returned from
-     * the channel (like a 'cursor').
+     * See comments in ProductsInterface::get
      *
      * @param string $token
      * @param int $limit
      * @param vo\Channel $channel
      * @return vo\ChannelProduct[] $channelProducts
+     * @throws exceptions\NotImplemented
      */
     public function get(string $token, int $limit, vo\Channel $channel): array
     {
@@ -90,9 +70,7 @@ class Products implements ProductsInterface
     }
 
     /**
-     * Get By Code
-     *
-     * This method returns vo\ChannelProduct items by code.
+     * See comments in ProductsInterface::getByCode
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
@@ -100,7 +78,11 @@ class Products implements ProductsInterface
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
-        // Products.
+        // Mimic fetching products from the channel.
+        // in this example, we return true for all products
+        // meaning all products are on the channel
+        // In your channel, you would need to first verify the product
+        // is actually on the channel before marking it as success = true.
         foreach ($channelProducts as $key => $product) {
             $channelProducts[$key]->channel_product_code = (string)$product->id;
             $channelProducts[$key]->success = true;
@@ -108,7 +90,7 @@ class Products implements ProductsInterface
                 $channelProducts[$key]->success = false;
             }
 
-            // Variants.
+            // Mark all variants as being on channel.
             foreach ($product->variants as $vKey => $variant) {
                 $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
                 $channelProducts[$key]->variants[$vKey]->success = true;
@@ -117,7 +99,7 @@ class Products implements ProductsInterface
                 }
             }
 
-            // Images.
+            // Mark all images as being on channel.
             foreach ($product->images as $ki => $img) {
                 $channelProducts[$key]->images[$ki]->channel_image_code = (string)$img->id;
                 $channelProducts[$key]->images[$ki]->success = true;
