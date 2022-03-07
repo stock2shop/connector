@@ -6,14 +6,42 @@ This document describes the high-level architecture of the connector code base.
 
 ### /tests
 
+This folder contains the source code for the [TestPrinter](tests/TestPrinter.php) class.
+There is a [TestStreamFilter](tests/TestStreamFilter.php) class which is used by the 
+printer to write the data to the command-line when the e2e test is run.
+
+The directory structure in [tests/www](tests/www) mirrors the main application to make 
+absolute paths and autoloading consistent.
+
+### /tests/e2e
+
 We have included E2E (end-to-end) tests directory.
 You do not have to write your own tests, the E2E tests should cover our requirements.
 
+#### /tests/e2e/data/channels
+
+This folder contains default channel configuration data and meta data. Sample data used to 
+populate Stock2Shop VO's is included in JSON files.
+
+#### /tests/e2e/data/channels/${CHANNEL_NAME}
+
 There are certain tests that may require you to add data.
-For example, an order webhook, which would require example data sent to our connector.
-This can be added to the `tests/data/` directory.
+
+For example, an order webhook, which would require that you mock the webhook for local testing
+during development. Add this to the [tests/e2e/data/channels](tests/e2e/data/channels/) directory
+in a file called `orderTransform.json`. If a directory does not exist for your connector on this
+path then feel free to create one.
 
 Please refer to the [tests readme](./tests/README.md) for more information.
+
+#### /tests/www/v1/stock2shop/dal/channels/os
+
+This folder contains a single unit test [ProductsTest](tests/www/v1/stock2shop/dal/channels/os/ProductsTest.php)
+which illustrates the recommended coding convention for writing a unit test for a method. Please use
+the example as the starting point for your own unit tests.
+
+It is not necessary to write tests for any of the functions which are already evaluated in 
+the [ChannelTest](tests/e2e/ChannelTest.php) class.
 
 ### /www/vendor
 
@@ -43,10 +71,12 @@ our Domain Model.
 ### /www/v1/stock2shop/dal
 
 DAL stands for "Data Access Layer". The purpose of this directory is to separate logic related to different systems.
+We use the DAL to standardize the way we synchronize data between channels and Stock2shop.
 
 ### /www/v1/stock2shop/dal/channel
 
-The `channel` directory contains our factory classes for channel creation.
+The `channel` directory contains the [Creator](www/v1/stock2shop/dal/channel/Creator.php) factory method class and 
+the contracts for Products, Orders and Fulfillments connector classes.
 
 ### /www/v1/stock2shop/dal/channels
 

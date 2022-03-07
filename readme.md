@@ -1,10 +1,3 @@
-1. Overview
-2. Data Flow
-3. Getting started setup.
-4.  running the tests (talk about test framework)
-5. Create channel connector (concepts related to the actual connector)
-6. submission guidelines and stuff below that
-
 # Stock2Shop - PHP Connectors
 
 The purpose of this repository is to allow you, the 3rd party developer, to create connector code
@@ -20,7 +13,7 @@ For more information on the aforementioned concepts and Stock2Shop, please visit
 on our website at [https://www.stock2shop.com](https://www.stock2shop.com) or our 
 [developer documentation](https://docs.stock2shop.com).
 
-### Data Flow
+## Data Flow
 
 [Channel Product data](www/v1/stock2shop/vo/ChannelProduct.php) is sent in batches to your
 connector. The connector then sends this data to your channel and marks each product if successful or not.
@@ -35,41 +28,7 @@ the order into [Stock2Shop order](www/v1/stock2shop/vo/SystemOrder.php).
 Fulfillments (logistic information) is sent in batches to your connector.
 The connector then sends this data to your channel, much the same as products above.
 
-### Tests
-
-An end-to-end test is included. Do not modify this.
-```shell
-export S2S_TEST_DEBUG=false && ${S2S_PATH}/phpunit-4.8.phar ./
-```
-Tests use [phpunit](https://devdocs.io/phpunit~8/) version 8.
-
-#### Unit Tests
-
-Your implementation will most likely require additional methods, transforms and other helper classes such as an API
-Client to access the data. Please see the example we have provided for unit testing of helper classes in
-[tests/unit/www/v1/stock2shop/dal/channels/os](tests/unit/www/v1/stock2shop/dal/channels/os/HelperTest.php)
-for an example of a unit test which evaluates the methods of the Helper class in the example connector that is
-provided.
-
-Your unit tests must extend the [TestCase](tests/TestCase.php) class.
-There is no need to add tests for the methods which are already evaluated in the E2E test (see below).
-
-#### E2E Test
-
-This is an overall test which defines all dependencies in our system. We ask that you do not modify our e2e test -
-although you may read through it to gain a better understanding of how your connector integration
-will fit into the Stock2Shop system when it is completed.
-
-The primary objective of the tests is to test whether your connector integration is working correctly.
-Use it whilst you implement the Products, Orders and Fulfillments concrete classes. Please note that there is mock
-product, order, fulfillment and Stock2Shop channel "metadata" in the `tests/e2e/data` directory which the test uses to
-simulate synchronization of data onto our system.
-
-Please mock the channel data and order transform (if implemented) for your target channel by adding JSON files to the
-[tests/e2e/data/channels](tests/e2e/data/channels/) directory. Have a look at the example provided for guidance and the
-`loadTestData()` method in the [ChannelTest](./tests/e2e/ChannelTest.php) class.
-
-## Creating A Channel Connector
+## Getting Started
 
 This setup assumes you already have an environment which is able to run PHP applications.
 See the section on "Submission Guidelines" in this readme file for specific information regarding your 
@@ -129,6 +88,47 @@ php ./phpunit-8.phar ./
 
 The tests should now run correctly for all channels and the new channel you've created.
 You can now start by editing the `Products.php` file integration.
+
+## Tests
+
+An end-to-end test is included. Do not modify this.
+Tests use [phpunit](https://devdocs.io/phpunit~8/) version 8.
+
+A test report is printed to the command-line if you set the `S2S_TEST_DEBUG` environment variable
+to 'true':
+
+```shell
+export S2S_TEST_DEBUG=true && ${S2S_PATH}/phpunit-8.phar ./
+```
+
+The report gives a detailed summary of object's and which properties were synced to the channel
+which is useful for identifying mistakes in your code.
+
+### Unit Tests
+
+Your implementation will most likely require additional methods, transforms and other helper classes such as an API
+Client to access the data. Please see the example we have provided for unit testing of helper classes in
+[tests/unit/www/v1/stock2shop/dal/channels/os](tests/unit/www/v1/stock2shop/dal/channels/os/HelperTest.php)
+for an example of a unit test which evaluates the methods of the Helper class in the example connector that is
+provided.
+
+Your unit tests must extend the [TestCase](tests/TestCase.php) class.
+There is no need to add tests for the methods which are already evaluated in the E2E test (see below).
+
+### E2E Test
+
+This is an overall test which defines all dependencies in our system. We ask that you do not modify our e2e test -
+although you may read through it to gain a better understanding of how your connector integration
+will fit into the Stock2Shop system when it is completed.
+
+The primary objective of the tests is to test whether your connector integration is working correctly.
+Use it whilst you implement the Products, Orders and Fulfillments concrete classes. Please note that there is mock
+product, order, fulfillment and Stock2Shop channel "metadata" in the `tests/e2e/data` directory which the test uses to
+simulate synchronization of data onto our system.
+
+Please mock the channel data and order transform (if implemented) for your target channel by adding JSON files to the
+[tests/e2e/data/channels](tests/e2e/data/channels/) directory. Have a look at the example provided for guidance and the
+`loadTestData()` method in the [ChannelTest](./tests/e2e/ChannelTest.php) class.
 
 ## Submission Guidelines
 
