@@ -16,10 +16,10 @@ use tests\printer\TestStreamFilter;
 class TestPrinter
 {
     /** @var int $defaultPadding */
-    public $defaultPadding = 50;
+    public $defaultPadding = 60;
 
     /** @var int $headingPadding */
-    public $headingPadding = 100;
+    public $headingPadding = 120;
 
     /** @var string $headingPadString */
     public $headingPadString = "-";
@@ -89,6 +89,9 @@ class TestPrinter
                 $outputValue = "false";
             }
         }
+        if(is_null($value)) {
+            $outputValue = "null";
+        }
         $this->output .= str_pad($name, $this->defaultPadding) . ' ' . $this->defaultPadString . ' ' . $outputValue . PHP_EOL;
     }
 
@@ -101,12 +104,19 @@ class TestPrinter
      * @return void
      */
     private function prepare() {
+
+        // Iterate over the lines property/map.
         foreach($this->lines as $heading => $lines) {
             $this->outputHeading($heading);
             foreach($lines as $lKey => $lVal) {
                 $this->outputLine($lKey, $lVal);
             }
         }
+
+        // Clear the lines property.
+        unset($this->lines);
+        $this->lines = [];
+
     }
 
     /**
@@ -117,9 +127,8 @@ class TestPrinter
      * @return void
      */
     public function print($return=false) {
-        if($this->output === "") {
-            $this->prepare();
-        }
+
+        $this->prepare();
 
         // Register filter.
         stream_filter_register("TestPrinterStream", "tests\printer\TestStreamFilter");
@@ -133,7 +142,38 @@ class TestPrinter
 
         // Output.
         print(TestStreamFilter::$cache);
+        unset($this->output);
+        $this->output = "";
 
+    }
+
+    /**
+     * Send Products To Printer
+     *
+     * @param vo\ChannelProduct[] $productsToPrint
+     * @return void
+     */
+    public function sendProductsToPrinter(array $productsToPrint, string $heading) {
+        $this->addHeading($heading);
+        $this->addLine(' ', ' ');
+        $this->addLine('Products in response: ', ' ');
+        foreach ($productsToPrint as $product) {
+            $this->addLine('product[' . $product->id . ']->id', $product->id);
+            $this->addLine('product[' . $product->id . ']->channel_product_code', $product->channel_product_code);
+            $this->addLine('product[' . $product->id . ']->success', $product->success);
+            $this->addLine('product[' . $product->id . ']->delete', $product->delete);
+            foreach ($product->variants as $variant) {
+                $this->addLine('product[' . $product->id . ']->variant[' . $variant->id . ']->id', $variant->id);
+                $this->addLine('product[' . $product->id . ']->variant[' . $variant->id . ']->channel_variant_code', $variant->channel_variant_code);
+                $this->addLine('product[' . $product->id . ']->variant[' . $variant->id . ']->success', $variant->success);
+                $this->addLine('product[' . $product->id . ']->variant[' . $variant->id . ']->sku', $variant->sku);
+            }
+            foreach ($product->images as $image) {
+                $this->addLine('product[' . $product->id . ']->image[' . $image->id . ']->id', $image->id);
+                $this->addLine('product[' . $product->id . ']->image[' . $image->id . ']->success', $image->success);
+                $this->addLine('product[' . $product->id . ']->image[' . $image->id . ']->channel_image_code', $image->channel_image_code);
+            }
+        }
     }
 
 }

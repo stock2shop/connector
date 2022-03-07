@@ -36,17 +36,15 @@ class ChannelVariant extends Variant
     }
 
     /**
-     * Checks if the channel variant is valid.
-     * Valid means that the minimum required fields are set
-     *
-     * TODO not sure what other properties make a "valid" variant?
+     * Returns true if the variant is synced with a channel.
      *
      * @return bool
      */
-    public function valid():bool {
+    public function hasSyncedToChannel(): bool
+    {
         return (
-            is_bool($this->success) &&
-            is_string($this->channel_variant_code) &&
+            $this->success &&
+            !is_null($this->channel_variant_code) &&
             $this->channel_variant_code !== ""
         );
     }

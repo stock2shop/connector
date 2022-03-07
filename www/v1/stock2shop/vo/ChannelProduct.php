@@ -2,9 +2,6 @@
 
 namespace stock2shop\vo;
 
-use stock2shop\vo\Product;
-use stock2shop\vo\ChannelVariant;
-
 class ChannelProduct extends Product
 {
     /** @var int|null $id */
@@ -59,45 +56,16 @@ class ChannelProduct extends Product
     }
 
     /**
-     * Checks if the channel product is valid.
-     * Valid means that the minimum required fields are set
-     *
-     * TODO not sure what other properties make a "valid" product?
+     * Returns true if a product is synced with a channel.
      *
      * @return bool
      */
-//    public function valid():bool {
-//        return (
-//            is_bool($this->success) &&
-//            !is_null($this->channel_product_code) &&
-//            $this->channel_product_code !== "" &&
-//            is_string($this->synced) && // TODO we could add n date format check to see if has milliseconds?
-//            $this->synced !== ""
-//        );
-//    }
-
-    /**
-     * Is Synced To Channel
-     *
-     * This method returns true if the product has been synchronized
-     * to a channel successfully. The conditions for this include:
-     *
-     * - The 'success' property must be a boolean and set to 'true'.
-     * - The 'channel_product_code' must not be null or an empty "".
-     * - The 'synced' property must be a string and not equal to "".
-     *
-     * NB: A product may be 'valid' without having been 'synced'.
-     *
-     * @return bool
-     */
-    public function isSyncedToChannel():bool {
+    public function hasSyncedToChannel(): bool
+    {
         return (
-            is_bool($this->success) &&
             $this->success &&
             !is_null($this->channel_product_code) &&
-            $this->channel_product_code !== "" &&
-            is_string($this->synced) &&
-            $this->synced !== ""
+            $this->channel_product_code !== ""
         );
     }
 

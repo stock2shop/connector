@@ -44,7 +44,6 @@ class Products implements ProductsInterface
 
             $channelProducts[$key]->channel_product_code = (string)$product->id;
             $channelProducts[$key]->success = true;
-            $channelProducts[$key]->synced = lib\Utils::getMySqlDateMicroseconds();
 
             // Mark Variants As Synced.
 

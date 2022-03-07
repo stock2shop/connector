@@ -243,7 +243,7 @@ class Products implements ProductsInterface
      *
      * This method defines the process flow for checking whether a list of products
      * is found on a channel. The products are checked by their 'channel_product_code'
-     * property - as this is the ID associated with the channel for the product.
+     * property - as this is the ID of the product on the channel.
      *
      * - Product channel_product_code
      * - Product success
@@ -291,62 +291,6 @@ class Products implements ProductsInterface
             }
         }
         return $channelProductsFound;
-
-//        $channelProductsSync = [];
-//        foreach ($channelProducts as $product) {
-//
-//            $prefix = urlencode($product->id);
-//            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, 'products');
-//
-//            // -----------------------------------------------
-//
-//            foreach ($currentFiles as $fileName => $channelObject) {
-//                if ($fileName === $prefix . '.json') {
-//
-//                    // Create product VO.
-//                    $newSyncProduct = new vo\ChannelProduct([
-//                        'channel_product_code' => $fileName
-//                    ]);
-//
-//                    // Add product VO.
-//                    $channelProductsSync[$prefix] = $newSyncProduct;
-//
-//                } else {
-//
-//                    // -----------------------------------------------
-//
-//                    // Channel Image
-//
-//                    // If the obj has a channel_image_code, then we can assume it is a
-//                    // product image. As per Stock2Shop requirements:
-//                    // - 'channel_image_code' must be set.
-//
-//                    if(array_key_exists("channel_image_code", $channelObject)) {
-//                        $channelProductsSync[$prefix]->images[] = new vo\ChannelImage([
-//                            "channel_image_code" => $channelObject["channel_image_code"]
-//                        ]);
-//                    }
-//
-//                    // -----------------------------------------------
-//
-//                    // Channel Variant
-//
-//                    // For channel product variants, the sku and channel_variant_code are
-//                    // properties which must be set and are evaluated in the ChannelTest class.
-//                    // - 'channel_variant_code' must be set.
-//                    // - variant 'sku' must be set.
-//
-//                    if (array_key_exists("channel_variant_code", $channelObject)) {
-//                        $channelProductsSync[$prefix]->variants[] = new vo\ChannelVariant([
-//                            "sku" => $channelObject["sku"],
-//                            "channel_variant_code" => $channelObject["channel_variant_code"]
-//                        ]);
-//                    }
-//                }
-//            }
-//        }
-//        return $channelProductsSync;
-
     }
 
     /**

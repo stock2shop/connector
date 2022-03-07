@@ -40,38 +40,13 @@ class ChannelImage extends ValueObject
     }
 
     /**
-     * Checks if the channel image is valid.
-     * Valid means that the minimum required fields are set
-     *
-     * TODO not sure what other properties make a "valid" image?
+     * Returns true if the image is synced with a channel.
      *
      * @return bool
      */
-//    public function valid():bool {
-//        return (
-//            is_bool($this->success) &&
-//            is_string($this->channel_image_code) &&
-//            $this->channel_image_code !== ""
-//        );
-//    }
-
-    /**
-     * Is Synced To Channel
-     *
-     * This method checks whether this object has been synced to
-     * a channel. When this returns true, then all the conditions
-     * for synchronization have been met:
-     *
-     * - the 'channel_image_code' property is not "" or null.
-     * - the 'channel_image_code' has been set to the ID of the image
-     *   on the channel.
-     * - the 'success' property is boolean and has been set to 'true'.
-     *
-     * @return bool
-     */
-    public function isSyncedToChannel(): bool {
+    public function hasSyncedToChannel(): bool
+    {
         return (
-            is_bool($this->success) &&
             $this->success &&
             !is_null($this->channel_image_code) &&
             $this->channel_image_code !== ""
