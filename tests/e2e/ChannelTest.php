@@ -182,7 +182,6 @@ final class ChannelTest extends Framework\TestCase
             // --------------------------------------------------------
 
             // Create all products on the channel from data on Stock2Shop.
-
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
 
@@ -193,8 +192,7 @@ final class ChannelTest extends Framework\TestCase
 
             // Delete a product variant from Stock2Shop.
 
-//            unset(self::$channelProductsData[1]["variants"][1]);
-
+            self::$channelProductsData[0]["variants"][0]["delete"] = true;
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             foreach($request as $idx => $product) {
                 foreach($product->variants as $variant) {
@@ -210,12 +208,14 @@ final class ChannelTest extends Framework\TestCase
             // --------------------------------------------------------
 
             // Remove all products from Stock2Shop.
-            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
-            foreach($request as $idx => $product) {
-                $product->delete = true;
+
+            foreach(self::$channelProductsData as $key => $product) {
+                self::$channelProductsData[$key]["delete"] = true;
             }
 
+            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
+
 
             self::verifyProductSync($request, $response, $connector, $channel);
             self::$printer->sendProductsToPrinter($request, $response, 'TEST CASE 3 - Remove All Products [' . $type . ']');
@@ -268,12 +268,18 @@ final class ChannelTest extends Framework\TestCase
 
         // Loop through the request products and add to productCnt and variantCnt.
         foreach ($request as $key => $product) {
-            $requestProductCnt++;
-            foreach ($product->variants as $variant) {
-                $requestVariantCnt++;
-            }
-            foreach($product->images as $image) {
-                $requestImageCnt++;
+            if(!$product->delete) {
+                $requestProductCnt++;
+                foreach ($product->variants as $variant) {
+                    if(!$variant->delete) {
+                        $requestVariantCnt++;
+                    }
+                }
+                foreach($product->images as $image) {
+                    if(!$image->delete) {
+                        $requestImageCnt++;
+                    }
+                }
             }
         }
 
@@ -294,7 +300,7 @@ final class ChannelTest extends Framework\TestCase
         $this->assertEquals($requestProductCnt, $existingProductCnt);
         $this->assertEquals($requestVariantCnt, $existingVariantCnt);
         $this->assertEquals($requestImageCnt, $existingImageCnt);
-
+//
         // Start building product, variant and image maps.
         $responseProductMap = [];
         $responseVariantMap = [];

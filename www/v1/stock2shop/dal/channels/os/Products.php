@@ -3,6 +3,7 @@
 namespace stock2shop\dal\channels\os;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
+use stock2shop\dal\channels\os\data\Helper;
 use stock2shop\exceptions;
 use stock2shop\helpers;
 use stock2shop\vo;
@@ -19,16 +20,16 @@ use stock2shop\vo;
 class Products implements ProductsInterface
 {
     /** @const string DATA_PATH */
-    const DATA_PATH = __DIR__ . "/data";
+    public const DATA_PATH = __DIR__ . "/data";
 
     /** @const string CHANNEL_SEPARATOR_VARIANT */
-    const CHANNEL_SEPARATOR_VARIANT = "variant_separator";
+    public const CHANNEL_SEPARATOR_VARIANT = "variant_separator";
 
     /** @const string CHANNEL_SEPARATOR_IMAGE */
-    const CHANNEL_SEPARATOR_IMAGE = "image_separator";
+    public const CHANNEL_SEPARATOR_IMAGE = "image_separator";
 
     /** @var string CHANNEL_ENDPOINT_PRODUCTS */
-    const CHANNEL_ENDPOINT_PRODUCTS = "products_endpoint";
+    public const CHANNEL_ENDPOINT_PRODUCTS = "products_endpoint";
 
     /**
      * Sync
@@ -96,7 +97,10 @@ class Products implements ProductsInterface
             // Check if the product has been flagged for delete.
             if ($product->delete === true) {
                 foreach ($currentFiles as $currentFileName => $obj) {
-                    $this->deleteProduct(self::DATA_PATH . '/' . $productsEndpoint . '/' . $currentFileName);
+
+//                    unlink($currentFileName);
+
+//                    $this->deleteProduct(self::DATA_PATH . '/' . $productsEndpoint . '/' . $currentFileName);
                 }
             } else {
                 $this->saveProduct($product);
@@ -106,21 +110,28 @@ class Products implements ProductsInterface
 
                     // This is the path to the source system storage for this file.
                     $filePath = self::DATA_PATH . '/' . $productsEndpoint . '/' . $variant->channel_variant_code;
-                    if ($product->delete) {
-                        $this->deleteVariant($filePath);
+
+                    if ($variant->delete) {
+                        $this->deleteVariant($variant->channel_variant_code);
                     } else {
                         $this->saveVariant($filePath, $variant);
                     }
+
                 }
 
                 // Iterate through the product images.
                 foreach ($product->images as $image) {
                     $filePath = self::DATA_PATH . '/' . $productsEndpoint . '/' . $image->channel_image_code;
                     if ($product->delete) {
-                        $this->deleteImage($filePath);
+                        $this->deleteImage($image->channel_image_code);
                     } else {
                         $this->saveImage($filePath, $image);
                     }
+
+                    if($image->delete) {
+                        $this->deleteImage($image->channel_image_code);
+                    }
+
                 }
             }
 
@@ -192,7 +203,7 @@ class Products implements ProductsInterface
         // getting products from the channel:
 
         $productsEndpointMeta = helpers\Meta::get($channel->meta, self::CHANNEL_ENDPOINT_PRODUCTS);
-        $currentFiles = \stock2shop\dal\channels\os\data\Helper::getJSONFiles($productsEndpointMeta);
+        $currentFiles = Helper::getJSONFiles($productsEndpointMeta);
 
         // ------------------------------------------------
 
