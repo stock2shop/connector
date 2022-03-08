@@ -183,7 +183,12 @@ class TestPrinter
      */
     public function sendProductsToPrinter(array $products, array $responses, string $heading) {
         $this->addHeading($heading);
-        for($pKey=0; $pKey!==count($products); $pKey++) {
+        $cProducts = count($responses);
+        if($cProducts === 0) {
+            return;
+        }
+
+        for($pKey=0; $pKey!==$cProducts; $pKey++) {
             $this->addLine('product[' . $pKey . ']->id', $products[$pKey]->id, $responses[$pKey]->id);
             $this->addLine('product[' . $pKey . ']->channel_product_code', $products[$pKey]->channel_product_code, $responses[$pKey]->channel_product_code);
             $this->addLine('product[' . $pKey . ']->success', $products[$pKey]->success, $responses[$pKey]->success);

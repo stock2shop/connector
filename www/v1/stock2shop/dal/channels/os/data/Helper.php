@@ -1,6 +1,6 @@
 <?php
 
-namespace os\data;
+namespace stock2shop\dal\channels\os\data;
 
 class Helper
 {

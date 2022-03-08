@@ -1,6 +1,6 @@
 <?php
 
-namespace example;
+namespace stock2shop\dal\channels\example;
 
 use stock2shop\dal\channel;
 use stock2shop\exceptions;

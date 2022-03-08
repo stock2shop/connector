@@ -1,6 +1,6 @@
 <?php
 
-namespace example;
+namespace stock2shop\dal\channels\example;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
 use stock2shop\exceptions;
@@ -25,31 +25,33 @@ class Products implements ProductsInterface
      */
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
+        $cnt = 0;
         foreach ($channelProducts as $key => $product) {
 
             // Mark Product As Synced.
             // - 'channel_product_code' in this example is the product ID
             //    but this would be the unique identifier in your channel for the product.
             // - 'success' to true.
-            $channelProducts[$key]->channel_product_code = (string)$product->id;
-            $channelProducts[$key]->success = false;
+            $channelProducts[$cnt]->channel_product_code = (string)$product->id;
+            $channelProducts[$cnt]->success = true;
 
             // Mark Variants As Synced.
             // - 'channel_variant_code' in this example is the variant ID.
             //   but this would be the unique identifier in your channel for the variant (e.g. sku).
             // - 'success' to true.
-            foreach ($product->variants as $vKey => $variant) {
-                $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
-                $channelProducts[$key]->variants[$vKey]->success = true;
+            foreach ($channelProducts[$cnt]->variants as $vKey => $variant) {
+                $channelProducts[$cnt]->variants[$vKey]->channel_variant_code = (string)$variant->id;
+                $channelProducts[$cnt]->variants[$vKey]->success = true;
             }
 
             // Mark Images As Synced.
             // - 'channel_image_code'.
             // - 'success' to true.
-            foreach ($product->images as $ki => $img) {
-                $channelProducts[$key]->images[$ki]->channel_image_code = (string)$img->id;
-                $channelProducts[$key]->images[$ki]->success = true;
+            foreach ($channelProducts[$cnt]->images as $ki => $img) {
+                $channelProducts[$cnt]->images[$ki]->channel_image_code = (string)$img->id;
+                $channelProducts[$cnt]->images[$ki]->success = true;
             }
+            $cnt++;
         }
         return $channelProducts;
     }
@@ -85,7 +87,7 @@ class Products implements ProductsInterface
         foreach ($channelProducts as $key => $product) {
             $channelProducts[$key]->channel_product_code = (string)$product->id;
             $channelProducts[$key]->success = true;
-            if ($channelProducts[$key]->delete === true) {
+            if ($channelProducts[$key]->delete) {
                 $channelProducts[$key]->success = false;
             }
 
@@ -93,7 +95,7 @@ class Products implements ProductsInterface
             foreach ($product->variants as $vKey => $variant) {
                 $channelProducts[$key]->variants[$vKey]->channel_variant_code = (string)$variant->id;
                 $channelProducts[$key]->variants[$vKey]->success = true;
-                if ($channelProducts[$key]->variants[$vKey]->delete === true) {
+                if ($channelProducts[$key]->variants[$vKey]->delete) {
                     $channelProducts[$key]->variants[$vKey]->success = false;
                 }
             }
@@ -102,7 +104,7 @@ class Products implements ProductsInterface
             foreach ($product->images as $ki => $img) {
                 $channelProducts[$key]->images[$ki]->channel_image_code = (string)$img->id;
                 $channelProducts[$key]->images[$ki]->success = true;
-                if ($channelProducts[$key]->images[$ki]->delete === true) {
+                if ($channelProducts[$key]->images[$ki]->delete) {
                     $channelProducts[$key]->images[$ki]->success = false;
                 }
             }

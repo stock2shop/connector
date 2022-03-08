@@ -1,6 +1,6 @@
 <?php
 
-namespace os;
+namespace stock2shop\dal\channels\os;
 
 use stock2shop\dal\channel;
 use stock2shop\exceptions;

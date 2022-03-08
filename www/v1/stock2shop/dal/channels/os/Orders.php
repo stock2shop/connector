@@ -1,6 +1,6 @@
 <?php
 
-namespace os;
+namespace stock2shop\dal\channels\os;
 
 use stock2shop\dal\channel\Orders as OrdersInterface;
 use stock2shop\exceptions;
@@ -38,7 +38,7 @@ class Orders implements OrdersInterface
         // `example\Products`). A 'channel order file' is akin to a raw order posted
         // by your system's webhook mechanism.
 
-        $channelOrderFiles = \os\data\Helper::getJSONFiles('orders');
+        $channelOrderFiles = data\Helper::getJSONFiles('orders');
 
         // ---------------------------------------------------
 
@@ -117,7 +117,7 @@ class Orders implements OrdersInterface
 
         // -----------------------------------------
 
-        $orderItems = \os\data\Helper::getJSONFiles("orders");
+        $orderItems = \stock2shop\dal\channels\os\data\Helper::getJSONFiles("orders");
 
         foreach($orders as $order) {
 
@@ -131,7 +131,7 @@ class Orders implements OrdersInterface
             // -----------------------------------------
 
             // This gets the order data from the channel for the specific order.
-            $currentFiles = \os\data\Helper::getJSONFilesByPrefix($prefix, "orders");
+            $currentFiles = \stock2shop\dal\channels\os\data\Helper::getJSONFilesByPrefix($prefix, "orders");
 
             // -----------------------------------------
 

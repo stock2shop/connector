@@ -2,9 +2,9 @@
 
 namespace tests\v1\stock2shop\dal\channels\os;
 
-use tests;
-use stock2shop\vo;
 use stock2shop\dal\channels\os;
+use stock2shop\vo;
+use tests;
 
 /**
  * Products Test

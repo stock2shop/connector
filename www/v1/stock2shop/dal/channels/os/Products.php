@@ -1,9 +1,8 @@
 <?php
 
-namespace os;
+namespace stock2shop\dal\channels\os;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
-use stock2shop\dal\channels\os\ChannelProduct;
 use stock2shop\exceptions;
 use stock2shop\helpers;
 use stock2shop\vo;
@@ -60,7 +59,7 @@ class Products implements ProductsInterface
         // ------------------------------------------------
 
         // Iterate through the channel products.
-        foreach ($channelProducts as &$product) {
+        foreach ($channelProducts as $product) {
             $prefix = urlencode($product->id);
             $productFileName = $prefix . '.json';
 
@@ -84,7 +83,7 @@ class Products implements ProductsInterface
             // ------------------------------------------------
 
             // Do the same as the loop above to set the channel_image_code for each channel image.
-            foreach ($product->images as $image) {
+            foreach ($product->images as &$image) {
                 $encodedChannelImageId = urlencode($image->id);
                 $image->channel_image_code = $prefix . $imageSeparator . $encodedChannelImageId . '.json';
             }
@@ -92,7 +91,7 @@ class Products implements ProductsInterface
             // ------------------------------------------------
 
             // Fetch the current files from the source (in this case, flat-file).
-            $currentFiles = \os\data\Helper::getJSONFilesByPrefix($prefix, $productsEndpoint);
+            $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, $productsEndpoint);
 
             // Check if the product has been flagged for delete.
             if ($product->delete === true) {
@@ -133,7 +132,7 @@ class Products implements ProductsInterface
                 $variant->success = true;
             }
 
-            foreach ($product->images as $image) {
+            foreach ($product->images as &$image) {
 
                 // Set product images as successfully synced.
                 $image->success = true;
@@ -193,7 +192,7 @@ class Products implements ProductsInterface
         // getting products from the channel:
 
         $productsEndpointMeta = helpers\Meta::get($channel->meta, self::CHANNEL_ENDPOINT_PRODUCTS);
-        $currentFiles = \os\data\Helper::getJSONFiles($productsEndpointMeta);
+        $currentFiles = \stock2shop\dal\channels\os\data\Helper::getJSONFiles($productsEndpointMeta);
 
         // ------------------------------------------------
 
@@ -208,7 +207,7 @@ class Products implements ProductsInterface
             // Compare Products With Token
 
             // The token is used to determine which products to add.
-            // We use strcm() below to do the comparison.
+            // We use strcmp() below to do the comparison.
 
             if (strcmp($token, $fileName) < 0) {
 
@@ -265,10 +264,10 @@ class Products implements ProductsInterface
         /** @var vo\ChannelProduct[] $channelProductsFound */
         $channelProductsFound = [];
 
-        foreach ($channelProducts as $product) {
+        foreach ($channelProducts as &$product) {
 
             // Get the product files from disk.
-            $productFiles = \os\data\Helper::getJSONFilesByPrefix(urlencode($product->id), 'products');
+            $productFiles = data\Helper::getJSONFilesByPrefix(urlencode($product->id), 'products');
             foreach ($productFiles as $fileChannelCode => $productFile) {
                 $product->success = true;
                 $product->source_product_code = $fileChannelCode;
@@ -313,7 +312,7 @@ class Products implements ProductsInterface
 
         // You will probably need to transform the data from our Stock2Shop format into
         // the format required by your system.
-        $filename = \os\data\Helper::getDataPath() . '/products/' .$product->id . '.json';
+        $filename = data\Helper::getDataPath() . '/products/' .$product->id . '.json';
 
         // Transform vo\ChannelProduct to json:
         $transformedProductData = json_encode($product);
