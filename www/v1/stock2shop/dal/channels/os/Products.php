@@ -20,16 +20,16 @@ use stock2shop\vo;
 class Products implements ProductsInterface
 {
     /** @const string DATA_PATH */
-    public const DATA_PATH = __DIR__ . "/data";
+    const DATA_PATH = __DIR__ . "/data";
 
     /** @const string CHANNEL_SEPARATOR_VARIANT */
-    public const CHANNEL_SEPARATOR_VARIANT = "variant_separator";
+    const CHANNEL_SEPARATOR_VARIANT = "variant_separator";
 
     /** @const string CHANNEL_SEPARATOR_IMAGE */
-    public const CHANNEL_SEPARATOR_IMAGE = "image_separator";
+    const CHANNEL_SEPARATOR_IMAGE = "image_separator";
 
     /** @var string CHANNEL_ENDPOINT_PRODUCTS */
-    public const CHANNEL_ENDPOINT_PRODUCTS = "products_endpoint";
+    const CHANNEL_ENDPOINT_PRODUCTS = "products_endpoint";
 
     /**
      * Sync

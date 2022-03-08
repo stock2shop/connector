@@ -39,7 +39,11 @@ class ProductsTest extends tests\TestCase
         $filename              = os\data\Helper::getDataPath() . '/products/' . $channelProduct->id . '.json';
 
         // Make sure previous test data removed
-        unlink($filename);
+        try {
+            unlink($filename);
+        } catch(\Exception $e) {
+        }
+
 
         // Call method to test
         $osProducts     = new os\Products();

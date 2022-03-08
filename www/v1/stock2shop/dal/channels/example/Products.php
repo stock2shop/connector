@@ -26,6 +26,49 @@ class Products implements ProductsInterface
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
         $cnt = 0;
+
+        // get a list of channel codes (unique identifier on the channel)
+        // to see if they exist in the channel.
+        // If they do exist, update them, if they do not, create them
+        // In some channels there may be bulk methods to update and create at the same time.
+        // We are doing these individually on this example channel, to show you how to do this
+        // if such functions do not exist.
+        $codes = [];
+        foreach ($channelProducts as $cp) {
+            $codes[] = $cp->channel_product_code;
+        }
+
+        // Do a bulk query to check which products already exist in the channel
+        $existingExampleProducts = ChannelState::getProductsByCode($codes);
+
+        // build an map of channel codes so we know if they exist?
+        $mapProducts = [];
+        $mapVariants = [];
+        $mapImages   = [];
+        foreach ($existingExampleProducts as $ep) {
+            if(!$ep->parent_id) {
+                $mapProducts[$ep->id] = $cp;
+            } else {
+                $mapVariants[$ep->id] = $cp;
+            }
+            array_merge($mapImages, $ep->images);
+        }
+
+        // Build a list of products to insert and products to update
+        foreach ($channelProducts as $p) {
+            foreach ($p->variants as $v) {
+                
+            }
+            $exampleProduct     = new ExampleProduct();
+            $exampleProduct->id = $p->channel_product_code;
+
+
+        }
+
+        ChannelState::insert();
+        ChannelState::update();
+
+
         foreach ($channelProducts as $key => $product) {
 
             // Mark Product As Synced.
