@@ -4,39 +4,8 @@
   "description": "OS Channel",
   "meta": [
     {
-      "key": "api_url",
-      "value": "https://www.your-store.com/wc-api/v3"
-    },
-    {
-      "key": "authentication",
-      "value": "query_params"
-    },
-    {
-      "key": "channelmeta",
-      "value": "K48MH_0"
-    },
-    {
-      "key": "consumer_key",
-      "value": "xxx"
-    },
-    {
-      "key": "consumer_secret",
-      "value": "xxx"
-    },
-    {
-      "key": "variant_separator",
-      "value": "~"
-    },
-    {
-      "key": "image_separator",
-      "value": "="
-    },
-    {
-      "key": "config_notes",
-      "value": "<p>sasdasdas</p>"
-    },
-    {
-      "key": "products_endpoint", "value": "products"
+      "key": "storage_separator",
+      "value": "-"
     }
   ],
   "modified": "2022-02-11 06:56:05",
