@@ -162,7 +162,6 @@ final class ChannelTest extends Framework\TestCase
 
         // Loop through the channel types found in the dal/channels/directory.
         foreach ($channelTypes as $type) {
-            $type = 'example';
 
             // Load test data and set channel
             self::loadTestData($type);
@@ -183,8 +182,7 @@ final class ChannelTest extends Framework\TestCase
             // Create all products on the channel from data on Stock2Shop.
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($request, $response, 'TEST CASE 1 - Create All Products On Channel [' . $type . ']');
+            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 1 - Create All Products On Channel [' . $type . ']');
 
             // --------------------------------------------------------
 
@@ -193,8 +191,7 @@ final class ChannelTest extends Framework\TestCase
             self::$channelProductsData[1]["variants"][0]["delete"] = true;
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($request, $response, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
+            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
 
             // --------------------------------------------------------
 
@@ -203,8 +200,7 @@ final class ChannelTest extends Framework\TestCase
             self::$channelProductsData[1]["images"][0]["delete"] = true;
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($request, $response, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
+            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 3 - Delete A Image [' . $type . ']');
 
             // --------------------------------------------------------
 
@@ -214,16 +210,16 @@ final class ChannelTest extends Framework\TestCase
             }
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($request, $response, 'TEST CASE 3 - Remove All Products [' . $type . ']');
+            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 4 - Remove All Products [' . $type . ']');
 
             // --------------------------------------------------------
 
             // Synchronize an empty payload of data from Stock2Shop.
             $request = vo\ChannelProduct::createArray([]);
             $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($request, $response, 'TEST CASE 4 - Sync Empty Payload [' . $type . ']');
+            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 5 - Sync Empty Payload [' . $type . ']');
+
+            // print results
             self::$printer->print();
 
         }
@@ -243,11 +239,15 @@ final class ChannelTest extends Framework\TestCase
      * @param vo\ChannelProduct[] $response
      * @param dal\channel\Products $connector
      * @param vo\Channel $channel
+     * @param string $name
      * @return vo\ChannelProduct[] $response
      */
-    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel)
+    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel, string $name)
     {
         $existingProducts = $connector->getByCode($request, $channel);
+
+        // send to printer
+        self::$printer->sendProductsToPrinter($request, $response, $existingProducts, $name);
 
         // Product, image and variant counters for existing and request products.
         $requestProductCnt  = 0;
