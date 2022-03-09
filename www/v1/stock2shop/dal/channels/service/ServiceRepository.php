@@ -111,7 +111,7 @@ class ServiceRepository
      * @param string $code
      * @return void
      */
-    public static function unsetProductByCode($code)
+    public function unsetProductByCode($code)
     {
         /**
          * @var int $key The index of the current iteration of the loop.
@@ -122,6 +122,22 @@ class ServiceRepository
                 unset(self::$products[$key]);
             }
         }
+    }
+
+    /**
+     * Add Product
+     *
+     * This method adds a product to the '$products' property
+     * of the channel's state. Only ServiceProducts are accepted.
+     *
+     * @param ServiceProduct $product
+     * @return void
+     */
+    public function addProduct(ServiceProduct $product) {
+
+        // Add product to state.
+        self::$products[] = $product;
+
     }
 
 }
