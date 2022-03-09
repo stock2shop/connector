@@ -1,0 +1,19 @@
+{
+  "active": 1,
+  "created": "2022-02-08 16:00:00",
+  "description": "Service Channel",
+  "meta": [
+    {
+      "id": "{{ChannelVariant.channel_variant_code}}",
+      "name": "{{Meta.title}}",
+      "brand": "{{Meta.brand}}",
+      "quantity": "{{ChannelVariant.qty}}",
+      "group": "{{ChannelProduct.id}}",
+      "price": "{{ChannelVariant.price}}"
+    }
+  ],
+  "modified": "2022-02-08 16:00:00",
+  "price_tier": null,
+  "qty_availability": null,
+  "type": "in-memory"
+}
