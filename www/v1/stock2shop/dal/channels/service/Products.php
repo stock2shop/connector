@@ -4,7 +4,7 @@ namespace stock2shop\dal\channels\service;
 
 use stock2shop\vo;
 
-class Products implements \stock2shop\dal\channel\Products
+class Products implements channel\Products
 {
 
     /**
