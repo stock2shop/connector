@@ -2,9 +2,6 @@
 
 namespace stock2shop\dal\channels\example;
 
-use stock2shop\dal\channel\Products as ProductsInterface;
-use stock2shop\exceptions;
-use stock2shop\lib;
 use stock2shop\vo;
 
 /**
@@ -17,10 +14,38 @@ use stock2shop\vo;
 class ProductMapper
 {
 
-    private $default_map = '';
+    /**
+     * @var ExampleProduct
+     */
+    private $product;
 
-    function ConvertS2SToExampleProduct() {
+    /**
+     * @param vo\ChannelProduct $cp
+     * @param vo\ChannelVariant $cv
+     * @param string|bool $template
+     */
+    public function __construct(vo\ChannelProduct $cp, vo\ChannelVariant $cv, $template)
+    {
+        // render using mustache
+        if ($template) {
+            // todo
+        } else {
+            $ep                   = new ExampleProduct();
+            $ep->id               = $cv->sku;
+            $ep->product_group_id = $cp->source_product_code;
+            $ep->name             = $cp->title;
+            $ep->price            = $cv->price;
+            $ep->quantity         = $cv->qty;
+            $this->product        = $ep;
+        }
+    }
 
+    /**
+     * @return ExampleProduct
+     */
+    public function get(): ExampleProduct
+    {
+        return $this->product;
     }
 
 }

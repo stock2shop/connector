@@ -18,7 +18,7 @@ class TestPrinter
     const DEBUG_ENV_VAR = 'S2S_TEST_DEBUG'; // if set to 'true' will print data objects
 
     /** @var int $defaultPadding */
-    public $defaultPadding = 55;
+    public $defaultPadding = 25;
 
     /** @var int $headingPadding */
     public $headingPadding = 135;
@@ -27,39 +27,10 @@ class TestPrinter
     public $headingPadString = "-";
 
     /** @var string $defaultPadString */
-    public $defaultPadString = "=";
-
-    /** @var array $lines */
-    public $lines = [];
+    public $defaultPadString = " ";
 
     /** @var string $output */
     public $output = "";
-
-    /** @var string $section */
-    public $section = "";
-
-    /**
-     * Add Line
-     *
-     * @param string $section
-     * @param string $name
-     * @param string $value
-     * @return void
-     */
-    public function addLine(string $name, $value=null) {
-        $this->lines[$this->section][$name] = (is_array($value) ? json_encode($value) : $value);
-    }
-
-    /**
-     * Add Heading
-     *
-     * @param string $name
-     * @return void
-     */
-    public function addHeading(string $name) {
-        $this->lines[$name] = [];
-        $this->section = $name;
-    }
 
     /**
      * Output Heading
@@ -67,7 +38,8 @@ class TestPrinter
      * @param string $heading
      * @return void
      */
-    private function outputHeading(string $heading) {
+    private function outputHeading(string $heading)
+    {
         $this->output .= PHP_EOL;
         $this->output .= str_pad('', $this->headingPadding, $this->defaultPadString) . PHP_EOL;
         $this->output .= str_pad($heading, $this->headingPadding, $this->headingPadString, STR_PAD_BOTH) . PHP_EOL;
@@ -78,30 +50,25 @@ class TestPrinter
     /**
      * Output Line
      *
-     * @param string $name
-     * @param string $value
+     * @param array $line
      * @return void
      */
-    private function outputLine(string $name, $value, $value2=null) {
-        $outputValue = $value;
-        $outputValue2 = $value2;
-        if(is_bool($value)) {
-            if($value === true) {
-                $outputValue = "true";
-            } else {
-                $outputValue = "false";
+    private function outputLine(array $values)
+    {
+        foreach ($values as $value) {
+            if (is_bool($value)) {
+                if ($value === true) {
+                    $value = "true";
+                } else {
+                    $value = "false";
+                }
+            } elseif (is_null($value)) {
+                $value = 'null';
             }
+            $o = str_pad($this->prepareValue($value), $this->defaultPadding);
+            $this->output .= $o;
         }
-        if(is_null($value)) {
-            $outputValue = "null";
-        }
-        if(is_null($value2)) {
-            $outputValue2 = "null";
-        }
-
-
-
-        $this->output .= str_pad($name, $this->defaultPadding) . ' ' . $this->defaultPadString . ' ' . str_pad($this->prepareValue($outputValue), $this->defaultPadding) . ' ' . $this->defaultPadString . ' ' . $this->prepareValue($outputValue2) . PHP_EOL;
+        $this->output .= PHP_EOL;
     }
 
     /**
@@ -113,35 +80,12 @@ class TestPrinter
      * @param mixed $value
      * @return mixed The shortened string or the original value.
      */
-    private function prepareValue($value) {
-        if(is_string($value) && strlen($value) >= $this->defaultPadding) {
-            $value = substr($value,0, ($this->defaultPadding - 10)) . "..";
+    private function prepareValue($value)
+    {
+        if (is_string($value) && strlen($value) >= $this->defaultPadding) {
+            $value = substr($value, 0, ($this->defaultPadding - 10)) . "..";
         }
         return $value;
-    }
-
-    /**
-     * Prepare
-     *
-     * Prints the content for a section to the terminal/stdout.
-     * The output format is defined by the constants in this class.
-     *
-     * @return void
-     */
-    private function prepare() {
-
-        // Iterate over the lines property/map.
-        foreach($this->lines as $heading => $lines) {
-            $this->outputHeading($heading);
-            foreach($lines as $lKey => $lVal) {
-                $this->outputLine($lKey, $lVal);
-            }
-        }
-
-        // Clear the lines property.
-        unset($this->lines);
-        $this->lines = [];
-
     }
 
     /**
@@ -151,11 +95,10 @@ class TestPrinter
      *
      * @return void
      */
-    public function print($return=false) {
-
+    public function print()
+    {
         $debug = getenv(self::DEBUG_ENV_VAR);
-        if($debug !== 'true') {
-            $this->prepare();
+        if ($debug === 'true') {
 
             // Register filter.
             stream_filter_register("TestPrinterStream", "tests\TestStreamFilter");
@@ -169,7 +112,6 @@ class TestPrinter
 
             // Output.
             print(TestStreamFilter::$cache);
-            unset($this->output);
             $this->output = "";
         }
     }
@@ -177,44 +119,124 @@ class TestPrinter
     /**
      * Send Products To Printer
      *
-     * @param vo\ChannelProduct[] $products
-     * @param vo\ChannelProduct[] $responses
+     * @param vo\ChannelProduct[] $products the request sent to sync()
+     * @param vo\ChannelProduct[] $responses the response received from sync()
+     * @param vo\ChannelProduct[] $existing the items on the channel fethced by getByCode()
      * @return void
      */
-    public function sendProductsToPrinter(array $products, array $responses, string $heading) {
-        $this->addHeading($heading);
-        $cProducts = count($responses);
-        if($cProducts === 0) {
-            return;
-        }
+    public function sendProductsToPrinter(array $products, array $responses, array $existing, string $heading)
+    {
+        $this->outputHeading($heading);
+        if(count($products) > 0) {
 
-        for($pKey=0; $pKey!==$cProducts; $pKey++) {
-            $this->addLine('product[' . $pKey . ']->id', $products[$pKey]->id, $responses[$pKey]->id);
-            $this->addLine('product[' . $pKey . ']->channel_product_code', $products[$pKey]->channel_product_code, $responses[$pKey]->channel_product_code);
-            $this->addLine('product[' . $pKey . ']->success', $products[$pKey]->success, $responses[$pKey]->success);
-            $this->addLine('product[' . $pKey . ']->delete', $products[$pKey]->delete, $responses[$pKey]->delete);
-
-            for($vKey=0; $vKey!==count($products[$pKey]->variants); $vKey++) {
-                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->id', $products[$pKey]->variants[$vKey]->id, $responses[$pKey]->variants[$vKey]->id);
-                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->channel_variant_code', $products[$pKey]->variants[$vKey]->channel_variant_code, $responses[$pKey]->variants[$vKey]->channel_variant_code);
-                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->success', $products[$pKey]->variants[$vKey]->success, $responses[$pKey]->variants[$vKey]->success);
-                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->delete', $products[$pKey]->variants[$vKey]->delete, $responses[$pKey]->variants[$vKey]->delete);
-                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->sku', $products[$pKey]->variants[$vKey]->sku, $responses[$pKey]->variants[$vKey]->sku);
+            // get a map of existing products
+            $mapExistingProducts = [];
+            $mapExistingVariants = [];
+            $mapExistingImages = [];
+            foreach ($existing as $p) {
+                $mapExistingProducts[$p->channel_product_code] = $p;
+                foreach ($p->variants as $v) {
+                    $mapExistingVariants[$v->channel_variant_code] = $v;
+                }
+                foreach ($p->images as $img) {
+                    $mapExistingImages[$img->channel_image_code] = $img;
+                }
             }
-            unset($vKey);
 
-            for($iKey=0; $iKey!==count($products[$pKey]->images); $iKey++) {
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->id', $products[$pKey]->images[$iKey]->id, $responses[$pKey]->images[$iKey]->id);
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->success', $products[$pKey]->images[$iKey]->success, $responses[$pKey]->images[$iKey]->success);
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->delete', $products[$pKey]->images[$iKey]->delete, $responses[$pKey]->images[$iKey]->delete);
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->channel_image_code', $products[$pKey]->images[$iKey]->channel_image_code, $responses[$pKey]->images[$iKey]->channel_image_code);
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->src', $products[$pKey]->images[$iKey]->src, $responses[$pKey]->images[$iKey]->src);
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->active', $products[$pKey]->images[$iKey]->active, $responses[$pKey]->images[$iKey]->active);
+            $this->outputLine([
+                'TYPE',
+                'CODE',
+                'PROPERTY',
+                'REQUEST',
+                'RESPONSE',
+                'ON CHANNEL',
+            ]);
+            foreach ($products as $k => $p) {
+                $r = $responses[$k] ?? new vo\ChannelProduct([]);
+                $ep = $mapExistingProducts[$p->channel_product_code] ?? new vo\ChannelProduct([]);
+                $this->outputLine([
+                    'product',
+                    $p->channel_product_code,
+                    'channel_product_code',
+                    $p->channel_product_code,
+                    $r->channel_product_code,
+                    $ep->channel_product_code
+                ]);
+                $this->outputLine([
+                    'product',
+                    $p->channel_product_code,
+                    'success',
+                    $p->success,
+                    $r->success,
+                    $ep->success
+                ]);
+                $this->outputLine([
+                    'product',
+                    $p->channel_product_code,
+                    'delete',
+                    $p->delete,
+                    $r->delete,
+                    $ep->delete
+                ]);
+                foreach ($p->variants as $kv => $v) {
+                    $rv = $responses[$k]->variants[$kv] ?? new vo\ChannelVariant([]);
+                    $ep = $mapExistingVariants[$v->channel_variant_code] ?? new vo\ChannelVariant([]);
+                    $this->outputLine([
+                        'variant',
+                        $v->channel_variant_code,
+                        'channel_variant_code',
+                        $v->channel_variant_code,
+                        $rv->channel_variant_code,
+                        $ep->channel_variant_code
+                    ]);
+                    $this->outputLine([
+                        'variant',
+                        $v->channel_variant_code,
+                        'success',
+                        $v->success,
+                        $rv->success,
+                        $ep->success
+                    ]);
+                    $this->outputLine([
+                        'variant',
+                        $v->channel_variant_code,
+                        'delete',
+                        $v->delete,
+                        $rv->delete,
+                        $ep->delete
+                    ]);
+                }
+                foreach ($p->images as $ki => $img) {
+                    $ri = $responses[$k]->images[$ki] ?? new vo\ChannelImage([]);
+                    $ei = $mapExistingImages[$img->channel_image_code] ?? new vo\ChannelImage([]);
+                    $this->outputLine([
+                        'image',
+                        $img->channel_image_code,
+                        'channel_image_code',
+                        $img->channel_image_code,
+                        $ri->channel_image_code,
+                        $ei->channel_image_code
+
+                    ]);
+                    $this->outputLine([
+                        'image',
+                        $img->channel_image_code,
+                        'success',
+                        $img->success,
+                        $ri->success,
+                        $ei->success
+                    ]);
+                    $this->outputLine([
+                        'image',
+                        $img->channel_image_code,
+                        'delete',
+                        $img->delete,
+                        $ri->delete,
+                        $ei->delete
+                    ]);
+                }
             }
-            unset($iKey);
-            $this->addLine('', '');
         }
-        unset($pKey);
     }
 
 }

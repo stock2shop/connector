@@ -14,29 +14,78 @@ class ChannelState
 {
 
     /**
-     * @var ExampleProduct[]
+     * @var array associative array with key as ExampleProduct->id and value as ExampleProduct
      */
-    private static $products = [];
+    public static $products = [];
 
     /**
-     * @param ExampleProduct[] $cp
+     * @var array associative array with key as ExampleImage->id and value as ExampleImage
      */
-    static function setProducts(array $cp) {
-        self::$products = $cp;
+    public static $images = [];
+
+    /**
+     * @param ExampleProduct[] $products
+     */
+    static function update(array $products) {
+        foreach ($products as $p) {
+            self::$products[$p->id] = $p;
+        }
     }
 
     /**
-     * @param string[] $codes
-     * @return ExampleProduct[]
+     * @param ExampleImage[] $images
      */
-    static function getProductsByCode(array $codes): array {
+    static function updateImages(array $images) {
+        foreach ($images as $i) {
+            self::$images[$i->id] = $i;
+        }
+    }
+
+    /**
+     * @param string[] $ids
+     * @return array associative array, key being id and value being ExampleProduct
+     */
+    static function getProductsByIDs(array $ids): array {
         $exampleProducts = [];
-        foreach (self::$products as $p) {
-            if(in_array($p->id, $codes)) {
-                $exampleProducts[] = $p;
+        foreach ($ids as $id) {
+            if(isset(self::$products[$id])) {
+                $exampleProducts[$id] = self::$products[$id];
             }
         }
         return $exampleProducts;
+    }
+
+    /**
+     * @param string[] $ids
+     * @return array associative array, key being id and value being ExampleImage
+     */
+    static function getImagesByIDs(array $ids): array {
+        $exampleImages = [];
+        foreach ($ids as $id) {
+            if(isset(self::$images[$id])) {
+                $exampleImages[$id] = self::$images[$id];
+            }
+        }
+        return $exampleImages;
+    }
+
+    /**
+     * @param string[] $ids
+     */
+    static function deleteProductsByIDs(array $ids) {
+        foreach ($ids as $id) {
+            unset(self::$products[$id]);
+        }
+    }
+
+    /**
+     * @param string[] $ids
+     */
+
+    static function deleteImages(array $ids) {
+        foreach ($ids as $id) {
+            unset(self::$images[$id]);
+        }
     }
 
 }

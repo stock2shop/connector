@@ -6,8 +6,6 @@ use PHPUnit\Framework;
 use tests\TestPrinter;
 use stock2shop\dal;
 use stock2shop\vo;
-use stock2shop\helpers;
-use stock2shop\exceptions\NotImplemented;
 use stock2shop\exceptions\UnprocessableEntity;
 
 /**
@@ -160,11 +158,10 @@ final class ChannelTest extends Framework\TestCase
      */
     public function testSyncProducts()
     {
-//        $channelTypes = self::getChannelTypes();
-//
-//        // Loop through the channel types found in the dal/channels/directory.
-//        foreach ($channelTypes as $type) {
-        $type = 'example';
+        $channelTypes = self::getChannelTypes();
+
+        // Loop through the channel types found in the dal/channels/directory.
+        foreach ($channelTypes as $type) {
 
             // Load test data and set channel
             self::loadTestData($type);
@@ -185,54 +182,47 @@ final class ChannelTest extends Framework\TestCase
             // Create all products on the channel from data on Stock2Shop.
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
-
-            self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($request, $response, 'TEST CASE 1 - Create All Products On Channel [' . $type . ']');
+            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 1 - Create All Products On Channel [' . $type . ']');
 
             // --------------------------------------------------------
 
-            // Delete a product variant from Stock2Shop.
-
-            self::$channelProductsData[0]["variants"][0]["delete"] = true;
+            // Delete a single variant from a product.
+            // The second product in the test data has two variants
+            self::$channelProductsData[1]["variants"][0]["delete"] = true;
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
-            foreach($request as $idx => $product) {
-                foreach($product->variants as $variant) {
-                    $variant->delete = true;
-                }
-            }
-
             $response = $connector->sync($request, $channel, $flagMap);
-
-            self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($request, $response, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
+            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
 
             // --------------------------------------------------------
 
-            // Remove all products from Stock2Shop.
+            // Delete a single image from a product.
+            // The second product in the test data has two images
+            self::$channelProductsData[1]["images"][0]["delete"] = true;
+            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
+            $response = $connector->sync($request, $channel, $flagMap);
+            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 3 - Delete A Image [' . $type . ']');
 
+            // --------------------------------------------------------
+
+            // Delete all products from Channel.
             foreach(self::$channelProductsData as $key => $product) {
                 self::$channelProductsData[$key]["delete"] = true;
             }
-
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
-
-
-            self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($request, $response, 'TEST CASE 3 - Remove All Products [' . $type . ']');
+            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 4 - Remove All Products [' . $type . ']');
 
             // --------------------------------------------------------
 
             // Synchronize an empty payload of data from Stock2Shop.
-
             $request = vo\ChannelProduct::createArray([]);
             $response = $connector->sync($request, $channel, $flagMap);
+            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 5 - Sync Empty Payload [' . $type . ']');
 
-            self::verifyProductSync($request, $response, $connector, $channel);
-            self::$printer->sendProductsToPrinter($request, $response, 'TEST CASE 4 - Sync Empty Payload [' . $type . ']');
+            // print results
             self::$printer->print();
 
-//        }
+        }
 
     }
 
@@ -243,21 +233,21 @@ final class ChannelTest extends Framework\TestCase
      * successful using the custom connectors in the stock2shop/dal/channels.
      * Please note that in the context of this test case, 'existing'
      * ($existingProducts) refers to data which has been persisted on a
-     * Stock2Shop channel.
-     *
-     * The workflow includes:
-     *
-     * 1. Get the existing products on the channel by calling getByCode().
+     * channel.
      *
      * @param vo\ChannelProduct[] $request
      * @param vo\ChannelProduct[] $response
      * @param dal\channel\Products $connector
      * @param vo\Channel $channel
+     * @param string $name
      * @return vo\ChannelProduct[] $response
      */
-    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel)
+    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel, string $name)
     {
         $existingProducts = $connector->getByCode($request, $channel);
+
+        // send to printer
+        self::$printer->sendProductsToPrinter($request, $response, $existingProducts, $name);
 
         // Product, image and variant counters for existing and request products.
         $requestProductCnt  = 0;
@@ -268,7 +258,7 @@ final class ChannelTest extends Framework\TestCase
         $existingImageCnt   = 0;
 
         // Loop through the request products and add to productCnt and variantCnt.
-        foreach ($request as $key => $product) {
+        foreach ($request as $product) {
             if(!$product->delete) {
                 $requestProductCnt++;
                 foreach ($product->variants as $variant) {
@@ -285,7 +275,8 @@ final class ChannelTest extends Framework\TestCase
         }
 
         // Loop through existing products.
-        foreach ($existingProducts as $key => $product) {
+        // These are the products returned by interface method Products->getByCode()
+        foreach ($existingProducts as $product) {
             $existingProductCnt++;
             foreach ($product->variants as $variant) {
                 $existingVariantCnt++;
@@ -301,8 +292,8 @@ final class ChannelTest extends Framework\TestCase
         $this->assertEquals($requestProductCnt, $existingProductCnt);
         $this->assertEquals($requestVariantCnt, $existingVariantCnt);
         $this->assertEquals($requestImageCnt, $existingImageCnt);
-//
-        // Start building product, variant and image maps.
+
+        // Building product, variant and image maps.
         $responseProductMap = [];
         $responseVariantMap = [];
         $responseImageMap = [];
@@ -326,7 +317,7 @@ final class ChannelTest extends Framework\TestCase
 
             // Check product.
             $this->assertTrue($product instanceof vo\ChannelProduct);
-//            $this->assertTrue($product->hasSyncedToChannel());
+            $this->assertTrue($product->hasSyncedToChannel());
 
             // -----------------------------------------
 
@@ -337,7 +328,7 @@ final class ChannelTest extends Framework\TestCase
             foreach ($existingProduct->variants as $existingVariant) {
                 $variant = $responseVariantMap[$existingVariant->channel_variant_code];
                 $this->assertTrue($variant instanceof vo\ChannelVariant);
-//                $this->assertTrue($variant->hasSyncedToChannel());
+                $this->assertTrue($variant->hasSyncedToChannel());
                 $this->assertNotEmpty($variant->sku);
             }
 
