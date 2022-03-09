@@ -55,6 +55,12 @@ class ServiceRepositoryTest extends tests\TestCase
         $this->assertEquals($firstRepository, $secondRepository);
         $this->assertEquals($sp, $state[0]);
 
+        // Cleanup.
+        unset($secondRepository);
+
+        $this->assertNotNull($firstRepository);
+        $this->assertEquals(1, count($firstRepository->getProductsByCode(['1'])));
+
     }
 
     /**
@@ -103,6 +109,9 @@ class ServiceRepositoryTest extends tests\TestCase
         $this->assertEquals('1', $existingProducts[0]->id);
         $this->assertEquals('2', $existingProducts[1]->id);
 
+        // Cleanup.
+        unset($repository);
+
     }
 
     /**
@@ -138,6 +147,8 @@ class ServiceRepositoryTest extends tests\TestCase
         $this->assertEquals(1, count($existingProducts));
         $this->assertEquals('stock2shop\\dal\\channels\\service\\ServiceProduct', get_class($existingProducts[0]));
 
+        unset($repository);
+
     }
 
     /**
@@ -164,16 +175,95 @@ class ServiceRepositoryTest extends tests\TestCase
         $spOne->group      = 'Group A';
         $spOne->brand      = 'Brand Name';
 
-        // Test add product.
+        // Add product to the repository.
+        $repository->addProduct($spOne);
+
+        // Get existing products by code.
+        $existingProducts = $repository->getProductsByCode(['addone']);
+
+        // Assert on state.
+        $this->assertEquals(2, count($existingProducts));
+
+        // Test remove product.
         $repository->unsetProductByCode('addone');
 
         // Get existing products by code.
-         $existingProducts = $repository->getProductsByCode(['addone']);
+        $existingProducts = $repository->getProductsByCode(['addone']);
 
         // Assert on state.
         $this->assertEquals(0, count($existingProducts));
 
+        // Cleanup.
+        unset($repository);
+
     }
 
+    /**
+     * Test Add Product
+     *
+     * Evaluates whether the add product method adds a
+     * `ServiceProduct` object to the class' state.
+     *
+     * @return void
+     */
+    public function testAddImage() {
+
+        // Instantiate the repository.
+        $repository = service\ServiceRepository::getInstance();
+
+        // Mock `ServiceProduct`.
+        $spOne = new service\ServiceImage();
+
+        $spOne->product_id  = 'addone';
+        $spOne->url         = 'addone';
+
+        // Test add product.
+        $repository->addImage($spOne);
+
+        // Get existing products by code.
+        $existingProducts = $repository->getImagesByCode(['addone']);
+
+        // Assert on state.
+        $this->assertEquals(1, count($existingProducts));
+        $this->assertEquals('stock2shop\\dal\\channels\\service\\ServiceImage', get_class($existingProducts[0]));
+
+    }
+
+    /**
+     * Test Unset Image By Code
+     *
+     * Tests whether the method to remove an image
+     * deletes the correct `ServiceImage` object
+     * from the class' state.
+     *
+     * @return void
+     */
+    public function testUnsetImageByCode() {
+
+        // Instantiate the repository.
+        $repository = service\ServiceRepository::getInstance();
+
+        // Mock a ServiceProduct object.
+        $siOne = new service\ServiceImage();
+
+        $siOne->product_id = 'addone';
+        $siOne->url        = 'https://aws.stock2shop../1.png';
+
+        // Add image to repository.
+        $repository->addImage($siOne);
+
+        // Assert on image count.
+//        $this->assertEquals(count($repository::));
+
+        // Test remove image from repository.
+        $repository->unsetImageByCode('addone');
+
+        // Get existing products by code.
+//        $existingProducts = $repository->getProductsByCode(['addone']);
+
+        // Assert on state.
+//        $this->assertEquals(0, count($existingProducts));
+
+    }
 
 }

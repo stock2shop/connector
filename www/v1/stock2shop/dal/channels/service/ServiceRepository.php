@@ -131,6 +131,24 @@ class ServiceRepository
     }
 
     /**
+     * Get Images By Code
+     *
+     * This method returns images from the repository.
+     *
+     * @param string[]
+     * @return array
+     */
+    public function getImagesByCode(array $codes): array {
+        $exampleImages = [];
+        foreach (self::$images as $p) {
+            if (in_array($p->product_id, $codes)) {
+                $exampleImages[] = $p;
+            }
+        }
+        return $exampleImages;
+    }
+
+    /**
      * Unset Product By Code
      *
      * This method removes a product from the channel's state.
@@ -138,7 +156,7 @@ class ServiceRepository
      * @param string $code
      * @return void
      */
-    public function unsetProductByCode($code)
+    public function unsetProductByCode(string $code)
     {
         /**
          * @var int $key The index of the current iteration of the loop.
@@ -161,10 +179,43 @@ class ServiceRepository
      * @return void
      */
     public function addProduct(ServiceProduct $product) {
-
         // Add product to state.
         self::$products[] = $product;
-
     }
 
+    /**
+     * Add Image
+     *
+     * This method adds a `ServiceImage` object to the channel's state.
+     * Images are added to the static $images property of this class.
+     *
+     * @param ServiceImage $image
+     * @return void
+     */
+    public function addImage(ServiceImage $image)
+    {
+        // Add product to state.
+        self::$images[] = $image;
+    }
+
+    /**
+     * Unset Image By Code
+     *
+     * This method removes a `ServiceImage` object by code.
+     *
+     * @param string $code
+     * @return void
+     */
+    public function unsetImageByCode(string $code)
+    {
+        /**
+         * @var int $key The index of the current iteration of the loop.
+         * @var ServiceImage $p A image of the service type.
+         */
+        foreach (self::$products as $key => $p) {
+            if ($p->id === $code) {
+                unset(self::$images[$key]);
+            }
+        }
+    }
 }
