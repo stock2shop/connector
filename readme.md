@@ -67,7 +67,13 @@ cp -r $S2S_PATH/connector/www/v1/stock2shop/dal/channels/example $S2S_PATH/conne
 
 4. Substitute Namespaces. 
 
-Substitute 'example' in the PHP classes in the directory with your `CHANNEL_NAME`.
+Substitute 'example' in the following PHP classes in the directory with your `CHANNEL_NAME`:
+
+```bash
+vi $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$CHANNEL_NAME/Products.php \
+$S2S_PATH/connector/www/v1/stock2shop/dal/channels/$CHANNEL_NAME/ProductMapper.php \
+$S2S_PATH/connector/www/v1/stock2shop/dal/channels/$CHANNEL_NAME/ImageMapper.php \
+```
 
 Replace 
 ```php
