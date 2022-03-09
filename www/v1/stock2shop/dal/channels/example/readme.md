@@ -5,21 +5,23 @@
 This is an example channel. 
 Use this as a boilerplate for creating new channels.
 
-## Classes
+## Storage
 
-*Creator*
+The `example` connector persists data to an in-memory storage class [ChannelState](./ChannelState.php)
+where products and images are created, updated or removed from the channel's state during synchronization. 
 
-Concrete class implementation of the [dal\channel\Creator](../../channel/Creator.php) class.
-The `createOrders()` and `createFulfillments()` methods throw [NotImplemented](../../../exceptions/NotImplemented.php) exceptions
-as the connector only implements the [dal\channel\Products](../../../dal/channel/Products.php) interface.
+## Data Models
 
-*Products*
+This channel models product and image data differently to the way that the Stock2Shop system does. 
+A [example\ProductMapper](./ProductMapper.php) class has been provided to transform [vo\ChannelProduct](../../../vo/ChannelProduct.php) 
+and [vo\ChannelVariant](../../../vo/ChannelImage.php) into [ExampleProduct](ExampleProduct.php) objects - 
+which has a flat structure and does not support "variants".
 
-This class defines the workflow for synchronization between the channel and Stock2Shop's system.
-It is a very simple and uncomplicated example which illustrates the minimum requirements for 
-a channel connector which syncs products.
+Images are mapped by the [example\ImageMapper](./ImageMapper.php) from [vo\ChannelImage](../../../vo/ChannelImage) objects
+into [example\ExampleImage](./ExampleImage.php) objects.
 
-## Usage
+## Configuration
 
-Use this example as the starting point for your implementation.
-See the main [readme](../../../../../../readme.md) file for the setup steps.
+Custom channel configuration has been added to the [data](../../../../../../tests/e2e/data/channels/example) directory
+of the e2e test which includes the `mustache_template` meta template used to map the product data onto the data classes 
+discussed in the previous section.

@@ -34,11 +34,18 @@ class ProductMapper
             $productData = [];
 
             // Get product meta.
-            unset($cp->variants, $cp->images, $cp->meta, $cp->options);
 
             // Add product and variant values.
             $productData['ChannelProduct'] = (array)$cp;
             $productData['ChannelVariant'] = (array)$cv;
+
+            // Unset the array properties.
+            unset(
+                $productData['ChannelProduct']['variants'],
+                $productData['ChannelProduct']['images'],
+                $productData['ChannelProduct']['meta'],
+                $productData['ChannelProduct']['options']
+            );
 
             // Create the product from template.
             $epData = $this->renderTemplate($template, $productData);

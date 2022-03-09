@@ -1,25 +1,11 @@
 {
   "active": 1,
   "created": "2022-02-08 16:00:00",
-  "description": "Service Channel",
+  "description": "Example Channel",
   "meta": [
     {
       "key": "mustache_template",
-      "value": {
-        "id": "{{ChannelVariant.sku}}",
-        "product_group_id": "{{ChannelProduct.channel_product_code}}",
-        "name": "{{ChannelProduct.title}}",
-        "price": "{{ChannelVariant.price}}",
-        "quantity": "{{ChannelVariant.qty}}"
-      }
-    },
-    {
-      "key": "variant_separator",
-      "value": "~"
-    },
-    {
-      "key": "image_separator",
-      "value": "="
+      "value": "{\n        \"id\": \"{{ChannelVariant.sku}}\",\n        \"product_group_id\": \"{{ChannelProduct.source_product_code}}\",\n        \"name\": \"{{ChannelProduct.title}}\",\n        \"price\": \"{{ChannelVariant.price}}\",\n        \"quantity\": \"{{ChannelVariant.qty}}\"\n      }"
     }
   ],
   "modified": "2022-02-08 16:00:00",
