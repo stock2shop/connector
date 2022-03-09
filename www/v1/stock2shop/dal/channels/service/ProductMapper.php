@@ -22,8 +22,8 @@ class ProductMapper
      *
      * {
      *     'id': '{{ChannelVariant.channel_variant_code}}',
-     *     'name': '{{ChannelProduct.title}}',
-     *     'brand': '{{ChannelProduct.title}}',
+     *     'name': '{{meta.title}}',
+     *     'brand': '{{meta.brand}}',
      *     'quantity': '{{ChannelProduct.qty}}',
      *     'group': '{{ChannelProduct.channel_product_code}}',
      *     'images': '{{ChannelProduct.images}}',
@@ -46,7 +46,7 @@ class ProductMapper
     public function __construct(vo\Channel $channel) {
 
         // Get the meta map from the channel meta.
-        $this->defaultChannelProductMap = helpers\Meta::get($channel->meta, "default_product_map");
+        $this->defaultChannelProductMap = helpers\Meta::get($channel->meta, "default_channel_product_map");
 
     }
 
@@ -65,32 +65,57 @@ class ProductMapper
         /** @var ServiceProduct[] $serviceProducts */
         $serviceProducts = [];
 
-        // In this method we are going to extract the variants
-        // one by one and instantiate a `ServiceProduct` object
-        // for each variant. Hence, a `vo\ChannelProduct` object
-        // may yield more than one `ServiceProduct` object,
-        // although only the fields belonging to the variants[]
-        // property of the product will be unique.
-
-        $flattenedChannelProducts = [];
-
         // First we need to extract the property that has the variants.
         // After that the variants and the product properties will be
         // merged into arrays which we'll use the template to map to
         // `ServiceProduct` objects.
-        $channelVariants = array_column($channelProduct, "variants");
-        $cProduct = (array)$channelProduct;
-        $this->prefixArrayKeys("ChannelProduct", $cProduct);
+        $productVariants = $channelProduct->variants;
+        $productMeta = helpers\Meta::map($channelProduct->meta);
+        $productImages = $channelProduct->images;
 
-        foreach($channelVariants as $cVariant) {
+        // Build the product.
+        $productData = [];
+        $productData['Meta'] = $productMeta;
 
-            // Prefix variant keys.
-            $this->prefixArrayKeys("ChannelVariant", $cVariant);
-            $sp = array_merge($cVariant, $cProduct);
+        // Unset array/object properties.
+        unset($channelProduct->variants, $channelProduct->images, $channelProduct->meta, $channelProduct->options);
+        $productData['ChannelProduct'] = (array)$channelProduct;
+
+        // Iterate over variants.
+        foreach($productVariants as $cVariant) {
+
+            $productData['ChannelVariant'] = (array)$cVariant;
+            $sp = $this->renderTemplate($this->defaultChannelProductMap, $productData);
 
             // New service product.
-            $m = new \Mustache_Engine();
-            $serviceProducts[] = $m->render($this->defaultChannelProductMap, new ServiceProduct());
+            $serviceProduct = new ServiceProduct();
+            foreach($sp as $k => $v) {
+                $serviceProduct->$k = $v;
+            }
+
+            // Iterate over the ChannelProduct images.
+            foreach($productImages as $cpImage) {
+                $serviceProduct->images[] = $cpImage->src;
+            }
+
+            /**
+             * Here we are expecting to have a complete `ServiceProduct`
+             * object which matches the structure of a product on the
+             * channel:
+             *
+             *  serviceProduct
+             *
+             *   id       =   ChannelVariant->channel_variant_code
+             *   name     =   Meta[name='title']->value
+             *   brand    =   Meta[name='brand']->value
+             *   price    =   ChannelVariant->price
+             *   quantity =   ChannelVariant->qty
+             *   quantity =   ChannelVariant->qty
+             *   group    =   ChannelProduct->channel_product_code
+             *   images   =   ChannelProduct->images
+             */
+
+            $serviceProducts[] = $serviceProduct;
 
         }
 
@@ -106,59 +131,12 @@ class ProductMapper
      * array of `ServiceProduct` data.
      *
      * @param string $rawTemplate
-     * @param array $flattenedChannelProduct
-     * @return array $serviceProductData
-     */
-//    public function renderTemplate(string $rawTemplate, array $flattenedChannelProduct): array {
-//
-//
-//
-//    }
-
-    /**
-     * Prefix Array Keys
-     *
-     * Adds a prefix to the keys of the array and updates the original
-     * array without copying it by reference. Dot notation is added in
-     * between so that it may be used with the Mustache template library.
-     *
-     * @param string $prefix
-     * @param array $array
-     * @return void
-     */
-    private function prefixArrayKeys(string $prefix, array $array) {
-        $format = $prefix . '.%s';
-        array_flip(array_map(function ($key) use($format) {
-            return sprintf($format, $key);
-        }, array_flip($array)));
-    }
-
-    /**
-     * Flatten
-     *
-     * This function uses the built-in 'RecursiveIteratorIterator'
-     * and 'RecursiveArrayIterator' classes to flatten a Value
-     * Object array.
-     *
-     * @param array $arr
+     * @param array $data
      * @return array
      */
-    public static function flatten(array $arr): array
-    {
-        $iterator = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($arr));
-        $keys = [];
-        foreach ($iterator as $key => $value) {
-            for ($i = $iterator->getDepth() - 1; $i >= 0; $i--) {
-                $parentKey = $iterator->getSubIterator($i)->key();
-                if (!is_numeric($parentKey)) {
-                    $key = $parentKey . '.' . $key;
-                }
-            }
-            $key .= '.' . $value;
-            $keys[] = $key;
-        }
-        sort($keys);
-        return $keys;
+    public function renderTemplate(string $rawTemplate, array $data): array {
+        $mustache = new \Mustache_Engine();
+        return json_decode($mustache->render($rawTemplate, $data), true);
     }
 
 }

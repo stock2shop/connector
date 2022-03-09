@@ -68,11 +68,13 @@ class ProductMapperTest extends tests\TestCase
                 ]
             ],
             'images' => [
-
+                ['id'=>'1', 'active'=>true, 'src'=>'http://aws.stock2sho..1', 'channel_image_code'=>'img1'],
+                ['id'=>'2', 'active'=>true, 'src'=>'http://aws.stock2sho..2', 'channel_image_code'=>'img2']
             ],
             'meta' => [
                 ['key'=>'title','value'=>'Product Title','template_name'=>null],
-                ['key'=>'title2','value'=>'Product Title Alt','template_name'=>null]
+                ['key'=>'title2','value'=>'Product Title Alt','template_name'=>null],
+                ['key'=>'brand','value'=>'Brand Name','template_name'=>null]
             ]
         ]);
 
@@ -81,7 +83,7 @@ class ProductMapperTest extends tests\TestCase
             'meta' => [
                 [
                     "key"=>"default_channel_product_map",
-                    "value" => '{"id": "{{ChannelVariant.channel_variant_code}}", "name": "{{Meta.title}}", "brand": "{{ChannelProduct.id}}", "quantity": "{{ChannelVariant.qty}}", "group": "{{ChannelProduct.id}}", "images": "{{ChannelProduct.images}}", "price": "{{ChannelVariant.price}}"}',
+                    "value" => '{"id": "{{ChannelVariant.channel_variant_code}}", "name": "{{Meta.title}}", "brand": "{{Meta.brand}}", "quantity": "{{ChannelVariant.qty}}", "group": "{{ChannelProduct.id}}", "price": "{{ChannelVariant.price}}"}',
                     "template_name" => null
                 ]
             ],
@@ -100,6 +102,10 @@ class ProductMapperTest extends tests\TestCase
         $expected->price = "2222";
         $expected->quantity = 2;
         $expected->group = "1";
+        $expected->images = [
+            'http://aws.stock2sho..1',
+            'http://aws.stock2sho..2'
+        ];
 
         // Test/compare.
         $this->assertEquals($expected->id, $outcome[0]->id);
@@ -107,6 +113,7 @@ class ProductMapperTest extends tests\TestCase
         $this->assertEquals($expected->price, $outcome[0]->price);
         $this->assertEquals($expected->quantity, $outcome[0]->quantity);
         $this->assertEquals($expected->group, $outcome[0]->group);
+        $this->assertEquals($expected->images, $outcome[0]->images);
 
     }
 
