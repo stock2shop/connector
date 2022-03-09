@@ -1,0 +1,29 @@
+{
+  "active": 1,
+  "created": "2022-02-08 16:00:00",
+  "description": "Service Channel",
+  "meta": [
+    {
+      "key": "mustache_template",
+      "value": {
+        "id": "{{ChannelVariant.sku}}",
+        "product_group_id": "{{ChannelProduct.channel_product_code}}",
+        "name": "{{ChannelProduct.title}}",
+        "price": "{{ChannelVariant.price}}",
+        "quantity": "{{ChannelVariant.qty}}"
+      }
+    },
+    {
+      "key": "variant_separator",
+      "value": "~"
+    },
+    {
+      "key": "image_separator",
+      "value": "="
+    }
+  ],
+  "modified": "2022-02-08 16:00:00",
+  "price_tier": null,
+  "qty_availability": null,
+  "type": "in-memory"
+}
