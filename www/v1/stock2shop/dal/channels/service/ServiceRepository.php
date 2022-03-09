@@ -25,6 +25,11 @@ class ServiceRepository
     private static $products = [];
 
     /**
+     * @var service\ServiceImage[]
+     */
+    private static $images = [];
+
+    /**
      * Default Constructor
      *
      * This method's access modifier is set to private because
@@ -71,6 +76,28 @@ class ServiceRepository
     }
 
     /**
+     * Get Instance
+     *
+     * Returns an instance of this class or otherwise returns
+     * the same object if it has already been instantiated in
+     * the application.
+     *
+     * This prevents duplicate objects and channel states from
+     * existing.
+     *
+     * @return ServiceRepository
+     */
+    public static function getInstance() {
+
+        if(!self::$instance) {
+            self::$instance = new ServiceRepository();
+        }
+
+        return self::$instance;
+
+    }
+
+    /**
      * Set Products
      *
      * This method sets a collection of ServiceProducts to the
@@ -90,7 +117,7 @@ class ServiceRepository
      * This method returns the products from the repository.
      *
      * @param string[] $codes
-     * @return ExampleProduct[]
+     * @return ServiceProduct[]
      */
     public static function getProductsByCode(array $codes): array
     {
