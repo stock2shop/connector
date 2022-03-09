@@ -182,39 +182,39 @@ class TestPrinter
      * @return void
      */
     public function sendProductsToPrinter(array $products, array $responses, string $heading) {
-        $this->addHeading($heading);
-        $cProducts = count($responses);
-        if($cProducts === 0) {
-            return;
-        }
-
-        for($pKey=0; $pKey!==$cProducts; $pKey++) {
-            $this->addLine('product[' . $pKey . ']->id', $products[$pKey]->id, $responses[$pKey]->id);
-            $this->addLine('product[' . $pKey . ']->channel_product_code', $products[$pKey]->channel_product_code, $responses[$pKey]->channel_product_code);
-            $this->addLine('product[' . $pKey . ']->success', $products[$pKey]->success, $responses[$pKey]->success);
-            $this->addLine('product[' . $pKey . ']->delete', $products[$pKey]->delete, $responses[$pKey]->delete);
-
-            for($vKey=0; $vKey!==count($products[$pKey]->variants); $vKey++) {
-                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->id', $products[$pKey]->variants[$vKey]->id, $responses[$pKey]->variants[$vKey]->id);
-                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->channel_variant_code', $products[$pKey]->variants[$vKey]->channel_variant_code, $responses[$pKey]->variants[$vKey]->channel_variant_code);
-                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->success', $products[$pKey]->variants[$vKey]->success, $responses[$pKey]->variants[$vKey]->success);
-                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->delete', $products[$pKey]->variants[$vKey]->delete, $responses[$pKey]->variants[$vKey]->delete);
-                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->sku', $products[$pKey]->variants[$vKey]->sku, $responses[$pKey]->variants[$vKey]->sku);
-            }
-            unset($vKey);
-
-            for($iKey=0; $iKey!==count($products[$pKey]->images); $iKey++) {
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->id', $products[$pKey]->images[$iKey]->id, $responses[$pKey]->images[$iKey]->id);
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->success', $products[$pKey]->images[$iKey]->success, $responses[$pKey]->images[$iKey]->success);
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->delete', $products[$pKey]->images[$iKey]->delete, $responses[$pKey]->images[$iKey]->delete);
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->channel_image_code', $products[$pKey]->images[$iKey]->channel_image_code, $responses[$pKey]->images[$iKey]->channel_image_code);
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->src', $products[$pKey]->images[$iKey]->src, $responses[$pKey]->images[$iKey]->src);
-                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->active', $products[$pKey]->images[$iKey]->active, $responses[$pKey]->images[$iKey]->active);
-            }
-            unset($iKey);
-            $this->addLine('', '');
-        }
-        unset($pKey);
+//        $this->addHeading($heading);
+//        $cProducts = count($responses);
+//        if($cProducts === 0) {
+//            return;
+//        }
+//
+//        for($pKey=0; $pKey!==$cProducts; $pKey++) {
+//            $this->addLine('product[' . $pKey . ']->id', $products[$pKey]->id, $responses[$pKey]->id);
+//            $this->addLine('product[' . $pKey . ']->channel_product_code', $products[$pKey]->channel_product_code, $responses[$pKey]->channel_product_code);
+//            $this->addLine('product[' . $pKey . ']->success', $products[$pKey]->success, $responses[$pKey]->success);
+//            $this->addLine('product[' . $pKey . ']->delete', $products[$pKey]->delete, $responses[$pKey]->delete);
+//
+//            for($vKey=0; $vKey!==count($products[$pKey]->variants); $vKey++) {
+//                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->id', $products[$pKey]->variants[$vKey]->id, $responses[$pKey]->variants[$vKey]->id);
+//                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->channel_variant_code', $products[$pKey]->variants[$vKey]->channel_variant_code, $responses[$pKey]->variants[$vKey]->channel_variant_code);
+//                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->success', $products[$pKey]->variants[$vKey]->success, $responses[$pKey]->variants[$vKey]->success);
+//                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->delete', $products[$pKey]->variants[$vKey]->delete, $responses[$pKey]->variants[$vKey]->delete);
+//                $this->addLine('product[' . $pKey . ']->variant[' . $vKey . ']->sku', $products[$pKey]->variants[$vKey]->sku, $responses[$pKey]->variants[$vKey]->sku);
+//            }
+//            unset($vKey);
+//
+//            for($iKey=0; $iKey!==count($products[$pKey]->images); $iKey++) {
+//                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->id', $products[$pKey]->images[$iKey]->id, $responses[$pKey]->images[$iKey]->id);
+//                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->success', $products[$pKey]->images[$iKey]->success, $responses[$pKey]->images[$iKey]->success);
+//                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->delete', $products[$pKey]->images[$iKey]->delete, $responses[$pKey]->images[$iKey]->delete);
+//                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->channel_image_code', $products[$pKey]->images[$iKey]->channel_image_code, $responses[$pKey]->images[$iKey]->channel_image_code);
+//                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->src', $products[$pKey]->images[$iKey]->src, $responses[$pKey]->images[$iKey]->src);
+//                $this->addLine('product[' . $pKey . ']->image[' . $iKey . ']->active', $products[$pKey]->images[$iKey]->active, $responses[$pKey]->images[$iKey]->active);
+//            }
+//            unset($iKey);
+//            $this->addLine('', '');
+//        }
+//        unset($pKey);
     }
 
 }

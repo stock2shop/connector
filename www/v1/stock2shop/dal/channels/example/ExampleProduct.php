@@ -20,12 +20,12 @@ class ExampleProduct
     /**
      * @var string
      */
-    public $name;
+    public $product_group_id;
 
     /**
      * @var string
      */
-    public $brand;
+    public $name;
 
     /**
      * @var float
@@ -36,18 +36,4 @@ class ExampleProduct
      * @var int
      */
     public $quantity;
-
-    /**
-     * @var string
-     */
-    public $parent_id;
-
-    /**
-     * unique path to each image
-     * @var string[]
-     */
-    public $images;
-
-
-
 }
