@@ -356,120 +356,46 @@ final class ChannelTest extends Framework\TestCase
      *
      * @return void
      */
-//    public function testGetProducts()
-//    {
-//        $channelTypes = self::getChannelTypes();
-//        foreach ($channelTypes as $type) {
-//
-//            if ($type === 'example') continue;
-//
-//            // Load test data.
-//            self::loadTestData($type);
-//
-//            // Set factory.
-//            self::setFactory($type);
-//
-//            // Instantiate the Creator factory object.
-//            $creator = self::$creator;
-//            $connector = $creator->createProducts();
-//
-//            // Instantiate new channel object using the test channel meta data.
-//            $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
-//            $channel = new vo\Channel(self::$channelData);
-//
-//            // --------------------------------------------------------
-//
-//            // Create all products on the channel.
-//
-//            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
-//            $this->assertCount(2, $request);
-//            $connector->sync($request, $channel, $flagMap);
-//
-//            // --------------------------------------------------------
-//
-//            // Provide an empty token.
-//            // We are expecting to receive all the products in the response from this function call.
-//
-//            $token = "";
-//            $limit = count($request);
-//
-//            // --------------------------------------------------------
-//
-//            // Get Synced Products.
-//
-//            // After the sync() we need to test that the products we synced are in fact
-//            // on the channel now. A try-catch is used to handle connector types which
-//            // do not implement the `get()` method.
-//
-//            try {
-//                $channelProductsGetArray = $connector->get($token, $limit, $channel);
-//            } catch (NotImplemented $e) {
-//                self::$printer->addHeading('[' . $type . ']' . ' Get - Not Implemented.');
-//                self::$printer->print();
-//            }
-//
-//            self::$printer->addHeading('[' . $type . ']' . ' Get - Return All Products');
-//            self::verifyGetProducts($token, $limit, $channelProductsGetArray);
-//
-//            // --------------------------------------------------------
-//
-//            $cnt = 0;
-//            $limit = 1;
-//
-//            // Iterate through the number of products in the $request array.
-//            // Check each product by getting it from the channel and verifying
-//            // it using verifyGetProducts.
-//
-//            self::$printer->addHeading('[' . $type . ']' . ' Get - Return One Product');
-//            for ($i = 0; $i < count($request); $i++) {
-//                $fetchedProductGet = $connector->get('', $limit, $channel);
-//                self::verifyGetProducts('', $limit, $fetchedProductGet);
-//                $cnt++;
-//            }
-//
-//            // Assert on the product count.
-//            $this->assertEquals(count($request), $cnt);
-//
-//        }
-//    }
-
-    /**
-     * Verify Get Products
-     *
-     * This is a helper test method which is used to evaluate whether the get() method of
-     * the dal\channel\Products has been implemented correctly in your connector integration.
-     * A successful get() action on a dal\channel\Products will return items which match
-     * the following criteria:
-     *
-     * 1. Each product will be a hydrated vo\ChannelProductGet object.
-     * 2. Each product will have a token value smaller than the cursor token.
-     * 3. vo\ChannelProductGet items must be sorted by the token value.
-     * 4. Check that each variant has a sku and channel_variant_code set.
-     * 5. Check that each image has its channel_image_code set.
-     *
-     * @param string $token
-     * @param int $limit
-     * @param ChannelProduct[] $fetchedProducts
-     * @return void
-     */
-    public function verifyGetProducts(string $token, int $limit, array $fetchedProducts)
+    public function testGetProducts()
     {
-        $this->assertLessThanOrEqual(count($fetchedProducts), $limit);
+        $channelTypes = self::getChannelTypes();
+        foreach ($channelTypes as $type) {
 
-        /** @var vo\ChannelProduct $product */
-        foreach ($fetchedProducts as $product) {
-            $this->assertInstanceOf("stock2shop\\vo\\ChannelProduct", $product);
-            $this->assertNotEmpty($product->channel_product_code);
-            $this->assertGreaterThan($token, $product->channel_product_code);
-            foreach ($product->variants as $variant) {
-                $this->assertNotEmpty($variant->channel_variant_code);
-                $this->assertNotEmpty($variant->sku);
+            // Load test data.
+            self::loadTestData($type);
+
+            // Set factory.
+            self::setFactory($type);
+
+            // Instantiate the Creator factory object.
+            $creator = self::$creator;
+            $connector = $creator->createProducts();
+
+            // Instantiate new channel object using the test channel meta data.
+            $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
+            $channel = new vo\Channel(self::$channelData);
+
+            // Create all products on the channel.
+            $channelProducts = vo\ChannelProduct::createArray(self::$channelProductsData);
+            $connector->sync($channelProducts, $channel, $flagMap);
+
+            // return products one at a time.
+            $channel_product_code = '';
+            foreach ($channelProducts as $product) {
+                $existingChannelProducts = $connector->get($channel_product_code, 1, $channel);
+                $this->assertCount(1, $existingChannelProducts);
+                $this->assertEquals(1, $existingChannelProducts);
+                $channel_product_code = $product->channel_product_code;
             }
-            foreach ($product->images as $image) {
-                $this->assertNotEmpty($image->channel_image_code);
+
+            // delete products from channel
+            foreach ($channelProducts as $product) {
+                $product->delete = true;
             }
+            $connector->sync($channelProducts, $channel, $flagMap);
+            $existingChannelProducts = $connector->get('', 10, $channel);
+            $this->assertCount(0, $existingChannelProducts);
         }
-        self::$printer->sendProductsToPrinter($fetchedProducts, [], "Verify Get Products");
     }
 
     /**
