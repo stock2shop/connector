@@ -13,22 +13,44 @@ use stock2shop\vo;
 class ChannelState
 {
 
-    /**
-     * @var array associative array with key as MemoryProduct->id and value as MemoryProduct
-     */
+    /** @var MemoryProduct[] Associative array with key as MemoryProduct->id and value as MemoryProduct. */
     public static $products = [];
 
-    /**
-     * @var array associative array with key as MemoryImage->id and value as MemoryImage
-     */
+    /** @var MemoryImage[] Associative array with key as the MemoryImage->id and value as MemoryImage. */
     public static $images = [];
+
+    /**
+     * Create
+     *
+     * This method creates a product on the channel.
+     *
+     * @param MemoryProduct $product
+     * @return string $id
+     */
+    public static function create(MemoryProduct $product): string {
+
+        // Get last insert ID.
+        $lastInsertId = count(self::$products);
+
+        // Increment and cast to string.
+        $id = (string)$lastInsertId++;
+        $product->id = $id;
+
+        // Create product on channel.
+        self::$products[$id] = $product;
+        return $id;
+
+    }
 
     /**
      * @param MemoryProduct[] $products
      */
     public static function update(array $products) {
         foreach ($products as $p) {
-            self::$products[$p->id] = $p;
+            // Check whether the product exists
+            if(array_key_exists($p->id, self::$products)) {
+                self::$products[$p->id] = $p;
+            }
         }
     }
 
@@ -39,6 +61,47 @@ class ChannelState
         foreach ($images as $i) {
             self::$images[$i->id] = $i;
         }
+    }
+
+    /**
+     * List Products
+     *
+     * This method returns paginated products.
+     *
+     * @param string $offset The channel_product_code value to start from.
+     * @param int $limit The number of products to return from the channel.
+     * @return MemoryProduct[] $list
+     */
+    public static function getProductsList(string $offset, int $limit): array {
+
+        /** @var MemoryProduct[] $list */
+        $list = [];
+
+        // Get start index using a combination of array_keys() and array_search().
+        // The needle will be the channel_product_code.
+        $startIndex = array_search($offset, array_keys(self::$products)) ?? 0;
+
+        // Iterate over products in state.
+        if($offset !== "") {
+            $list = array_values(array_merge(array_slice(self::$products, $startIndex, $limit, true)));
+        } else {
+            $count = 0;
+            foreach(self::$products as $id => $productFromStart) {
+                if($count === $limit) {
+                    break;
+                }
+                $list[] = $productFromStart;
+                $count++;
+            }
+        }
+
+        // Sort products list by id.
+        usort($list, function ($p1, $p2) {
+            return strcmp($p1->id, $p2->id);
+        });
+
+        return $list;
+
     }
 
     /**

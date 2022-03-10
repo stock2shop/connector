@@ -77,10 +77,10 @@ The variable must be a lowercase string with no spaces or non-alphanumeric chara
 export S2S_CHANNEL_NAME=yourchannelname
 ```
 
-Copy the channel source files by executing this command which copies the `example` connector directory:
+Copy the channel source files by executing this command which copies the `boilerplate` connector directory:
 
 ```bash
-cp -r $S2S_PATH/connector/www/v1/stock2shop/dal/channels/example $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME 
+cp -r $S2S_PATH/connector/www/v1/stock2shop/dal/channels/boilerpate $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME 
 ```
 
 Substitute 'example' in the following PHP classes in the `S2S_CHANNEL_NAME` directory with your `S2S_CHANNEL_NAME`:
@@ -122,6 +122,7 @@ You can now start by editing the `Products.php` class with your integration.
 
 An end-to-end test is included. Do not modify this.
 Tests use [phpunit](https://devdocs.io/phpunit~8/) version 8.
+PHAR executables have been included for version 8.0.0 and 4.8 (for backwards compatibility). 
 
 A test report is printed to the command-line if you set the `S2S_TEST_DEBUG` environment variable
 to 'true':
