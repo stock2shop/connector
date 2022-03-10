@@ -42,7 +42,7 @@ class Products implements ProductsInterface
                 $exampleProduct = $mapper->get();
                 if ($cp->delete || $cv->delete) {
                     ChannelState::deleteProductsByIDs([$exampleProduct->id]);
-                } elseif (!$exampleProduct->id || $exampleProduct->id === "") {
+                } elseif (!$exampleProduct->id) {
                     $exampleProduct->product_group_id = $cp->id;
                     $productId = ChannelState::create($exampleProduct);
                     $cv->channel_variant_code = $productId;

@@ -151,13 +151,14 @@ final class ChannelTest extends Framework\TestCase
      * To verify the sync is correct it uses Products->getByCodes() to confirm the products
      * are found on the channel.
      *
-     * If the envionrment var S2S_CHANNEL_NAME is set, it will only run the end-to-end test
+     * If the environment var S2S_CHANNEL_NAME is set, it will only run the end-to-end test
      * for one channel.
      *
      * The goal of sync() is to synchronise the product data onto a Stock2Shop
      * channel. Synchronisation in this context may refer to:
      *
      * @return void
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function testSyncProducts()
     {
@@ -245,7 +246,7 @@ final class ChannelTest extends Framework\TestCase
      * @param string $name
      * @return vo\ChannelProduct[] $response
      */
-    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel, string $name)
+    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel, string $name): array
     {
         $existingProducts = $connector->getByCode($request, $channel);
 
@@ -355,6 +356,7 @@ final class ChannelTest extends Framework\TestCase
      * all the connector implementations in the dal/channels directory.
      *
      * @return void
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function testGetProducts()
     {
@@ -377,16 +379,16 @@ final class ChannelTest extends Framework\TestCase
 
             // Create all products on the channel.
             $channelProducts = vo\ChannelProduct::createArray(self::$channelProductsData);
-            $connector->sync($channelProducts, $channel, $flagMap);
+            $syncedProducts = $connector->sync($channelProducts, $channel, $flagMap);
 
             // sort products by channel_product_code
             usort($channelProducts, function (vo\ChannelProduct $p1, vo\ChannelProduct $p2) {
-                return strcmp($p1->channel_product_code, $p2->channel_product_code);
+                return strcmp($p2->channel_product_code, $p1->channel_product_code);
             });
 
             // return products one at a time.
             $channel_product_code = '';
-            foreach ($channelProducts as $product) {
+            foreach ($syncedProducts as $product) {
                 $existingChannelProducts = $connector->get($channel_product_code, 1, $channel);
                 $this->assertCount(1, $existingChannelProducts);
                 $this->assertEquals($product->channel_product_code, $existingChannelProducts[0]->channel_product_code);

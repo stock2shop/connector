@@ -96,9 +96,9 @@ class ChannelState
         }
 
         // Sort products list by id.
-        usort($list, function ($p1, $p2) {
-            return strcmp($p1->id, $p2->id);
-        });
+//        usort($list, function ($p1, $p2) {
+//            return strcmp($p1->id, $p2->id);
+//        });
 
         return $list;
 
