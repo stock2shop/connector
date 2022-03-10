@@ -61,7 +61,7 @@ class ProductMapper
         } else {
             $ep                   = new MemoryProduct();
             $ep->id               = $cv->sku;
-            $ep->product_group_id = $cp->source_product_code;
+            $ep->product_group_id = $cp->channel_product_code;
             $ep->name             = $cp->title;
             $ep->price            = $cv->price;
             $ep->quantity         = $cv->qty;
