@@ -102,14 +102,23 @@ final class ChannelTest extends Framework\TestCase
      */
     public function getChannelTypes(): array
     {
+        $channelsFolderPath = '/../../www/v1/stock2shop/dal/channels';
         $channels = [];
+
+        // Check if the channel name override is set.
+        $channelName = getenv("S2S_CHANNEL_NAME");
+        if($channelName) {
+            return [$channelName];
+        }
+
         $items = array_diff(scandir(
-            __DIR__ . '/../../www/v1/stock2shop/dal/channels',
+            __DIR__ . $channelsFolderPath,
             SCANDIR_SORT_ASCENDING
-        ), array('..', '.'));
+        ), array('..', '.', 'example'));
         foreach ($items as $item) {
             $channels[] = $item;
         }
+
         return $channels;
     }
 

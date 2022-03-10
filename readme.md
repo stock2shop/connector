@@ -34,45 +34,60 @@ This setup assumes you already have an environment which is able to run PHP appl
 See the section on "Submission Guidelines" in this readme file for specific information regarding your 
 environment.
 
-1. Set Environment Variables
+1. Setup Environment
+
+The `S2S_PATH` variable must be the absolute path to the directory where this repository is located.
 
 ```bash
 export S2S_PATH=/your/path/for/stock2shop
-export CHANNEL_NAME=your_channel_name
 ```
 
-The S2S_PATH variable must be the absolute path to the directory where this repository is located. 
 For example:
 
 On Mac OSX:
-/Users/yourUsername/stock2shop
-On Ubuntu: 
-/home/yourUsername/stock2shop
+```bash
+export S2S_PATH=/Users/yourUsername/stock2shop
+```
+On Ubuntu:
+```bash
+export S2S_PATH=/home/yourUsername/stock2shop
+```
 
-The `CHANNEL_NAME` variable must be a lowercase string with no spaces.
-
-2. Clone this repository.
+2. Clone Repository
 
 ```bash
 git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 ```
 
-3. Copy Example Channel.
+3. Run Channel Test
 
-Copy the channel source files:
+Enter the following command to run the test - it should run without error:
 
 ```bash
-cp -r $S2S_PATH/connector/www/v1/stock2shop/dal/channels/example $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$CHANNEL_NAME 
+cd $S2S_PATH/connector/tests
+./phpunit-4.8.phar ./e2e
 ```
 
-4. Substitute Namespaces. 
+4. Creating Your Connector
 
-Substitute 'example' in the following PHP classes in the directory with your `CHANNEL_NAME`:
+The `S2S_CHANNEL_NAME` variable is the name of the channel connector you will be creating in this repository.
+The variable must be a lowercase string with no spaces or non-alphanumeric characters.
 
 ```bash
-vi $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$CHANNEL_NAME/Products.php \
-$S2S_PATH/connector/www/v1/stock2shop/dal/channels/$CHANNEL_NAME/ProductMapper.php \
-$S2S_PATH/connector/www/v1/stock2shop/dal/channels/$CHANNEL_NAME/ImageMapper.php \
+export S2S_CHANNEL_NAME=yourchannelname
+```
+
+Copy the channel source files by executing this command which copies the `example` connector directory:
+
+```bash
+cp -r $S2S_PATH/connector/www/v1/stock2shop/dal/channels/example $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME 
+```
+
+Substitute 'example' in the following PHP classes in the `S2S_CHANNEL_NAME` directory with your `S2S_CHANNEL_NAME`:
+
+```bash
+vi $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME/Creator.php \ 
+$S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME/Products.php 
 ```
 
 Replace 
@@ -85,15 +100,23 @@ With your CHANNEL_NAME:
 namespace stock2shop\dal\channels\$CHANNEL_NAME;
 ```
 
-5. Run Tests for your `CHANNEL_NAME`.
+5. Rerun Test For Your Connector
+
+If you run the command from step 3 again, you will notice that the tests fail:
 
 ```bash
 cd $S2S_PATH/connector/tests
-php ./phpunit-8.phar ./
+./phpunit-4.8.phar ./e2e
 ```
 
-The tests should now run correctly for all channels and the new channel you've created.
-You can now start by editing the `Products.php` file integration.
+This is because the `S2S_CHANNEL_NAME` variable has been set - meaning only your connector's source code is being 
+exercised by the end-to-end test. To change this and run the example tests, unset the `S2S_CHANNEL_NAME` variable:
+
+```bash
+export S2S_CHANNEL_NAME= && ./phpunit-4.8.phar ./e2e
+```
+
+You can now start by editing the `Products.php` class with your integration.
 
 ## Tests
 

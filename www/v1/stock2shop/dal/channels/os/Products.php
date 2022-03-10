@@ -10,7 +10,7 @@ use stock2shop\vo;
 
 /**
  *
- * @package stock2shop\dal\example
+ * @package stock2shop\dal\os
  */
 class Products implements ProductsInterface
 {
