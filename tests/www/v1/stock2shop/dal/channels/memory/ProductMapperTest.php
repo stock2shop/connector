@@ -30,13 +30,13 @@ class ProductMapperTest extends tests\TestCase
         // Create object to map.
         $channelProduct = new vo\ChannelProduct([
             'id' => '1',
-            'channel_product_code' => 'foo',
+            'channel_product_code' => '62714',
             'source_product_code' => '9876',
             'title' => 'Product Title',
             'variants' => [
                 [
                     'id' => '1234',
-                    'channel_variant_code' => '12341',
+                    'channel_variant_code' => '4210173',
                     'qty' => 2,
                     'price' => '2222',
                     'sku' => 'product title 1'
@@ -54,7 +54,7 @@ class ProductMapperTest extends tests\TestCase
         ]);
 
         // Template.
-        $template = '{"id": "{{ChannelVariant.channel_variant_code}}", "name": "{{ChannelProduct.title}}", "brand": "{{Meta.brand}}", "quantity": "{{ChannelVariant.qty}}", "product_group_id": "{{ChannelProduct.source_product_code}}", "price": "{{ChannelVariant.price}}"}';
+        $template = '{"id": "{{ChannelVariant.channel_variant_code}}", "name": "{{ChannelProduct.title}}", "quantity": "{{ChannelVariant.qty}}", "product_group_id": "{{ChannelProduct.channel_product_code}}", "price": "{{ChannelVariant.price}}"}';
 
         // Call method to test.
         $object = new memory\ProductMapper($channelProduct, $channelProduct->variants[0], $template);
@@ -63,11 +63,11 @@ class ProductMapperTest extends tests\TestCase
         // Now we need to create a ExampleProduct manually
         // and compare the two objects.
         $expected = new memory\MemoryProduct();
-        $expected->id = "12341";
+        $expected->id = "4210173";
         $expected->name ="Product Title";
         $expected->price = "2222";
         $expected->quantity = 2;
-        $expected->product_group_id = "9876";
+        $expected->product_group_id = "62714";
 
         // Test/compare.
         $this->assertEquals($expected->id, $outcome->id);
@@ -77,6 +77,5 @@ class ProductMapperTest extends tests\TestCase
         $this->assertEquals($expected->product_group_id, $outcome->product_group_id);
 
     }
-
 
 }
