@@ -379,6 +379,11 @@ final class ChannelTest extends Framework\TestCase
             $channelProducts = vo\ChannelProduct::createArray(self::$channelProductsData);
             $connector->sync($channelProducts, $channel, $flagMap);
 
+            // sort products by channel_product_code
+            usort($channelProducts, function (vo\ChannelProduct $p1, vo\ChannelProduct $p2) {
+                return strcmp($p1->channel_product_code, $p2->channel_product_code);
+            });
+
             // return products one at a time.
             $channel_product_code = '';
             foreach ($channelProducts as $product) {
