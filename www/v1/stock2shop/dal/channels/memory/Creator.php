@@ -1,6 +1,6 @@
 <?php
 
-namespace stock2shop\dal\channels\example;
+namespace stock2shop\dal\channels\memory;
 
 use stock2shop\dal\channel;
 use stock2shop\exceptions;
@@ -17,9 +17,6 @@ class Creator extends channel\Creator
      */
     public function createProducts(): channel\Products
     {
-        // This is a concrete class implementation of the
-        // abstract Creator factory class defined in dal\channel.
-        // Do not add any additional methods to this class.
         return new Products();
     }
 
@@ -30,8 +27,6 @@ class Creator extends channel\Creator
      */
     public function createOrders(): channel\Orders
     {
-        // If your connector implementation does not support synchronising
-        // order or fulfillment data, then you will throw an exception here.
         throw new exceptions\NotImplemented();
     }
 
@@ -42,7 +37,6 @@ class Creator extends channel\Creator
      */
     public function createFulfillments(): channel\Fulfillments
     {
-        // See comment above.
         throw new exceptions\NotImplemented();
     }
 
