@@ -36,11 +36,16 @@ class Products implements ProductsInterface
 
         // Build and save all MemoryProduct objects.
         foreach ($channelProducts as $cp) {
+
             foreach ($cp->variants as $cv) {
                 $mapper         = new ProductMapper($cp, $cv, $template);
                 $exampleProduct = $mapper->get();
                 if ($cp->delete || $cv->delete) {
                     ChannelState::deleteProductsByIDs([$exampleProduct->id]);
+                } elseif (!$exampleProduct->id || $exampleProduct->id === "") {
+                    $exampleProduct->product_group_id = $cp->id;
+                    $productId = ChannelState::create($exampleProduct);
+                    $cv->channel_variant_code = $productId;
                 } else {
                     ChannelState::update([$exampleProduct]);
                 }
@@ -75,9 +80,41 @@ class Products implements ProductsInterface
      * @return vo\ChannelProduct[] $channelProducts
      * @throws exceptions\NotImplemented
      */
-    public function get(string $token, int $limit, vo\Channel $channel): array
+    public function get(string $channel_product_code, int $limit, vo\Channel $channel): array
     {
-        throw new exceptions\NotImplemented();
+        // Return array.
+        $channelProducts = [];
+
+        // Get products from the channel's state which are filtered
+        // starting from the position of channel_product_code and
+        // limited by the integer value.
+        $products = ChannelState::getProductsList($channel_product_code, $limit);
+
+        // Iterate over the products returned from the channel
+        // and build a map. The key of the map will be the
+        // product_group_id and the value will be the product IDs.
+        $productMap = [];
+        foreach($products as $memProduct) {
+            if(!array_key_exists($memProduct->product_group_id, $productMap)) {
+                $productMap[$memProduct->product_group_id] = [];
+            }
+            $productMap[$memProduct->product_group_id][] = ["channel_variant_code" => $memProduct->id, "success"=>true];
+        }
+
+        // Convert map into stock2shop VOs.
+        foreach($productMap as $productId => $variantIds) {
+
+            // Map the product onto a `vo\ChannelProduct()` object.
+            $channelProducts[] = new vo\ChannelProduct([
+                'channel_product_code' => $productId,
+                'success' => true,
+                'variants' => $variantIds
+            ]);
+
+        }
+
+        return $channelProducts;
+
     }
 
     /**
