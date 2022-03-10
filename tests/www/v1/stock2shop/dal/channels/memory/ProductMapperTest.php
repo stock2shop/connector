@@ -1,10 +1,11 @@
 <?php
 
-namespace tests\v1\stock2shop\dal\channels\example;
+namespace tests\v1\stock2shop\dal\channels\memory;
 
+use stock2shop\exceptions\UnprocessableEntity;
 use tests;
 use stock2shop\vo;
-use stock2shop\dal\channels\example;
+use stock2shop\dal\channels\memory;
 
 /**
  * Product Mapper Test
@@ -21,7 +22,7 @@ class ProductMapperTest extends tests\TestCase
      * onto a `ExampleProduct` object.
      *
      * @return void
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     public function testMap()
     {
@@ -56,12 +57,12 @@ class ProductMapperTest extends tests\TestCase
         $template = '{"id": "{{ChannelVariant.channel_variant_code}}", "name": "{{ChannelProduct.title}}", "brand": "{{Meta.brand}}", "quantity": "{{ChannelVariant.qty}}", "product_group_id": "{{ChannelProduct.source_product_code}}", "price": "{{ChannelVariant.price}}"}';
 
         // Call method to test.
-        $object = new example\ProductMapper($channelProduct, $channelProduct->variants[0], $template);
+        $object = new memory\ProductMapper($channelProduct, $channelProduct->variants[0], $template);
         $outcome = $object->get();
 
         // Now we need to create a ExampleProduct manually
         // and compare the two objects.
-        $expected = new example\ExampleProduct();
+        $expected = new memory\MemoryProduct();
         $expected->id = "12341";
         $expected->name ="Product Title";
         $expected->price = "2222";

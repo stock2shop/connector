@@ -6,7 +6,6 @@ use PHPUnit\Framework;
 use tests\TestPrinter;
 use stock2shop\dal;
 use stock2shop\vo;
-use stock2shop\exceptions\UnprocessableEntity;
 
 /**
  * This "end to end" test runs through all channel types.
@@ -14,6 +13,8 @@ use stock2shop\exceptions\UnprocessableEntity;
  */
 final class ChannelTest extends Framework\TestCase
 {
+    const IGNORE_CHANNEL = 'boilerplate';
+
     /** @var dal\channel\Creator The object of the concrete class which extends the dal\channel\Creator factory abstract class. */
     public static $creator;
 
@@ -110,11 +111,10 @@ final class ChannelTest extends Framework\TestCase
         if($channelName) {
             return [$channelName];
         }
-
         $items = array_diff(scandir(
             __DIR__ . $channelsFolderPath,
             SCANDIR_SORT_ASCENDING
-        ), array('..', '.', 'example'));
+        ), array('..', '.', self::IGNORE_CHANNEL));
         foreach ($items as $item) {
             $channels[] = $item;
         }
@@ -146,24 +146,18 @@ final class ChannelTest extends Framework\TestCase
     /**
      * Test Sync Products
      *
-     * This test case evaluates the implementation of the sync() method from
-     * the createProducts() factory.
+     * This test is a full end-to-end.
+     * It syncs products to a channel using Products->sync().
+     * To verify the sync is correct it uses Products->getByCodes() to confirm the products
+     * are found on the channel.
+     *
+     * If the envionrment var S2S_CHANNEL_NAME is set, it will only run the end-to-end test
+     * for one channel.
      *
      * The goal of sync() is to synchronise the product data onto a Stock2Shop
      * channel. Synchronisation in this context may refer to:
      *
-     * 1. Adding of products, variants, images and other meta information to a channel.
-     * 2. Removing of product variants or images from a channel.
-     * 3. Removing a product or more than one product from a channel.
-     * 4. Sending an empty payload of products onto the channel for processing.
-     *
-     * The workflow of this test runs through four scenarios - the results of which are
-     * deconstructed and asserted on in a separate method called verifyTestSync().
-     * You may expect the outcomes to indicate issues, bugs and logic problems in specific
-     * areas of code in the integration you are working on.
-     *
      * @return void
-     * @throws UnprocessableEntity
      */
     public function testSyncProducts()
     {
@@ -361,7 +355,6 @@ final class ChannelTest extends Framework\TestCase
      * all the connector implementations in the dal/channels directory.
      *
      * @return void
-     * @throws UnprocessableEntity
      */
 //    public function testGetProducts()
 //    {
@@ -571,7 +564,6 @@ final class ChannelTest extends Framework\TestCase
      * Each order is passed to the verifyTransformOrder() method.
      *
      * @return void
-     * @throws UnprocessableEntity
      */
     // TODO: Complete when interface is ready.
 //    public function _testGetOrdersByCode()
