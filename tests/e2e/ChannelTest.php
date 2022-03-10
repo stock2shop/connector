@@ -390,7 +390,17 @@ final class ChannelTest extends Framework\TestCase
                 $existingChannelProducts = $connector->get($channel_product_code, 1, $channel);
                 $this->assertCount(1, $existingChannelProducts);
                 $this->assertEquals($product->channel_product_code, $existingChannelProducts[0]->channel_product_code);
+                $this->assertCount(count($product->variants), $existingChannelProducts[0]->variants);
+                $this->assertCount(count($product->images), $existingChannelProducts[0]->images);
                 $this->assertTrue($product->success);
+                foreach ($existingChannelProducts[0]->variants as $variant) {
+                    $this->assertNotEmpty($variant->channel_variant_code);
+                    $this->assertTrue($variant->success);
+                }
+                foreach ($existingChannelProducts[0]->images as $image) {
+                    $this->assertNotEmpty($image->channel_image_code);
+                    $this->assertTrue($image->success);
+                }
                 $channel_product_code = $product->channel_product_code;
             }
 

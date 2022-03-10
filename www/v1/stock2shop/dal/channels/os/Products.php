@@ -4,7 +4,6 @@ namespace stock2shop\dal\channels\os;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
 use stock2shop\dal\channels\os\data\Helper;
-use stock2shop\exceptions;
 use stock2shop\helpers;
 use stock2shop\vo;
 
@@ -15,10 +14,10 @@ use stock2shop\vo;
 class Products implements ProductsInterface
 {
     /** @const string DATA_PATH */
-    const DATA_PATH = __DIR__ . "/data";
+    const DATA_PATH = __DIR__ . '/data';
 
     /** @const string */
-    const META_STORAGE_SEPARATOR = "storage_separator";
+    const META_STORAGE_SEPARATOR = 'storage_separator';
 
     /**
      * See comments in ProductsInterface::sync
@@ -54,8 +53,8 @@ class Products implements ProductsInterface
             // ------------------------------------------------
 
             // Do the same as the loop above to set the channel_image_code for each channel image.
-            foreach ($product->images as &$image) {
-                $image->channel_image_code = $prefix . $storageSeparator . $image->id . '.json';
+            foreach ($product->images as $image) {
+                $image->channel_image_code = $prefix . $storageSeparator . $storageSeparator . $image->id . '.json';
             }
 
             // ------------------------------------------------
@@ -67,7 +66,7 @@ class Products implements ProductsInterface
             if ($product->delete === true) {
                 foreach ($currentFiles as $filename => $obj) {
                     $fullpath = data\Helper::getDataPath() . '/products/' . $filename;
-                    if(file_exists($fullpath)) {
+                    if (file_exists($fullpath)) {
                         unlink($fullpath);
                     }
                 }
@@ -77,7 +76,7 @@ class Products implements ProductsInterface
                 foreach ($product->variants as $variant) {
                     $filename = data\Helper::getDataPath() . '/products/' . $variant->channel_variant_code;
                     if ($variant->delete) {
-                        if(file_exists($filename)) {
+                        if (file_exists($filename)) {
                             unlink($filename);
                         }
                     } else {
@@ -89,7 +88,7 @@ class Products implements ProductsInterface
                 foreach ($product->images as $image) {
                     $filename = self::DATA_PATH . '/products/' . $image->channel_image_code;
                     if ($image->delete) {
-                        if(file_exists($filename)) {
+                        if (file_exists($filename)) {
                             unlink($filename);
                         }
                     } else {
@@ -103,7 +102,7 @@ class Products implements ProductsInterface
             foreach ($product->variants as $variant) {
                 $variant->success = true;
             }
-            foreach ($product->images as &$image) {
+            foreach ($product->images as $image) {
                 $image->success = true;
             }
         }
@@ -114,59 +113,55 @@ class Products implements ProductsInterface
      *
      * See comments in ProductsInterface::get
      *
-     * @param string $token
-     * @param int $limit
+     * @param string $channel_product_code only return results greater than this
+     * @param int $limit max records to return
      * @param vo\Channel $channel
-     * @return vo\ChannelProduct[] $channelProducts
+     * @return vo\ChannelProduct[]
      */
-    public function get(string $token, int $limit, vo\Channel $channel): array
+    public function get(string $channel_product_code, int $limit, vo\Channel $channel): array
     {
-//        /** @var string $imageSeparator Channel separator for channel codes and storage. */
-//        $storageSeparator = helpers\Meta::get($channel->meta, self::META_STORAGE_SEPARATOR);
-//        $currentFiles = Helper::getJSONFiles($productsEndpointMeta);
-//
-//        // ------------------------------------------------
-//
-//        /** @var  $currentFiles */
-//
-//        $cnt = 0;
-//        $channelProducts = [];
-//        foreach ($currentFiles as $fileName => $fileData) {
-//
-//            // ------------------------------------------------
-//
-//            // Compare Products With Token
-//
-//            // The token is used to determine which products to add.
-//            // We use strcmp() below to do the comparison.
-//
-//            if (strcmp($token, $fileName) < 0) {
-//
-//                // Variant check.
-//                if(strcmp($variantSeparator, $fileName) < 0) {
-//                    $channelProducts[$fileName]->variants[] = new vo\ChannelVariant($fileData);
-//                }
-//
-//                // Image check.
-//                if(strcmp($imageSeparator, $fileName) < 0) {
-//                    $channelProducts[$fileName]->images[] = new vo\ChannelImage($fileData);
-//                }
-//
-//                // product prefix:   [^[0-9]{5}]   include all numbers up to 5 characters at the start of the string.
-//                if(preg_match('/^[0-9]{5}.json/', $fileName)) {
-//
-//                    // Check that we have not reached the limit.
-//                    if ($cnt > $limit) {
-//                        break;
-//                    }
-//
-//                    // Create new vo\ChannelProduct using the VO and add to the array.
-//                    $channelProducts[$fileName] = new vo\ChannelProduct($fileData);
-//                    $cnt++;
-//                }
-//            }
-//        }
-        return [];
+        /** @var string $imageSeparator Channel separator for channel codes and storage. */
+        $storageSeparator    = helpers\Meta::get($channel->meta, self::META_STORAGE_SEPARATOR);
+        $channelProducts     = [];
+        $channelProductsData = [];
+        $cnt                 = 0;
+
+        // results are sorted by channel_product_code asc already
+        $products = Helper::getJSONFiles('products');
+
+        // build products, variants and images hierarchy
+        foreach ($products as $filename => $data) {
+            $parts  = explode($storageSeparator, $filename);
+            $prefix = str_replace('.json', '', $parts[0]);
+            if ($prefix > $channel_product_code) {
+                if (count($parts) === 1) {
+                    $channelProductsData[$prefix] = [
+                        'channel_product_code' => $filename,
+                        'success'              => true,
+                        'variants'             => [],
+                        'images'               => []
+                    ];
+                } elseif (count($parts) === 2) {
+                    $channelProductsData[$prefix]['variants'][] = [
+                        'channel_variant_code' => $filename,
+                        'success'              => true
+                    ];
+                } elseif (count($parts) === 3) {
+                    $channelProductsData[$prefix]['images'][] = [
+                        'channel_image_code' => $filename,
+                        'success'              => true
+                    ];
+                }
+            }
+        }
+        foreach ($channelProductsData as $product) {
+            if ($cnt < $limit) {
+                $channelProducts[] = new vo\ChannelProduct($product);
+            }
+            $cnt++;
+        }
+
+        return $channelProducts;
     }
 
     /**
@@ -179,18 +174,18 @@ class Products implements ProductsInterface
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
         $productsToRemove = [];
-        $imagesToRemove = [];
+        $imagesToRemove   = [];
         $variantsToRemove = [];
         foreach ($channelProducts as $product) {
             $productFiles = data\Helper::getJSONFilesByPrefix($product->id, 'products');
-            $hasProduct = false;
+            $hasProduct   = false;
             foreach ($productFiles as $filename => $data) {
                 if ($filename === $product->channel_product_code) {
                     $hasProduct = true;
                     break;
                 }
             }
-            if(!$hasProduct) {
+            if (!$hasProduct) {
                 array_push($productsToRemove, $product->channel_product_code);
             }
             foreach ($product->variants as $variant) {
@@ -201,7 +196,7 @@ class Products implements ProductsInterface
                         break;
                     }
                 }
-                if(!$hasVariant) {
+                if (!$hasVariant) {
                     array_push($variantsToRemove, $variant->channel_variant_code);
                 }
             }
@@ -213,7 +208,7 @@ class Products implements ProductsInterface
                         break;
                     }
                 }
-                if(!$hasImage) {
+                if (!$hasImage) {
                     array_push($imagesToRemove, $image->channel_image_code);
                 }
             }
@@ -221,16 +216,16 @@ class Products implements ProductsInterface
         // remove products, images and variants not on channel.
         foreach ($channelProducts as $key => $product) {
             foreach ($product->variants as $vk => $variant) {
-                if(in_array($variant->channel_variant_code, $variantsToRemove)) {
+                if (in_array($variant->channel_variant_code, $variantsToRemove)) {
                     unset($product->variants[$vk]);
                 }
             }
             foreach ($product->images as $ik => $image) {
-                if(in_array($image->channel_image_code, $imagesToRemove)) {
+                if (in_array($image->channel_image_code, $imagesToRemove)) {
                     unset($product->images[$ik]);
                 }
             }
-            if(in_array($product->channel_product_code, $productsToRemove)) {
+            if (in_array($product->channel_product_code, $productsToRemove)) {
                 unset($channelProducts[$key]);
             }
         }
