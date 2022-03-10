@@ -90,15 +90,10 @@ class ChannelState
                 if($count === $limit) {
                     break;
                 }
-                $list[] = $productFromStart;
+                $list[$id] = $productFromStart;
                 $count++;
             }
         }
-
-        // Sort products list by id.
-//        usort($list, function ($p1, $p2) {
-//            return strcmp($p1->id, $p2->id);
-//        });
 
         return $list;
 

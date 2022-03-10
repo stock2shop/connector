@@ -38,14 +38,36 @@ class Products implements ProductsInterface
         foreach ($channelProducts as $cp) {
 
             foreach ($cp->variants as $cv) {
+
+                // Map the product and variant(s) onto the MemoryProduct schema.
+
                 $mapper         = new ProductMapper($cp, $cv, $template);
                 $exampleProduct = $mapper->get();
+
                 if ($cp->delete || $cv->delete) {
+
+                    // We can use the same logic to delete products
+                    // and variants since they are the same thing on
+                    // the channel.
+
                     ChannelState::deleteProductsByIDs([$exampleProduct->id]);
+
                 } elseif (!$exampleProduct->id) {
-                    $exampleProduct->product_group_id = $cp->id;
-                    $productId = ChannelState::create($exampleProduct);
-                    $cv->channel_variant_code = $productId;
+
+                    // The Stock2Shop product->variant[] relationship
+                    // must translate to the "memory" channel schema
+                    // in some way.
+
+                    // ChannelVariant objects rely on the "product_id"
+                    // property being set and the column is not nullable
+                    // in the Stock2Shop DB.
+
+                    // We have to set the "product_group_id" property
+                    // of each `MemoryProduct` to the value of this
+                    // property.
+                    $exampleProduct->product_group_id = $cv->product_id;
+                    $cv->channel_variant_code = ChannelState::create($exampleProduct);
+
                 } else {
                     ChannelState::update([$exampleProduct]);
                 }
