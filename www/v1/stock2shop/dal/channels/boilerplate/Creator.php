@@ -1,6 +1,6 @@
 <?php
 
-namespace stock2shop\dal\channels\example;
+namespace stock2shop\dal\channels\boilerplate;
 
 use stock2shop\dal\channel;
 use stock2shop\exceptions;
@@ -12,19 +12,18 @@ class Creator extends channel\Creator
 {
 
     /**
-     * Create Products
+     * See comments in Creator::createProducts
+     *
      * @return channel\Products
      */
     public function createProducts(): channel\Products
     {
-        // This is a concrete class implementation of the
-        // abstract Creator factory class defined in dal\channel.
-        // Do not add any additional methods to this class.
         return new Products();
     }
 
     /**
-     * Create Orders
+     * See comments in Creator::createOrders
+     *
      * @return channel\Orders
      * @throws exceptions\NotImplemented
      */
@@ -36,7 +35,8 @@ class Creator extends channel\Creator
     }
 
     /**
-     * Create Fulfillments
+     * See comments in Creator::createFulfillments
+     *
      * @return channel\Orders
      * @throws exceptions\NotImplemented
      */
