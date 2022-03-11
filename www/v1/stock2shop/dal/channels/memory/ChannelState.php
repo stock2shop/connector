@@ -20,6 +20,26 @@ class ChannelState
     private static $images = [];
 
     /**
+     * Next Insert Id
+     *
+     * This is a generic function which abstracts the logic
+     * for getting the last inserted ID away from the create()
+     * methods. The id is incremented.
+     *
+     * @return void
+     */
+    public static function nextInsertId(string $type) {
+        $id = '0';
+        if(count(self::$$type) > 0) {
+            // If there are already items, calculate the next item's position.
+            $end = self::$$type[count(self::$$type) - 1];
+            $id = (int)$end->id;
+            $id++;
+        }
+        return $id;
+    }
+
+    /**
      * Create Image
      *
      * This method creates an image on the channel.
@@ -29,22 +49,12 @@ class ChannelState
      */
     public static function createImage(MemoryImage $image) {
 
-        $productImages = [];
+        // Get id.
+        $image->id = ChannelState::nextInsertId("images");
 
-        // We need to add the ids for the
-        // images that the product has on
-        // the channel first.
-
-        foreach(self::$images as $i) {
-            if($image->product_id === $i->product_id) {
-                $productImages[] = $i;
-            }
-        }
-
-        $lastId = count($productImages) + 1;
-        $url = "http://stock2shoptestchannel/$image->product_id/$lastId";
-        $image->id = $url;
-        self::$images[$url] = $image;
+        // Create image on channel.
+        self::$images[$image->id] = $image;
+        return $image->id;
 
     }
 
@@ -58,24 +68,8 @@ class ChannelState
      */
     public static function create(MemoryProduct $product): string {
 
-        // Get last insert ID.
-//        $last = end(self::$products);
-
-        if(count(self::$products) === 0) {
-
-            // This is the first product.
-            $product->id = '0';
-
-        } else {
-
-            // Increment and cast to string.
-//            $product->id = (string) ((int)$last->id++);
-            $end = self::$products[count(self::$products) - 1];
-            $id = (int)$end->id;
-            $id++;
-            $product->id = (string) $id;
-
-        }
+        // Get id.
+        $product->id = ChannelState::nextInsertId('products');
 
         // Create product on channel.
         self::$products[$product->id] = $product;

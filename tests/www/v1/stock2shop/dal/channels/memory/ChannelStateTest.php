@@ -25,9 +25,10 @@ class ChannelStateTest extends tests\TestCase
     public function testCreate()
     {
 
-        // Create an object to reference the ChannelState class.
-        $ref = memory\ChannelState::getInstance();
+        // Cleanup.
+        memory\ChannelState::clean();
 
+        // Create an object to reference the ChannelState class.
         // Create product.
         $product = new memory\MemoryProduct([
             // Product ID will not be set yet,
@@ -50,18 +51,17 @@ class ChannelStateTest extends tests\TestCase
         ]);
 
         // Add product to the channel's state.
-        $productId = $ref->create($product);
+        $productId = memory\ChannelState::create($product);
         $this->assertNotNull($productId);
         $this->assertEquals("string", gettype($productId));
 
         // Get the product from channel state.
-        $stateProducts = $ref->getProductsByIDs([$productId]);
+        $stateProducts = memory\ChannelState::getProductsByIDs([$productId]);
         $this->assertCount(1, $stateProducts);
         $this->assertEquals($product, $stateProducts[0]);
 
         // Cleanup the state.
-        $ref->deleteProductsByIDs([$productId]);
-        $this->assertCount(0, $ref->getProductsByIDs([$productId]));
+        memory\ChannelState::clean();
 
     }
 
@@ -76,13 +76,12 @@ class ChannelStateTest extends tests\TestCase
      */
     public function testGetProductsList() {
 
+        // Cleanup.
+        memory\ChannelState::clean();
+
+        // Create products.
         $productCount = 11;
         $pageSize = 10;
-
-        // The channel state will be populated with 12 products.
-        // Get ChannelState reference.
-
-        // Create products on the channel.
         $offsets = [];
 
         for($i=0; $i<$productCount; $i++) {
@@ -99,13 +98,27 @@ class ChannelStateTest extends tests\TestCase
             ]));
         }
 
+        // Here we are chunking the indices (iterator position)
+        // of the items in the "ChannelState::$products" global
+        // array.
+
         $chunks = array_chunk($offsets, $pageSize);
         foreach($chunks as $chunk) {
+
+            // We then use the indices to simulate paging
+            // and only return the products which are on
+            // the current page.
+
             $products = memory\ChannelState::getProductsList($chunk[0], $pageSize);
             $this->assertEquals(count($chunk), count($products));
+
+            // Assert on the request and the response
+            // received from the channel state.
+
             foreach($chunk as $key => $index) {
                 $this->assertEquals($index, $products[$key]->id);
             }
+
         }
 
     }
@@ -115,6 +128,9 @@ class ChannelStateTest extends tests\TestCase
      * @return void
      */
     public function testUpdate() {
+
+        // Cleanup.
+        memory\ChannelState::clean();
 
         // Setup.
         $id = memory\ChannelState::create(new memory\MemoryProduct([
@@ -157,12 +173,12 @@ class ChannelStateTest extends tests\TestCase
     public function testUpdateImages() {
 
         // Setup.
-        for($i=0; $i<3; $i++) {
-            $offsets[] = $i;
-            memory\ChannelState::createImage(new memory\MemoryImage([
-//                'id' =>
-            ]));
-        }
+//        for($i=0; $i<3; $i++) {
+//            $offsets[] = $i;
+//            memory\ChannelState::createImage(new memory\MemoryImage([
+////                'id' =>
+//            ]));
+//        }
 
         // Update the items.
         $offsets = [];
@@ -170,7 +186,7 @@ class ChannelStateTest extends tests\TestCase
 
 
         // Check updated count is correct.
-        $this->assertEquals($outcome);
+//        $this->assertEquals($outcome);
 
         // Cleanup.
         memory\ChannelState::clean();
