@@ -26,17 +26,18 @@ class ChannelState
      * for getting the last inserted ID away from the create()
      * methods. The id is incremented.
      *
-     * @return void
+     * @return string
      */
     public static function nextInsertId(string $type) {
         $id = '0';
-        if(count(self::$$type) > 0) {
+        $counter = count(self::$$type);
+        if($counter > 0) {
             // If there are already items, calculate the next item's position.
-            $end = self::$$type[count(self::$$type) - 1];
+            $end = self::$$type[$counter - 1];
             $id = (int)$end->id;
             $id++;
         }
-        return $id;
+        return (string)$id;
     }
 
     /**
@@ -110,19 +111,10 @@ class ChannelState
      *
      * @param MemoryImage[] $images
      */
-    public static function updateImages(array $images): array
-    {
-        // Array of updated IDs.
-        $ids = [];
-
-        // Check whether the image exists.
-        foreach($images as $i) {
-            if(array_key_exists($i->id, self::$images)) {
-                self::$images[$i->id] = $i;
-                $ids[] = $i->id;
-            }
+    public static function updateImages(array $images) {
+        foreach ($images as $i) {
+            self::$images[$i->id] = $i;
         }
-        return $ids;
     }
 
     /**

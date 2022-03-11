@@ -39,8 +39,6 @@ class ProductMapper
             // Build product data array.
             $productData = [];
 
-            // Get product meta.
-
             // Add product and variant values.
             $productData['ChannelProduct'] = (array)$cp;
             $productData['ChannelVariant'] = (array)$cv;
@@ -56,17 +54,17 @@ class ProductMapper
             // Create the product from template.
             $epData = $this->renderTemplate($template, $productData);
             $ep = new MemoryProduct($epData);
-            $this->product = $ep;
-
         } else {
             $ep                   = new MemoryProduct();
-            $ep->id               = $cv->sku;
-            $ep->product_group_id = $cp->channel_product_code;
             $ep->name             = $cp->title;
             $ep->price            = $cv->price;
             $ep->quantity         = $cv->qty;
-            $this->product        = $ep;
         }
+
+        // These are non-configurable properties.
+        $ep->id = $cv->sku;
+        $ep->product_group_id = $cp->channel_product_code;
+        $this->product = $ep;
     }
 
     /**

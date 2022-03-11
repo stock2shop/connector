@@ -196,7 +196,7 @@ final class ChannelTest extends Framework\TestCase
             // The second product in the test data has two variants
             self::$channelProductsData[1]["variants"][0]["delete"] = true;
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
-//            $response = $connector->sync($request, $channel, $flagMap);
+            $response = $connector->sync($request, $channel, $flagMap);
             self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
 
             // --------------------------------------------------------
@@ -221,7 +221,8 @@ final class ChannelTest extends Framework\TestCase
             // --------------------------------------------------------
 
             // Synchronize an empty payload of data from Stock2Shop.
-            $request = vo\ChannelProduct::createArray([]);
+            self::$channelProductsData = [];
+            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $response = $connector->sync($request, $channel, $flagMap);
             self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 5 - Sync Empty Payload [' . $type . ']');
 

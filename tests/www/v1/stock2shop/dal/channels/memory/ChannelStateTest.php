@@ -199,4 +199,28 @@ class ChannelStateTest extends tests\TestCase
 
     }
 
+    /**
+     * Test Create Image
+     * @return void
+     */
+    public function testCreateImage() {
+
+        // Cleanup.
+        memory\ChannelState::clean();
+
+        // Setup.
+        $imageIds = [];
+
+        for($i=0; $i!==6; $i++) {
+            $imageIds[] = memory\ChannelState::createImage(new memory\MemoryImage([
+                'id' => null,
+                'url' => 'http://aws.stock2sho..' . $i,
+                'product_id' => '1'
+            ]));
+        }
+
+        $this->assertNotEmpty($imageIds);
+
+    }
+
 }

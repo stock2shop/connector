@@ -4,8 +4,8 @@ namespace stock2shop\dal\channels\memory;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
 use stock2shop\exceptions;
-use stock2shop\vo;
 use stock2shop\helpers;
+use stock2shop\vo;
 
 /**
  * See comments in ProductsInterface
@@ -32,53 +32,22 @@ class Products implements ProductsInterface
         $template = helpers\Meta::get($channel->meta, self::META_MUSTACHE_TEMPLATE);
 
         // This example channel updates products one at a time.
-        // In many channels you work on this should be done in bulk where possible.
+        // In many channels your work on this should be done in bulk where possible.
 
-        // Build and save all MemoryProduct objects.
         foreach ($channelProducts as $cp) {
-
             foreach ($cp->variants as $cv) {
-
-                // Map the product and variant(s) onto the MemoryProduct schema.
-
-                $mapper         = new ProductMapper($cp, $cv, $template);
+                $mapper = new ProductMapper($cp, $cv, $template);
                 $exampleProduct = $mapper->get();
-
                 if ($cp->delete || $cv->delete) {
-
-                    // We can use the same logic to delete products
-                    // and variants since they are the same thing on
-                    // the channel.
-
                     ChannelState::deleteProductsByIDs([$exampleProduct->id]);
-
                 } elseif (!$exampleProduct->id) {
-
-                    // The Stock2Shop product->variant[] relationship
-                    // must translate to the "memory" channel schema
-                    // in some way.
-
-                    // ChannelVariant objects rely on the "product_id"
-                    // property being set and the column is not nullable
-                    // in the Stock2Shop DB.
-
-                    // We have to set the "product_group_id" property
-                    // of each `MemoryProduct` to the value of this
-                    // property.
-                    $exampleProduct->product_group_id = $cv->product_id;
                     $cv->channel_variant_code = ChannelState::create($exampleProduct);
-
                 } else {
                     ChannelState::update([$exampleProduct]);
                 }
-                $cp->channel_product_code = $exampleProduct->product_group_id;
-                $cp->success              = true;
-                $cv->channel_variant_code = $exampleProduct->id;
-                $cv->success              = true;
-
-                // set images
+                $cv->success = true;
                 foreach ($cp->images as $ci) {
-                    $mapper       = new ImageMapper($ci, $exampleProduct);
+                    $mapper = new ImageMapper($ci, $exampleProduct);
                     $exampleImage = $mapper->get();
                     if ($ci->delete) {
                         ChannelState::deleteImages([$exampleImage->id]);
@@ -86,9 +55,11 @@ class Products implements ProductsInterface
                         ChannelState::updateImages([$exampleImage]);
                     }
                     $ci->channel_image_code = $exampleImage->id;
-                    $ci->success            = true;
+                    $ci->success = true;
                 }
+                $cp->channel_product_code = $exampleProduct->product_group_id;
             }
+            $cp->success = true;
         }
         return $channelProducts;
     }
@@ -96,7 +67,7 @@ class Products implements ProductsInterface
     /**
      * See comments in ProductsInterface::get
      *
-     * @param string $token
+     * @param string $channel_product_code
      * @param int $limit
      * @param vo\Channel $channel
      * @return vo\ChannelProduct[] $channelProducts
@@ -116,23 +87,21 @@ class Products implements ProductsInterface
         // and build a map. The key of the map will be the
         // product_group_id and the value will be the product IDs.
         $productMap = [];
-        foreach($products as $memProduct) {
-            if(!array_key_exists($memProduct->product_group_id, $productMap)) {
+        foreach ($products as $memProduct) {
+            if (!array_key_exists($memProduct->product_group_id, $productMap)) {
                 $productMap[$memProduct->product_group_id] = [];
             }
-            $productMap[$memProduct->product_group_id][] = ["channel_variant_code" => $memProduct->id, "success"=>true];
+            $productMap[$memProduct->product_group_id][] = ["channel_variant_code" => $memProduct->id, "success" => true];
         }
 
         // Convert map into stock2shop VOs.
-        foreach($productMap as $productId => $variantIds) {
-
+        foreach ($productMap as $productId => $variantIds) {
             // Map the product onto a `vo\ChannelProduct()` object.
             $channelProducts[] = new vo\ChannelProduct([
                 'channel_product_code' => $productId,
                 'success' => true,
                 'variants' => $variantIds
             ]);
-
         }
 
         return $channelProducts;
@@ -154,8 +123,8 @@ class Products implements ProductsInterface
 
                 // Transform `vo\ChannelProduct` to `MemoryProduct` and fetch existing
                 // `MemoryProduct` stored in `ChannelState`.
-                $mapper                  = new ProductMapper($cp, $cv, $template);
-                $exampleProduct          = $mapper->get();
+                $mapper = new ProductMapper($cp, $cv, $template);
+                $exampleProduct = $mapper->get();
                 $existingExampleProducts = ChannelState::getProductsByIDs([$exampleProduct->id]);
 
                 // remove variant if it is not found
@@ -164,22 +133,22 @@ class Products implements ProductsInterface
                     continue;
                 }
                 $cp->channel_product_code = $exampleProduct->product_group_id;
-                $cp->success              = true;
+                $cp->success = true;
                 $cv->channel_variant_code = $exampleProduct->id;
-                $cv->success              = true;
+                $cv->success = true;
 
                 // Check images exist in state
                 foreach ($cp->images as $kci => $ci) {
 
-                    $mapper                = new ImageMapper($ci, $exampleProduct);
-                    $exampleImage          = $mapper->get();
+                    $mapper = new ImageMapper($ci, $exampleProduct);
+                    $exampleImage = $mapper->get();
                     $existingExampleImages = ChannelState::getImagesByIDs([$exampleImage->id]);
                     if (count($existingExampleImages) === 0) {
                         unset($cp->images[$kci]);
                         continue;
                     }
                     $ci->channel_image_code = $exampleImage->id;
-                    $ci->success            = true;
+                    $ci->success = true;
                 }
             }
 
