@@ -100,33 +100,80 @@ class ChannelStateTest extends tests\TestCase
         }
 
         $chunks = array_chunk($offsets, $pageSize);
-
         foreach($chunks as $chunk) {
-
             $products = memory\ChannelState::getProductsList($chunk[0], $pageSize);
             $this->assertEquals(count($chunk), count($products));
-
             foreach($chunk as $key => $index) {
                 $this->assertEquals($index, $products[$key]->id);
             }
-
         }
 
-        // Get all products up until limit.
-        // Expected outcome is 10 MemoryProduct objects for first
-        // page and 2 MemoryProduct objects for the second page.
+    }
 
-        // IDs will be: 0,1,2,3,4,5,6,7,8,9   [10]
+    /**
+     * Test Update
+     * @return void
+     */
+    public function testUpdate() {
+
+        // Setup.
+        $id = memory\ChannelState::create(new memory\MemoryProduct([
+            'id' => null,
+            'product_group_id' => 'cpid1',
+            'name' => 'Product Name',
+            'price' => '5000.00',
+            'quantity' => 5,
+            'images' => [
+                'http://aws.stock2sho..1',
+            ]
+        ]));
+
+        $this->assertNotNull($id, "Failed to create product.");
+
+        // Update the item.
+        $update = new memory\MemoryProduct([
+            'id' => $id,
+            'product_group_id' => 'cpid2',
+            'name' => 'new name',
+            'price' => '1000.00',
+            'quantity' => 2,
+            'images' => []
+        ]);
+        $updatedIds = memory\ChannelState::update([$update]);
+
+        // Check updated count is correct.
+        $this->assertNotNull($updatedIds, "No updated IDs returned from channel.");
+        $this->assertEquals($updatedIds, [$id], "Product ID does not match the updated product's ID.");
+
+        // Cleanup.
+        memory\ChannelState::clean();
+
+    }
+
+    /**
+     * Test Update Images
+     * @return void
+     */
+    public function testUpdateImages() {
+
+        // Setup.
+        for($i=0; $i<3; $i++) {
+            $offsets[] = $i;
+            memory\ChannelState::createImage(new memory\MemoryImage([
+//                'id' =>
+            ]));
+        }
+
+        // Update the items.
+        $offsets = [];
 
 
-        // IDs will be 10, 11   [2]
-//        $p2 = memory\ChannelState::getProductsList('10', 10);
-//
-//        $this->assertNotNull($p1);
-//        $this->assertCount(10, $p1);
-//
-//        $this->assertNotNull($p2);
-//        $this->assertCount(2, $p2);
+
+        // Check updated count is correct.
+        $this->assertEquals($outcome);
+
+        // Cleanup.
+        memory\ChannelState::clean();
 
     }
 

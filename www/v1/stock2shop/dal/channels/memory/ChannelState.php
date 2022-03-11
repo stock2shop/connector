@@ -20,6 +20,35 @@ class ChannelState
     private static $images = [];
 
     /**
+     * Create Image
+     *
+     * This method creates an image on the channel.
+     *
+     * @param MemoryImage $image
+     * @return string $id
+     */
+    public static function createImage(MemoryImage $image) {
+
+        $productImages = [];
+
+        // We need to add the ids for the
+        // images that the product has on
+        // the channel first.
+
+        foreach(self::$images as $i) {
+            if($image->product_id === $i->product_id) {
+                $productImages[] = $i;
+            }
+        }
+
+        $lastId = count($productImages) + 1;
+        $url = "http://stock2shoptestchannel/$image->product_id/$lastId";
+        $image->id = $url;
+        self::$images[$url] = $image;
+
+    }
+
+    /**
      * Create
      *
      * This method creates a product on the channel.
@@ -55,25 +84,49 @@ class ChannelState
     }
 
     /**
+     * Update
+     *
+     * This method updates a batch of products if they
+     * exist in the $products class property.
+     *
      * @param MemoryProduct[] $products
      */
-    public static function update(array $products) {
-        foreach ($products as $p) {
-            // Check whether the product exists
-            if(array_key_exists($p->id, self::$products)) {
-                self::$products[$p->id] = $p;
+    public static function update(array $products): array
+    {
+        // Array of updated IDs.
+        $ids = [];
+
+        // Check whether the product exists.
+        foreach($products as $i) {
+            if(array_key_exists($i->id, self::$products)) {
+                self::$products[$i->id] = $i;
+                $ids[] = $i->id;
             }
         }
+        return $ids;
     }
 
     /**
+     * Update Images
+     *
+     * This method updates images if found in the
+     * $images class property.
+     *
      * @param MemoryImage[] $images
      */
-    public static function updateImages(array $images) {
-        // TODO: Refactor same as update().
-        foreach ($images as $i) {
-            self::$images[$i->id] = $i;
+    public static function updateImages(array $images): array
+    {
+        // Array of updated IDs.
+        $ids = [];
+
+        // Check whether the image exists.
+        foreach($images as $i) {
+            if(array_key_exists($i->id, self::$images)) {
+                self::$images[$i->id] = $i;
+                $ids[] = $i->id;
+            }
         }
+        return $ids;
     }
 
     /**
@@ -159,6 +212,19 @@ class ChannelState
         foreach ($ids as $id) {
             self::$images[$id] = null;
         }
+    }
+
+    /**
+     * Clean
+     *
+     * Removes all products and images from the
+     * channel's state.
+     *
+     * @return void
+     */
+    public static function clean() {
+        self::$products = null;
+        self::$images = null;
     }
 
 }
