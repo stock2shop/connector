@@ -13,38 +13,11 @@ use stock2shop\vo;
 class ChannelState
 {
 
-    private static $instance = null;
-
     /** @var MemoryProduct[] Associative array with key as MemoryProduct->id and value as MemoryProduct. */
-    public static $products = [];
+    private static $products = [];
 
     /** @var MemoryImage[] Associative array with key as the MemoryImage->id and value as MemoryImage. */
-    public static $images = [];
-
-    /**
-     * Get Instance
-     *
-     * Returns an instance of the singleton.
-     * Only one object of this class will exist
-     * in the application.
-     *
-     * @return ChannelState
-     */
-    public static function getInstance() {
-        if(!self::$instance) {
-            self::$instance = new ChannelState();
-        }
-        return self::$instance;
-    }
-
-    /**
-     * Constructor
-     *
-     * Default constructor set to private.
-     *
-     * @return void
-     */
-    private function __construct() { }
+    private static $images = [];
 
     /**
      * Create
@@ -57,15 +30,27 @@ class ChannelState
     public static function create(MemoryProduct $product): string {
 
         // Get last insert ID.
-        $lastInsertId = count(self::$products);
+//        $last = end(self::$products);
 
-        // Increment and cast to string.
-        $id = (string)$lastInsertId++;
-        $product->id = $id;
+        if(count(self::$products) === 0) {
+
+            // This is the first product.
+            $product->id = '0';
+
+        } else {
+
+            // Increment and cast to string.
+//            $product->id = (string) ((int)$last->id++);
+            $end = self::$products[count(self::$products) - 1];
+            $id = (int)$end->id;
+            $id++;
+            $product->id = (string) $id;
+
+        }
 
         // Create product on channel.
-        self::$products[$id] = $product;
-        return $id;
+        self::$products[$product->id] = $product;
+        return $product->id;
 
     }
 
@@ -85,6 +70,7 @@ class ChannelState
      * @param MemoryImage[] $images
      */
     public static function updateImages(array $images) {
+        // TODO: Refactor same as update().
         foreach ($images as $i) {
             self::$images[$i->id] = $i;
         }
@@ -102,27 +88,17 @@ class ChannelState
     public static function getProductsList(string $offset, int $limit): array {
 
         /** @var MemoryProduct[] $list */
-        $list = [];
+        $products = [];
 
-        // Get start index using a combination of array_keys() and array_search().
-        // The needle will be the channel_product_code.
-        $startIndex = array_search($offset, array_keys(self::$products)) ?? 0;
+        // Slice array
+        // - preserve indices
+        $list = array_slice(self::$products, $offset, $limit, true);
 
-        // Iterate over products in state.
-        if($offset !== "") {
-            $list = array_values(array_merge(array_slice(self::$products, $startIndex, $limit, true)));
-        } else {
-            $count = 0;
-            foreach(self::$products as $id => $productFromStart) {
-                if($count === $limit) {
-                    break;
-                }
-                $list[$id] = $productFromStart;
-                $count++;
-            }
+        foreach($list as $item) {
+            $products[] = $item;
         }
 
-        return $list;
+        return $products;
 
     }
 

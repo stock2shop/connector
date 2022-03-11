@@ -74,15 +74,20 @@ class ChannelStateTest extends tests\TestCase
      *
      * @return void
      */
-    public function testListProducts() {
+    public function testGetProductsList() {
+
+        $productCount = 11;
+        $pageSize = 10;
 
         // The channel state will be populated with 12 products.
         // Get ChannelState reference.
-        $ref = memory\ChannelState::getInstance();
 
         // Create products on the channel.
-        for($i=0; $i<11; $i++) {
-            $ref->create(new memory\MemoryProduct([
+        $offsets = [];
+
+        for($i=0; $i<$productCount; $i++) {
+            $offsets[] = $i;
+            memory\ChannelState::create(new memory\MemoryProduct([
                 'id' => null,
                 'product_group_id' => 'cpid1',
                 'name' => 'Product Name',
@@ -94,21 +99,34 @@ class ChannelStateTest extends tests\TestCase
             ]));
         }
 
+        $chunks = array_chunk($offsets, $pageSize);
+
+        foreach($chunks as $chunk) {
+
+            $products = memory\ChannelState::getProductsList($chunk[0], $pageSize);
+            $this->assertEquals(count($chunk), count($products));
+
+            foreach($chunk as $key => $index) {
+                $this->assertEquals($index, $products[$key]->id);
+            }
+
+        }
+
         // Get all products up until limit.
         // Expected outcome is 10 MemoryProduct objects for first
         // page and 2 MemoryProduct objects for the second page.
 
         // IDs will be: 0,1,2,3,4,5,6,7,8,9   [10]
-        $p1 = $ref->getProductsList('', 10);
+
 
         // IDs will be 10, 11   [2]
-        $p2 = $ref->getProductsList('10', 10);
-
-        $this->assertNotNull($p1);
-        $this->assertCount(10, $p1);
-
-        $this->assertNotNull($p2);
-        $this->assertCount(2, $p2);
+//        $p2 = memory\ChannelState::getProductsList('10', 10);
+//
+//        $this->assertNotNull($p1);
+//        $this->assertCount(10, $p1);
+//
+//        $this->assertNotNull($p2);
+//        $this->assertCount(2, $p2);
 
     }
 
