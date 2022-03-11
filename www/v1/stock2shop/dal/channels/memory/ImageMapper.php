@@ -19,12 +19,18 @@ class ImageMapper
      * @param vo\ChannelImage $ci
      * @param MemoryProduct $ep
      */
-    public function __construct(vo\ChannelImage $ci, MemoryProduct $ep)
+    public function __construct(vo\ChannelImage $ci, MemoryProduct $mp)
     {
-        $ei             = new MemoryImage();
-        $ei->id         = $ci->src;
-        $ei->product_id = $ep->product_group_id;
-        $this->image    = $ei;
+        // Image mapping onto channel MemoryImage.
+        $mapping = [
+            "id" => $ci->channel_image_code,
+            "product_id" => $mp->id,
+            "url" => $ci->src
+        ];
+
+        // Create new object.
+        $mi = new MemoryImage($mapping);
+        $this->image = $mi;
     }
 
     /**
