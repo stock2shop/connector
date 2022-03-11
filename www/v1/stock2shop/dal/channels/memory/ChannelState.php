@@ -13,11 +13,38 @@ use stock2shop\vo;
 class ChannelState
 {
 
+    private static $instance = null;
+
     /** @var MemoryProduct[] Associative array with key as MemoryProduct->id and value as MemoryProduct. */
     public static $products = [];
 
     /** @var MemoryImage[] Associative array with key as the MemoryImage->id and value as MemoryImage. */
     public static $images = [];
+
+    /**
+     * Get Instance
+     *
+     * Returns an instance of the singleton.
+     * Only one object of this class will exist
+     * in the application.
+     *
+     * @return ChannelState
+     */
+    public static function getInstance() {
+        if(!self::$instance) {
+            self::$instance = new ChannelState();
+        }
+        return self::$instance;
+    }
+
+    /**
+     * Constructor
+     *
+     * Default constructor set to private.
+     *
+     * @return void
+     */
+    private function __construct() { }
 
     /**
      * Create
@@ -140,7 +167,8 @@ class ChannelState
      */
     public static function deleteProductsByIDs(array $ids) {
         foreach ($ids as $id) {
-            unset(self::$products[$id]);
+            self::$products[$id] = null;
+//            unset(self::$products[$id]);
         }
     }
 
@@ -153,7 +181,7 @@ class ChannelState
      */
     public static function deleteImages(array $ids) {
         foreach ($ids as $id) {
-            unset(self::$images[$id]);
+            self::$images[$id] = null;
         }
     }
 
