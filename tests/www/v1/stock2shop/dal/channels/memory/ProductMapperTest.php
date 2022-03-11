@@ -24,7 +24,7 @@ class ProductMapperTest extends tests\TestCase
      * @return void
      * @throws UnprocessableEntity
      */
-    public function testMap()
+    public function testGet()
     {
 
         // Create object to map.
