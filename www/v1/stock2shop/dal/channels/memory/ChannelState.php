@@ -83,17 +83,19 @@ class ChannelState
      * This method updates a batch of products if they
      * exist in the $products class property.
      *
-     * @param MemoryProduct[] $products
+     * @param array $items The Memory* objects to update. Must have ids set.
+     * @param $type The type of item to update, either product or image.
+     * @return array
      */
-    public static function update(array $products): array
+    public static function update(array $items, $type='products'): array
     {
         // Array of updated IDs.
         $ids = [];
 
         // Check whether the product exists.
-        foreach($products as $i) {
-            if(array_key_exists($i->id, self::$products)) {
-                self::$products[$i->id] = $i;
+        foreach($items as $i) {
+            if(array_key_exists($i->id, self::$$type)) {
+                self::$$type[$i->id] = $i;
                 $ids[] = $i->id;
             }
         }

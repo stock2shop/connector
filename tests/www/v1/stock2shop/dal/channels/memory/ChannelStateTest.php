@@ -160,6 +160,7 @@ class ChannelStateTest extends tests\TestCase
         // Check updated count is correct.
         $this->assertNotNull($updatedIds, "No updated IDs returned from channel.");
         $this->assertEquals($updatedIds, [$id], "Product ID does not match the updated product's ID.");
+        $this->assertEquals($updatedIds, [$id], "Product ID does not match the updated product's ID.");
 
         // Cleanup.
         memory\ChannelState::clean();
@@ -172,24 +173,29 @@ class ChannelStateTest extends tests\TestCase
      */
     public function testUpdateImages() {
 
-        // Setup.
-//        for($i=0; $i<3; $i++) {
-//            $offsets[] = $i;
-//            memory\ChannelState::createImage(new memory\MemoryImage([
-////                'id' =>
-//            ]));
-//        }
-
-        // Update the items.
-        $offsets = [];
-
-
-
-        // Check updated count is correct.
-//        $this->assertEquals($outcome);
-
         // Cleanup.
         memory\ChannelState::clean();
+
+        // Setup.
+        $id = memory\ChannelState::createImage(new memory\MemoryImage([
+            'id' => null,
+            'url' => 'http://aws.stock2sho..1',
+            'product_id' => '1'
+        ]));
+
+        $this->assertNotNull($id, 'Failed to create image.');
+
+        // Update the item.
+        $update = new memory\MemoryImage([
+            'id' => $id,
+            'url' => 'http://aws.stock2sho..1',
+            'product_id' => '2'
+        ]);
+
+        $updatedIds = memory\ChannelState::update([$update], 'images');
+        $this->assertNotNull($updatedIds);
+        $this->assertCount(1, $updatedIds);
+        $this->assertEquals($updatedIds, [$id], "Image ID does not match.");
 
     }
 
