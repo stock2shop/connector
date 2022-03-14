@@ -31,37 +31,97 @@ class Products implements ProductsInterface
         // authenticate with some 3rd party shopping cart.
         $template = helpers\Meta::get($channel->meta, self::META_MUSTACHE_TEMPLATE);
 
+        // Instantiate the maps.
+        // We'll use the maps for products, variants and images to know which
+        // have been synchronized to the channel when we mark the entities synced.
+        $products_success_map = [];
+        $variants_success_map = [];
+        $images_success_map = [];
+
+
+
+        // First we need to map the products onto the Memory channel
+        // data classes. We will add these to an array of products
+        // which may be sent to the channel.
+        $memoryChannelProducts = [];
+//        foreach($channelProducts as $cpk => $cpp) {
+//            foreach($channelProducts[$cpk]->variants as $cpv) {
+//                $mapper = new ProductMapper($cpp, $cpv, $template);
+//                $memoryChannelProducts[$cpv->sku] = $mapper->get();
+//            }
+//        }
+
+
+
+
+
         // This example channel updates products one at a time.
         // In many channels your work on this should be done in bulk where possible.
+        foreach ($channelProducts as $key => $product) {
+            foreach ($product->variants as $variant) {
 
-        foreach ($channelProducts as $cp) {
-            foreach ($cp->variants as $cv) {
-                $mapper = new ProductMapper($cp, $cv, $template);
-                $exampleProduct = $mapper->get();
-                if ($cp->delete || $cv->delete) {
-                    ChannelState::deleteProductsByIDs([$exampleProduct->id]);
-                } elseif (!$exampleProduct->id) {
-                    $cv->channel_variant_code = ChannelState::create($exampleProduct);
+                $pMapper = new ProductMapper($product, $variant, $template);
+                $memoryProduct = $pMapper->get();
+
+                if ($product->delete || $variant->delete) {
+                    ChannelState::deleteProductsByIDs([$memoryProduct->id]);
+                } elseif (!$memoryProduct->id) {
+                    $memoryProduct->id = ChannelState::create($memoryProduct);
                 } else {
-                    ChannelState::update([$exampleProduct]);
+                    ChannelState::update([$memoryProduct]);
                 }
-                $cv->success = true;
-                foreach ($cp->images as $ci) {
-                    $mapper = new ImageMapper($ci, $exampleProduct);
-                    $exampleImage = $mapper->get();
-                    if ($ci->delete) {
-                        ChannelState::deleteImages([$exampleImage->id]);
-                    } else {
-                        ChannelState::updateImages([$exampleImage]);
-                    }
-                    $ci->channel_image_code = $exampleImage->id;
-                    $ci->success = true;
-                }
-                $cp->channel_product_code = $exampleProduct->product_group_id;
+                $variant->channel_variant_code = $memoryProduct->id;
+//                $memoryProductMap[$variant->channel_variant_code] = [ "mp" => $memoryProduct, => $product->];
             }
-            $cp->success = true;
+        }
+
+
+        // Build map of all the products on the channel which
+        // require an image to be linked to them. Some of the images
+        // might already have been linked to a product  on the channel,
+        // so for these we will have to link the same image. The images
+        // are shared between the products which map to the same
+        // product->variant group on the channel.
+//        $productVariantMap = [];
+//        foreach($channelProducts as $key => $product) {
+//            foreach($channelProducts[$key]->variants as $variant) {
+//                $productVariantMap[$variant->sku][] = $product->images;
+//            }
+//        }
+        // Iterate over the products on the channel and use the
+        // productVariantMap to determine the images to create for each product.
+        // When we create images on the channel, we will also receive an ID back
+        // from the channel's state.
+//        foreach ($channelProducts as $key => $product) {
+//            foreach($channelProducts[$key]->images as $iKey => $iValue) {
+//                $mpMap = $memoryProductMap[$product->id];
+//                foreach($mpMap as $mp) {
+//                    $imageMapper = new ImageMapper($iValue, $mp);
+//                    $imageMapping = $imageMapper->get();
+//                    if(!isset($imageMapping->id)) {
+//
+//                    }
+//                    $channelImageId = ChannelState::createImage();
+//                }
+//                $channelProducts[$key]->images[$iKey]->channel_image_code = $channelImageId;
+//            }
+//        }
+
+
+
+        // Iterate over products and mark synced.
+        foreach($channelProducts as $key => $product) {
+            $product->success = true;
+            foreach ($product->variants as $variant) {
+                $variant->success = true;
+            }
+            foreach ($product->images as $image) {
+                $image->success = true;
+            }
         }
         return $channelProducts;
+
+
     }
 
     /**
@@ -117,47 +177,58 @@ class Products implements ProductsInterface
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
-        $template = helpers\Meta::get($channel->meta, self::META_MUSTACHE_TEMPLATE);
-        foreach ($channelProducts as $kcp => $cp) {
-            foreach ($cp->variants as $kcv => $cv) {
+        $productsToRemove = [];
+        $imagesToRemove = [];
+        $variantsToRemove = [];
 
-                // Transform `vo\ChannelProduct` to `MemoryProduct` and fetch existing
-                // `MemoryProduct` stored in `ChannelState`.
-                $mapper = new ProductMapper($cp, $cv, $template);
-                $exampleProduct = $mapper->get();
-                $existingExampleProducts = ChannelState::getProductsByIDs([$exampleProduct->id]);
+        // ---------------------------------------
 
-                // remove variant if it is not found
-                if (count($existingExampleProducts) === 0) {
-                    unset($cp->variants[$kcv]);
-                    continue;
-                }
-                $cp->channel_product_code = $exampleProduct->product_group_id;
-                $cp->success = true;
-                $cv->channel_variant_code = $exampleProduct->id;
-                $cv->success = true;
-
-                // Check images exist in state
-                foreach ($cp->images as $kci => $ci) {
-
-                    $mapper = new ImageMapper($ci, $exampleProduct);
-                    $exampleImage = $mapper->get();
-                    $existingExampleImages = ChannelState::getImagesByIDs([$exampleImage->id]);
-                    if (count($existingExampleImages) === 0) {
-                        unset($cp->images[$kci]);
-                        continue;
+        foreach ($channelProducts as $product) {
+            $productFiles = ChannelState::getAllProducts();
+            $hasProduct = false;
+            $hasVariant = false;
+            foreach ($productFiles as $filename => $data) {
+                foreach ($product->variants as $variant) {
+                    $hasVariant = false;
+                    foreach ($productFiles as $filename => $data) {
+                        if ($filename === $variant->channel_variant_code) {
+                            $hasVariant = true;
+                            break;
+                        }
                     }
-                    $ci->channel_image_code = $exampleImage->id;
-                    $ci->success = true;
+                    if (!$hasVariant) {
+                        array_push($variantsToRemove, $variant->channel_variant_code);
+                    }
                 }
-            }
-
-            // remove products which have no variants
-            if (count($cp->variants) === 0) {
-                unset($channelProducts[$kcp]);
+                if (!$hasVariant) {
+                    array_push($productsToRemove, $product->channel_product_code);
+                }
             }
         }
+
+        // -----------------------------------------
+
+        // Iterate over the channel products in the return array
+        // and set their "success" properties to true.
+
+        foreach ($channelProducts as $key => $product) {
+            foreach ($product->variants as $vk => $variant) {
+                if (in_array($variant->channel_variant_code, $variantsToRemove)) {
+                    unset($product->variants[$vk]);
+                }
+            }
+            foreach ($product->images as $ik => $image) {
+                if (in_array($image->channel_image_code, $imagesToRemove)) {
+                    unset($product->images[$ik]);
+                }
+            }
+            if (in_array($product->channel_product_code, $productsToRemove)) {
+                unset($channelProducts[$key]);
+            }
+        }
+
         return $channelProducts;
+
     }
 
 }
