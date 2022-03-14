@@ -32,15 +32,20 @@ class ProductMapper
      */
     public function __construct(vo\ChannelProduct $cp, vo\ChannelVariant $cv, $template = null)
     {
+        $ep = null;
+
         // Render with Mustache.
         if ($template) {
 
             // Build product data array.
             $productData = [];
 
+            $tempCp = clone $cp;
+            $tempCv = clone $cv;
+
             // Add product and variant values.
-            $productData['ChannelProduct'] = (array)$cp;
-            $productData['ChannelVariant'] = (array)$cv;
+            $productData['ChannelProduct'] = (array)$tempCp;
+            $productData['ChannelVariant'] = (array)$tempCv;
 
             // Unset the array properties.
             unset(
@@ -53,14 +58,28 @@ class ProductMapper
             // Create the product from template.
             $epData = $this->renderTemplate($template, $productData);
             $ep = new MemoryProduct($epData);
+        } else {
+
+            // If we are not mapping according to a template,
+            // then apply the default mapping for the product:
+            $ep = new MemoryProduct([
+                'id' => $cv->sku,
+                'name' => $cp->title,
+                'quantity' => $cv->qty,
+                'price' => $cv->price
+            ]);
         }
 
         // These are non-configurable properties.
-        $ep->product_group_id = $cp->channel_product_code;
         $this->product = $ep;
+
     }
 
     /**
+     * Get
+     *
+     * Returns the mapped product from the class property.
+     *
      * @return MemoryProduct
      */
     public function get(): MemoryProduct

@@ -219,7 +219,62 @@ class ChannelStateTest extends tests\TestCase
             ]));
         }
 
+        // Assert on outcome.
         $this->assertNotEmpty($imageIds);
+        $this->assertEquals(["0","1","2","3","4","5"], $imageIds);
+
+    }
+
+    /**
+     * Get Images
+     *
+     * Tests creating and returning all
+     * images from the channel.
+     *
+     * @return void
+     */
+    public function testGetImages() {
+
+        // Cleanup.
+        memory\ChannelState::clean();
+
+        // Created image IDs.
+        $imageIds = [];
+
+        // Setup.
+        $numberOfImages = 6;
+        $productId = '1';
+        for($i=0; $i!==$numberOfImages; $i++) {
+            $imageIds[] = memory\ChannelState::createImage(new memory\MemoryImage([
+                'id' => null,
+                'url' => 'http://aws.stock2sho..' . $i,
+                'product_id' => $productId
+            ]));
+        }
+
+        // Test get images by IDs off channel.
+        $outcome = memory\ChannelState::getImagesByIDs($imageIds);
+
+        // Assert on outcome.
+        $this->assertCount($numberOfImages, $outcome);
+        // Return value must be a map.
+        $this->assertArrayHasKey($imageIds[0], $outcome);
+        // Values must be MemoryImage objects.
+        $this->assertInstanceOf('stock2shop\dal\channels\memory\MemoryImage', array_values($outcome)[0]);
+        // MemoryImage objects must have their "product_id" properties set to the ID of the product.
+        $this->assertEquals(array_values($outcome)[$numberOfImages-1]->product_id, $productId);
+
+        // Test get images off channel.
+        $outcome = memory\ChannelState::getImages();
+
+        // Assert on outcome.
+        $this->assertCount($numberOfImages, $outcome);
+        // Return value must be a map with string keys.
+        $this->assertEquals('string', gettype(array_keys($outcome)[0]));
+        // Values must be MemoryImage objects.
+        $this->assertInstanceOf('stock2shop\dal\channels\memory\MemoryImage', array_values($outcome)[$numberOfImages-2]);
+        // Each object must have its "id" property set to a string value.
+        $this->assertEquals('string', gettype(array_values($outcome)[0]->id));
 
     }
 

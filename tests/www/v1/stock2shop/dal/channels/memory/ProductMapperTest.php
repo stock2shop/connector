@@ -54,24 +54,24 @@ class ProductMapperTest extends tests\TestCase
         ]);
 
         // Template.
-        $template = '{"id": "{{ChannelVariant.sku}}", "name": "{{ChannelProduct.title}}", "quantity": "{{ChannelVariant.qty}}", "product_group_id": "{{ChannelProduct.channel_product_code}}", "price": "{{ChannelVariant.price}}"}';
+        $template = '{
+            "id": "{{ChannelVariant.sku}}",
+            "name": "{{ChannelProduct.title}}",
+            "quantity": "{{ChannelVariant.qty}}",
+            "product_group_id": "{{ChannelProduct.id}}",
+            "price": "{{ChannelVariant.price}}"
+          }';
 
         // Call method to test.
         $object = new memory\ProductMapper($channelProduct, $channelProduct->variants[0], $template);
         $outcome = $object->get();
 
-        // Now we need to create a ExampleProduct manually
-        // and compare the two objects.
-        $expected = new memory\MemoryProduct([
-            'id' => $channelProduct->variants[0]->sku,
-            'name' => 'Product Title',
-            'price' => '2222',
-            'quantity' => '2',
-            'product_group_id' => '62714'
-        ]);
-
         // Test/compare.
-        $this->assertEquals($expected, $outcome);
+        $this->assertEquals('1', $outcome->product_group_id);
+        $this->assertEquals('Product Title', $outcome->name);
+        $this->assertEquals('2', $outcome->quantity);
+        $this->assertEquals('product title 1', $outcome->id);
+        $this->assertEquals('2222', $outcome->price);
 
     }
 

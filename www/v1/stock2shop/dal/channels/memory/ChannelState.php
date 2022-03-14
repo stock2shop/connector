@@ -2,8 +2,6 @@
 
 namespace stock2shop\dal\channels\memory;
 
-use stock2shop\vo;
-
 /**
  * Stores the state for the channel in memory as an example
  * i.e. products, orders ad fulfillments
@@ -14,10 +12,10 @@ class ChannelState
 {
 
     /** @var MemoryProduct[] Associative array with key as MemoryProduct->id and value as MemoryProduct. */
-    private static $products = [];
+    private static $stateProducts = [];
 
     /** @var MemoryImage[] Associative array with key as the MemoryImage->id and value as MemoryImage. */
-    private static $images = [];
+    private static $stateImages = [];
 
     /**
      * Next Insert Id
@@ -28,15 +26,31 @@ class ChannelState
      *
      * @return string
      */
-    public static function nextInsertId(string $type) {
+    public static function nextInsertId(string $type)
+    {
         $id = '0';
-        $counter = count(self::$$type);
-        if($counter > 0) {
+        $counter = 0;
+
+        if ($type === 'products') {
+            $counter = count(self::$stateProducts);
+        }
+        if ($type === 'images') {
+            $counter = count(self::$stateImages);
+        }
+
+        if ($counter > 0) {
+            $end = null;
             // If there are already items, calculate the next item's position.
-            $end = self::$$type[$counter - 1];
+            if($type === 'products') {
+                $end = self::$stateProducts[$counter - 1];
+            }
+            if ($type === 'images') {
+                $end = self::$stateImages[$counter - 1];
+            }
             $id = (int)$end->id;
             $id++;
         }
+
         return (string)$id;
     }
 
@@ -48,15 +62,34 @@ class ChannelState
      * @param MemoryImage $image
      * @return string $id
      */
-    public static function createImage(MemoryImage $image) {
-
+    public static function createImage(MemoryImage $image)
+    {
         // Get id.
-        $image->id = ChannelState::nextInsertId("images");
+        $image->id = self::generateID();
 
         // Create image on channel.
-        self::$images[$image->id] = $image;
+        self::$stateImages[$image->id] = $image;
         return $image->id;
+    }
 
+    /**
+     * Generate ID
+     *
+     * Creates a new ID for the product or image.
+     *
+     * @return string $id The unique ID string.
+     * @throws \Exception
+     */
+    public static function generateID(): string
+    {
+        $length = 50;
+        $pieces = [];
+        $keyspace = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $max = mb_strlen($keyspace, '8bit') - 1;
+        for ($i = 0; $i < $length; ++$i) {
+            $pieces [] = $keyspace[random_int(0, $max)];
+        }
+        return implode('', $pieces);
     }
 
     /**
@@ -67,40 +100,35 @@ class ChannelState
      * @param MemoryProduct $product
      * @return string $id
      */
-    public static function create(MemoryProduct $product): string {
-
+    public static function create(MemoryProduct $product): string
+    {
         // Get id.
-        $product->id = ChannelState::nextInsertId('products');
+//        $product->id = ChannelState::nextInsertId('products');
+
+        $product->id = self::generateID();
 
         // Create product on channel.
-        self::$products[$product->id] = $product;
+        self::$stateProducts[$product->id] = $product;
         return $product->id;
-
     }
 
     /**
      * Update
      *
      * This method updates a batch of products if they
-     * exist in the $products class property.
+     * exist in the $stateProducts class property.
      *
-     * @param array $items The Memory* objects to update. Must have ids set.
-     * @param $type The type of item to update, either product or image.
-     * @return array
+     * @param MemoryProduct[] $items The MemoryProduct items to update.
+     * @return array An array of IDs of updated MemoryProduct items.
      */
-    public static function update(array $items, $type='products'): array
+    public static function update(array $items): array
     {
-        // Array of updated IDs.
-        $ids = [];
-
-        // Check whether the product exists.
-        foreach($items as $i) {
-            if(array_key_exists($i->id, self::$$type)) {
-                self::$$type[$i->id] = $i;
-                $ids[] = $i->id;
-            }
+        $updated = [];
+        foreach ($items as $i) {
+            self::$stateProducts[$i->id] = $i;
+            $updated[] = $i->id;
         }
-        return $ids;
+        return $updated;
     }
 
     /**
@@ -109,12 +137,17 @@ class ChannelState
      * This method updates images if found in the
      * $images class property.
      *
-     * @param MemoryImage[] $images
+     * @param MemoryImages[] $items An array of MemoryImage items to update.
+     * @return array An array of IDs from MemoryImage items which have been updated.
      */
-    public static function updateImages(array $images) {
-        foreach ($images as $i) {
-            self::$images[$i->id] = $i;
+    public static function updateImages(array $items)
+    {
+        $updated = [];
+        foreach ($items as $i) {
+            self::$stateImages[$i->id] = $i;
+            $updated[] = $i->id;
         }
+        return $updated;
     }
 
     /**
@@ -126,32 +159,38 @@ class ChannelState
      * @param int $limit The number of products to return from the channel.
      * @return MemoryProduct[] $list
      */
-    public static function getProductsList(string $offset, int $limit): array {
-
+    public static function getProductsList(string $offset, int $limit): array
+    {
         /** @var MemoryProduct[] $list */
         $products = [];
-
         // Slice array
         // - preserve indices
-        $list = array_slice(self::$products, $offset, $limit, true);
-
-        foreach($list as $item) {
+        $list = array_slice(self::$stateProducts, $offset, $limit, true);
+        foreach ($list as $item) {
             $products[] = $item;
         }
-
         return $products;
+    }
 
+    public static function getAllProducts() {
+        return self::$stateProducts;
     }
 
     /**
+     * Get Products By IDs
+     *
+     * Returns an array of MemoryProduct items which match the
+     * IDs provided in the parameter.
+     *
      * @param string[] $ids
-     * @return array associative array, key being id and value being MemoryProduct
+     * @return MemoryProduct[] associative array, key being id and value being MemoryProduct
      */
-    public static function getProductsByIDs(array $ids): array {
+    public static function getProductsByIDs(array $ids): array
+    {
         $exampleProducts = [];
         foreach ($ids as $id) {
-            if(isset(self::$products[$id])) {
-                $exampleProducts[$id] = self::$products[$id];
+            if (isset(self::$stateProducts[$id])) {
+                $exampleProducts[$id] = self::$stateProducts[$id];
             }
         }
         return $exampleProducts;
@@ -163,16 +202,33 @@ class ChannelState
      * Returns matching image objects by ID.
      *
      * @param string[] $ids
-     * @return array associative array, key being id and value being ExampleImage
+     * @return MemoryImage[] associative array, key being id and value being ExampleImage
      */
-    public static function getImagesByIDs(array $ids): array {
+    public static function getImagesByIDs(array $ids): array
+    {
         $exampleImages = [];
         foreach ($ids as $id) {
-            if(isset(self::$images[$id])) {
-                $exampleImages[$id] = self::$images[$id];
+            if (isset(self::$stateImages[$id])) {
+                $exampleImages[$id] = self::$stateImages[$id];
             }
         }
         return $exampleImages;
+    }
+
+    /**
+     * Get Images
+     *
+     * Returns all images on the channel.
+     *
+     * @return MemoryImage[]|[]
+     */
+    public static function getImages()
+    {
+        $memoryImages = [];
+        foreach (self::$stateImages as $miKey => $miValue) {
+            $memoryImages[$miKey] = $miValue;
+        }
+        return $memoryImages;
     }
 
     /**
@@ -182,10 +238,10 @@ class ChannelState
      *
      * @param string[] $ids
      */
-    public static function deleteProductsByIDs(array $ids) {
+    public static function deleteProductsByIDs(array $ids)
+    {
         foreach ($ids as $id) {
-            self::$products[$id] = null;
-//            unset(self::$products[$id]);
+            self::$stateProducts[$id] = null;
         }
     }
 
@@ -196,9 +252,10 @@ class ChannelState
      *
      * @param string[] $ids
      */
-    public static function deleteImages(array $ids) {
+    public static function deleteImages(array $ids)
+    {
         foreach ($ids as $id) {
-            self::$images[$id] = null;
+            self::$stateImages[$id] = null;
         }
     }
 
@@ -210,9 +267,10 @@ class ChannelState
      *
      * @return void
      */
-    public static function clean() {
-        self::$products = null;
-        self::$images = null;
+    public static function clean()
+    {
+        self::$stateProducts = null;
+        self::$stateImages = null;
     }
 
 }

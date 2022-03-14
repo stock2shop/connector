@@ -31,86 +31,56 @@ class Products implements ProductsInterface
         // authenticate with some 3rd party shopping cart.
         $template = helpers\Meta::get($channel->meta, self::META_MUSTACHE_TEMPLATE);
 
-        // Instantiate the maps.
+        // Instantiate maps.
         // We'll use the maps for products, variants and images to know which
         // have been synchronized to the channel when we mark the entities synced.
         $products_success_map = [];
         $variants_success_map = [];
         $images_success_map = [];
 
+        // Build arrays of products to delete, update and create.
+        $products_to_delete = [];
+        $products_to_create = [];
+        $products_to_update = [];
 
-
-        // First we need to map the products onto the Memory channel
-        // data classes. We will add these to an array of products
-        // which may be sent to the channel.
-        $memoryChannelProducts = [];
-//        foreach($channelProducts as $cpk => $cpp) {
-//            foreach($channelProducts[$cpk]->variants as $cpv) {
-//                $mapper = new ProductMapper($cpp, $cpv, $template);
-//                $memoryChannelProducts[$cpv->sku] = $mapper->get();
-//            }
-//        }
-
-
-
-
+        // Get all products from the channel.
+        $stateProducts = ChannelState::getAllProducts();
 
         // This example channel updates products one at a time.
         // In many channels your work on this should be done in bulk where possible.
         foreach ($channelProducts as $key => $product) {
-            foreach ($product->variants as $variant) {
-
+            if ($product->delete) {
+                foreach ($stateProducts as $sp) {
+                    if ($sp->product_group_id === $product->channel_product_code) {
+                        ChannelState::deleteProductsByIDs([$sp->id]);
+                        $product->channel_product_code = $sp->product_group_id;
+                    }
+                }
+                continue;
+            }
+            $memoryProduct = null;
+            foreach ($product->variants as $vKey => $variant) {
                 $pMapper = new ProductMapper($product, $variant, $template);
                 $memoryProduct = $pMapper->get();
-
-                if ($product->delete || $variant->delete) {
-                    ChannelState::deleteProductsByIDs([$memoryProduct->id]);
+                if ($variant->delete) {
+                    $products_to_delete[] = $memoryProduct;
                 } elseif (!$memoryProduct->id) {
                     $memoryProduct->id = ChannelState::create($memoryProduct);
+                    $variant->channel_variant_code = $memoryProduct->id;
                 } else {
-                    ChannelState::update([$memoryProduct]);
+                    $products_to_update[] = $memoryProduct;
                 }
-                $variant->channel_variant_code = $memoryProduct->id;
-//                $memoryProductMap[$variant->channel_variant_code] = [ "mp" => $memoryProduct, => $product->];
             }
+            $product->channel_product_code = $memoryProduct->product_group_id;
         }
 
-
-        // Build map of all the products on the channel which
-        // require an image to be linked to them. Some of the images
-        // might already have been linked to a product  on the channel,
-        // so for these we will have to link the same image. The images
-        // are shared between the products which map to the same
-        // product->variant group on the channel.
-//        $productVariantMap = [];
-//        foreach($channelProducts as $key => $product) {
-//            foreach($channelProducts[$key]->variants as $variant) {
-//                $productVariantMap[$variant->sku][] = $product->images;
-//            }
-//        }
-        // Iterate over the products on the channel and use the
-        // productVariantMap to determine the images to create for each product.
-        // When we create images on the channel, we will also receive an ID back
-        // from the channel's state.
-//        foreach ($channelProducts as $key => $product) {
-//            foreach($channelProducts[$key]->images as $iKey => $iValue) {
-//                $mpMap = $memoryProductMap[$product->id];
-//                foreach($mpMap as $mp) {
-//                    $imageMapper = new ImageMapper($iValue, $mp);
-//                    $imageMapping = $imageMapper->get();
-//                    if(!isset($imageMapping->id)) {
-//
-//                    }
-//                    $channelImageId = ChannelState::createImage();
-//                }
-//                $channelProducts[$key]->images[$iKey]->channel_image_code = $channelImageId;
-//            }
-//        }
-
-
+//        $variant->channel_variant_code = $memoryProduct->id;
+//        $variants_success_map[] = $variant;
+//        $product->channel_product_code = $memoryProduct->product_group_id;
+//        $products_success_map[] = $product;
 
         // Iterate over products and mark synced.
-        foreach($channelProducts as $key => $product) {
+        foreach ($channelProducts as $key => $product) {
             $product->success = true;
             foreach ($product->variants as $variant) {
                 $variant->success = true;
@@ -120,8 +90,6 @@ class Products implements ProductsInterface
             }
         }
         return $channelProducts;
-
-
     }
 
     /**
