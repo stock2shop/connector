@@ -31,13 +31,6 @@ class Products implements ProductsInterface
         // authenticate with some 3rd party shopping cart.
         $template = helpers\Meta::get($channel->meta, self::META_MUSTACHE_TEMPLATE);
 
-        // Instantiate maps.
-        // We'll use the maps for products, variants and images to know which
-        // have been synchronized to the channel when we mark the entities synced.
-        $products_success_map = [];
-        $variants_success_map = [];
-        $images_success_map = [];
-
         // Build arrays of products to delete, update and create.
         $products_to_delete = [];
         $products_to_create = [];
@@ -73,11 +66,6 @@ class Products implements ProductsInterface
             }
             $product->channel_product_code = $memoryProduct->product_group_id;
         }
-
-//        $variant->channel_variant_code = $memoryProduct->id;
-//        $variants_success_map[] = $variant;
-//        $product->channel_product_code = $memoryProduct->product_group_id;
-//        $products_success_map[] = $product;
 
         // Iterate over products and mark synced.
         foreach ($channelProducts as $key => $product) {
