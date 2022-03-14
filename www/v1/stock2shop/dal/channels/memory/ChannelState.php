@@ -18,43 +18,6 @@ class ChannelState
     private static $stateImages = [];
 
     /**
-     * Next Insert Id
-     *
-     * This is a generic function which abstracts the logic
-     * for getting the last inserted ID away from the create()
-     * methods. The id is incremented.
-     *
-     * @return string
-     */
-    public static function nextInsertId(string $type)
-    {
-        $id = '0';
-        $counter = 0;
-
-        if ($type === 'products') {
-            $counter = count(self::$stateProducts);
-        }
-        if ($type === 'images') {
-            $counter = count(self::$stateImages);
-        }
-
-        if ($counter > 0) {
-            $end = null;
-            // If there are already items, calculate the next item's position.
-            if($type === 'products') {
-                $end = self::$stateProducts[$counter - 1];
-            }
-            if ($type === 'images') {
-                $end = self::$stateImages[$counter - 1];
-            }
-            $id = (int)$end->id;
-            $id++;
-        }
-
-        return (string)$id;
-    }
-
-    /**
      * Create Image
      *
      * This method creates an image on the channel.
@@ -124,9 +87,15 @@ class ChannelState
     public static function update(array $items): array
     {
         $updated = [];
-        foreach ($items as $i) {
-            self::$stateProducts[$i->id] = $i;
-            $updated[] = $i->id;
+        foreach ($items as $item) {
+            if(!$item->id) {
+                $item->id = self::generateID();
+            }
+            if(!$item->product_group_id) {
+                $item->product_group_id = self::generateID();
+            }
+            self::$stateProducts[$item->id] = $item;
+            $updated[] = $item;
         }
         return $updated;
     }
@@ -163,9 +132,8 @@ class ChannelState
     {
         /** @var MemoryProduct[] $list */
         $products = [];
-        // Slice array
-        // - preserve indices
-        $list = array_slice(self::$stateProducts, $offset, $limit, true);
+        $start = ($offset === '')? 0: $offset;
+        $list = array_slice(self::$stateProducts, $start, $limit, true);
         foreach ($list as $item) {
             $products[] = $item;
         }
@@ -241,8 +209,46 @@ class ChannelState
     public static function deleteProductsByIDs(array $ids)
     {
         foreach ($ids as $id) {
-            self::$stateProducts[$id] = null;
+            if(isset(self::$stateProducts[$id])) {
+                unset(self::$stateProducts[$id]);
+            }
         }
+    }
+
+    /**
+     * Delete Products By Ids
+     *
+     * Removes matching product objects by ID.
+     *
+     * @param string[] $ids
+     */
+    public static function deleteProductsByGroupIDs(array $ids)
+    {
+        foreach (self::$stateProducts as $sp) {
+            if(in_array($sp->product_group_id, $ids)) {
+                ChannelState::deleteProductsByIDs([$sp->id]);
+            }
+        }
+    }
+
+    /**
+     * Fetches products with matching product_group_id
+     *
+     * @param string[] $ids
+     */
+    /**
+     * @param array $ids
+     * @return MemoryProduct[]
+     */
+    public static function getProductsByGroupID(array $ids)
+    {
+        $products = [];
+        foreach (self::$stateProducts as $sp) {
+            if(in_array($sp->product_group_id, $ids)) {
+                $products [] = ChannelState::getProductsByIDs([$sp->id]);
+            }
+        }
+        return $products;
     }
 
     /**
@@ -255,7 +261,9 @@ class ChannelState
     public static function deleteImages(array $ids)
     {
         foreach ($ids as $id) {
-            self::$stateImages[$id] = null;
+            if(isset(self::$stateImages[$id])) {
+                unset(self::$stateImages[$id]);
+            }
         }
     }
 
@@ -269,8 +277,8 @@ class ChannelState
      */
     public static function clean()
     {
-        self::$stateProducts = null;
-        self::$stateImages = null;
+        self::$stateProducts = [];
+        self::$stateImages = [];
     }
 
 }

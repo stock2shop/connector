@@ -63,7 +63,6 @@ class ProductMapper
             // If we are not mapping according to a template,
             // then apply the default mapping for the product:
             $ep = new MemoryProduct([
-                'id' => $cv->sku,
                 'name' => $cp->title,
                 'quantity' => $cv->qty,
                 'price' => $cv->price
@@ -71,6 +70,8 @@ class ProductMapper
         }
 
         // These are non-configurable properties.
+        $ep->id = $cv->channel_variant_code;
+        $ep->product_group_id = $cp->channel_product_code;
         $this->product = $ep;
 
     }

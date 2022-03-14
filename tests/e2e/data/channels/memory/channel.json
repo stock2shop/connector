@@ -4,7 +4,7 @@
   "description": "Example Channel",
   "meta": [
     {
-      "key": "mustache_template",
+      "key": "mustache_templatexx",
       "value": "{\n            \"id\": \"{{ChannelVariant.channel_variant_code}}\",\n            \"name\": \"{{ChannelProduct.title}}\",\n            \"quantity\": \"{{ChannelVariant.qty}}\",\n            \"product_group_id\": \"{{ChannelVariant.product_id}}\",\n            \"price\": \"{{ChannelVariant.price}}\"\n          }"
     }
   ],
