@@ -3,7 +3,6 @@
 namespace stock2shop\dal\channels\memory;
 
 use stock2shop\vo;
-use stock2shop\helpers;
 
 /**
  * Example showing how to build an MemoryProduct from a S2S ChannelProduct.
@@ -31,7 +30,7 @@ class ProductMapper
      * @param vo\ChannelVariant $cv
      * @param string|null $template
      */
-    public function __construct(vo\ChannelProduct $cp, vo\ChannelVariant $cv, $template=null)
+    public function __construct(vo\ChannelProduct $cp, vo\ChannelVariant $cv, $template = null)
     {
         // Render with Mustache.
         if ($template) {
@@ -54,15 +53,9 @@ class ProductMapper
             // Create the product from template.
             $epData = $this->renderTemplate($template, $productData);
             $ep = new MemoryProduct($epData);
-        } else {
-            $ep                   = new MemoryProduct();
-            $ep->name             = $cp->title;
-            $ep->price            = $cv->price;
-            $ep->quantity         = $cv->qty;
         }
 
         // These are non-configurable properties.
-        $ep->id = $cv->sku;
         $ep->product_group_id = $cp->channel_product_code;
         $this->product = $ep;
     }
@@ -86,7 +79,8 @@ class ProductMapper
      * @param array $data
      * @return array
      */
-    public function renderTemplate(string $template, array $data): array {
+    public function renderTemplate(string $template, array $data): array
+    {
         $mustache = new \Mustache_Engine();
         return json_decode($mustache->render($template, $data), true);
     }

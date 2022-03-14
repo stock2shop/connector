@@ -5,7 +5,7 @@
   "meta": [
     {
       "key": "mustache_template",
-      "value": "{\n        \"id\": \"{{ChannelVariant.channel_variant_code}}\",\n        \"name\": \"{{ChannelProduct.title}}\",\n        \"quantity\": \"{{ChannelVariant.qty}}\",\n        \"price\": \"{{ChannelVariant.price}}\",\n        \"product_group_id\": \"{{ChannelProduct.channel_product_code}}\"\n      }"
+      "value": "{\n        \"id\": \"{{ChannelVariant.sku}}\",\n        \"name\": \"{{ChannelProduct.title}}\",\n        \"quantity\": \"{{ChannelVariant.qty}}\",\n        \"price\": \"{{ChannelVariant.price}}\",\n        \"product_group_id\": \"{{ChannelProduct.channel_product_code}}\"\n      }"
     }
   ],
   "modified": "2022-02-08 16:00:00",
