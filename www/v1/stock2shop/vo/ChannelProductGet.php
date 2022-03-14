@@ -28,9 +28,9 @@ class ChannelProductGet extends ValueObject
 
     /**
      * @var vo\ChannelProduct[]
-     * $products This is an array of products which are returned from the channel.
+     * $channelProducts This is an array of products which are returned from the channel.
      */
-    public $products = [];
+    public $channelProducts = [];
 
     /**
      * Default Constructor
@@ -45,7 +45,7 @@ class ChannelProductGet extends ValueObject
     public function __construct(array $data = [])
     {
         $this->token = self::stringFrom($data, 'token');
-        $this->products = ChannelProduct::createArray(self::arrayFrom($data, 'products'));
+        $this->channelProducts = ChannelProduct::createArray(self::arrayFrom($data, 'channelProducts'));
     }
 
 }

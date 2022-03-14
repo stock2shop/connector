@@ -79,18 +79,16 @@ class Products implements ProductsInterface
      * @param string $channel_product_code
      * @param int $limit
      * @param vo\Channel $channel
-     * @return vo\ChannelProduct[] $channelProducts
-     * @throws exceptions\NotImplemented
+     * @return vo\ChannelProductGet $channelProducts
      */
-    public function get(string $channel_product_code, int $limit, vo\Channel $channel): array
+    public function get(string $token, int $limit, vo\Channel $channel): vo\ChannelProductGet
     {
-        // Return array.
-        $channelProducts = [];
-
         // Get products from the channel's state which are filtered
         // starting from the position of channel_product_code and
         // limited by the integer value.
-        $products = ChannelState::getProductsList($channel_product_code, $limit);
+        $products = ChannelState::getProductsList($token, $limit);
+
+        // ----------------------------------------
 
         // Iterate over the products returned from the channel
         // and build a map. The key of the map will be the
@@ -103,17 +101,34 @@ class Products implements ProductsInterface
             $productMap[$memProduct->product_group_id][] = ["channel_variant_code" => $memProduct->id, "success" => true];
         }
 
+        // ----------------------------------------
+
         // Convert map into stock2shop VOs.
         foreach ($productMap as $productId => $variantIds) {
             // Map the product onto a `vo\ChannelProduct()` object.
+            $variants = vo\ChannelVariant::createArray($variantIds);
             $channelProducts[] = new vo\ChannelProduct([
                 'channel_product_code' => $productId,
-                'success'              => true,
-                'variants'             => $variantIds
+                'success' => true,
+                'variants' => $variants
             ]);
         }
 
-        return $channelProducts;
+        // ----------------------------------------
+
+        // Get the "channel_product_code" of the last
+        // product in the result set returned from the
+        // channel.
+        $lastProduct = end($channelProducts);
+
+        // ----------------------------------------
+
+        // Return the "token" and "products" in a
+        // ChannelProductGet object.
+        return new vo\ChannelProductGet([
+            'token' => $lastProduct->id,
+            'channelProducts' => $channelProducts
+        ]);
 
     }
 

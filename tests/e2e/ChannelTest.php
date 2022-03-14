@@ -363,12 +363,7 @@ final class ChannelTest extends Framework\TestCase
             $connector->sync($channelProducts, $channel, $flagMap);
 
 
-            // change from here
-
-//            // sort products by channel_product_code
-//            usort($channelProducts, function (vo\ChannelProduct $p1, vo\ChannelProduct $p2) {
-//                return strcmp($p1->channel_product_code, $p2->channel_product_code);
-//            });
+            // change from here ---->
 
             // return products one at a time.
             $token = '';
@@ -378,13 +373,13 @@ final class ChannelTest extends Framework\TestCase
             for($i=0; $i < count($channelProducts); $i++) {
                 $ChannelProductGet = $connector->get($token, 1, $channel);
                 $token = $ChannelProductGet->token;
-                $this->assertCount(1, $ChannelProductGet->ChannelProducts);
-                $channelProduct = $ChannelProductGet->ChannelProducts[0];
+                $this->assertCount(1, $ChannelProductGet->channelProducts);
+                $channelProduct = $ChannelProductGet->channelProducts[0];
                 $retrievedProductsMap[$channelProduct->channel_product_code] = $channelProduct;
 //                $this->assertEquals($product->channel_product_code, $existingChannelProducts[0]->channel_product_code);
 //                $this->assertCount(count($product->variants), $existingChannelProducts[0]->variants);
 //                $this->assertCount(count($product->images), $existingChannelProducts[0]->images);
-                $this->assertTrue($product->success);
+//                $this->assertTrue($product->success);
 
                 // do same map for images and variants
 //                foreach ($existingChannelProducts[0]->variants as $variant) {
@@ -399,9 +394,11 @@ final class ChannelTest extends Framework\TestCase
             }
 
             // loop through the products you synced to channel and make sure they exist in maps...
-            foreach ($channelProducts as $product) {}
+            foreach ($channelProducts as $product) {
 
-            // stop changing
+            }
+
+            // <!----
 
             // delete products from channel
             foreach ($channelProducts as $product) {

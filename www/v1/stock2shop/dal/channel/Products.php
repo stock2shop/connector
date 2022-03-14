@@ -104,12 +104,12 @@ interface Products {
      *
      * If $channel_product_code is blank, the first products in the ordered list must be returned.
      *
-     * @param string $channel_product_code only return results greater than this
+     * @param string $token only return results greater than this
      * @param int $limit max records to return
      * @param vo\Channel $channel
-     * @return vo\ChannelProduct[]
+     * @return vo\ChannelProductGet
      */
-    public function get(string $channel_product_code, int $limit, vo\Channel $channel): array;
+    public function get(string $token, int $limit, vo\Channel $channel): vo\ChannelProductGet;
 
 }
 
