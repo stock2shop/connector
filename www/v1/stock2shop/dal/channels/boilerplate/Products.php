@@ -36,10 +36,10 @@ class Products implements ProductsInterface
      * @param string $token
      * @param int $limit
      * @param vo\Channel $channel
-     * @return vo\ChannelProduct[] $channelProducts
+     * @return vo\ChannelProductGet $channelProductsGet
      * @throws exceptions\NotImplemented
      */
-    public function get(string $token, int $limit, vo\Channel $channel): array
+    public function get(string $token, int $limit, vo\Channel $channel): vo\ChannelProductGet
     {
         // Add your code here
         // See examples in:

@@ -116,9 +116,9 @@ class Products implements ProductsInterface
      * @param string $channel_product_code only return results greater than this
      * @param int $limit max records to return
      * @param vo\Channel $channel
-     * @return vo\ChannelProduct[]
+     * @return vo\ChannelProductGet $channelProductGet
      */
-    public function get(string $channel_product_code, int $limit, vo\Channel $channel): array
+    public function get(string $token, int $limit, vo\Channel $channel): vo\ChannelProductGet
     {
         /** @var string $imageSeparator Channel separator for channel codes and storage. */
         $storageSeparator    = helpers\Meta::get($channel->meta, self::META_STORAGE_SEPARATOR);
@@ -161,7 +161,21 @@ class Products implements ProductsInterface
             $cnt++;
         }
 
-        return $channelProducts;
+        // ----------------------------------------
+
+        // Get the "channel_product_code" of the last
+        // product in the result set returned from the
+        // channel.
+        $lastProduct = end($channelProducts);
+
+        // ----------------------------------------
+
+        // Return the "token" and "products" in a
+        // ChannelProductGet object.
+        return new vo\ChannelProductGet([
+            'token' => $lastProduct->channel_product_code,
+            'channelProducts' => $channelProducts
+        ]);
     }
 
     /**

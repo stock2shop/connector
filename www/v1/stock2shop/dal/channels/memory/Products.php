@@ -36,18 +36,12 @@ class Products implements ProductsInterface
             if ($product->delete) {
                 ChannelState::deleteProductsByGroupIDs([$product->channel_product_code]);
                 ChannelState::deleteImagesByGroupIDs([$product->channel_product_code]);
-                foreach($product->variants as $delVariant) {
-                    $delVariant->success;
-                }
-                foreach($product->images as $delImage) {
-                    $delImage->success;
-                }
                 $product->success = true;
                 continue;
             }
 
             // Do we have a memory product with a product_group_id?
-            $existingMemoryProducts = ChannelState::getProductsByGroupID([$product->channel_product_code]);
+            $existingMemoryProducts = ChannelState::getProductsByGroupIDs([$product->channel_product_code]);
             $currentGroupProductID = $existingMemoryProducts[0]->product_group_id ?? false;
             foreach ($product->variants as $variant) {
 
@@ -55,10 +49,15 @@ class Products implements ProductsInterface
                 $existingMemoryProduct = ChannelState::getProductsByIDs([$variant->channel_variant_code]);
                 if ($variant->delete) {
                     if (count($existingMemoryProduct) === 1) {
-                        ChannelState::deleteProductsByIDs([$variant->channel_variant_code]);
+                        $ids = ChannelState::deleteProductsByIDs([$variant->channel_variant_code]);
                         $variant->success = true;
                         // Delete all images linked to this variant.
-                        ChannelState::deleteImagesByProductIDs([$variant->channel_variant_code]);
+                        $imageIds = ChannelState::deleteImagesByProductIDs([$variant->channel_variant_code]);
+                        foreach ($product->images as $deletedProductImage) {
+                            if (in_array($deletedProductImage->channel_image_code, $imageIds)) {
+                                $deletedProductImage->success = true;
+                            }
+                        }
                     }
                 } else {
                     $pMapper = new ProductMapper($product, $variant, $template);
@@ -81,34 +80,32 @@ class Products implements ProductsInterface
             // -----------------------------------------
 
             // Synchronize product images.
-            foreach ($product->images as $image) {
+            $existingMemoryImages = ChannelState::getImagesByGroupIDs([$product->channel_product_code]);
+            foreach ($product->images as $channelProductImageKey => $channelProductImageValue) {
 
-                // Check whether the image exists on the channel.
-                $existingMemoryImages = ChannelState::getImagesByIDs([$image->channel_image_code]);
-                if ($image->delete) {
-                    if (count($existingMemoryImages) === 1) {
-                        // Delete the image.
-                        ChannelState::deleteImages([$image->channel_image_code]);
-                        $image->success = true;
+                // Check if we need to delete the image.
+                if ($channelProductImageValue->delete) {
+                    $deletedImageCodes = ChannelState::deleteImageByUrl([$channelProductImageValue->src]);
+                    if (!empty($deletedImageCodes)) {
+                        unset($product->images[$channelProductImageKey]);
                     }
                 } else {
 
                     // Get existing "MemoryProducts" off the channel.
-                    $existingMemoryProducts = ChannelState::getProductsByGroupID([$product->channel_product_code]);
+                    $existingMemoryProducts = ChannelState::getProductsByGroupIDs([$product->channel_product_code]);
                     foreach ($existingMemoryProducts as $memoryProductKey => $memoryProduct) {
 
                         // Map the "ChannelImage" VO and "MemoryProduct" onto a "MemoryImage".
-                        $imageMapper = new ImageMapper($image, array_values($memoryProduct)[0]);
+                        $imageMapper = new ImageMapper($product->images[$channelProductImageKey], $memoryProduct);
                         $memoryImage = $imageMapper->get();
 
                         // If it exists, then we'll just assign the ID and update.
-                        $memoryImage = ChannelState::updateImages([$memoryImage]);
-                        $image->success = true;
-                        $image->channel_image_code = $memoryImage->id;
+                        $memoryImage = ChannelState::updateImages([$memoryImage])[0];
+                        $product->images[$channelProductImageKey]->success = true;
+                        $product->images[$channelProductImageKey]->channel_image_code = $memoryImage->id;
                     }
                 }
             }
-
         }
         return $channelProducts;
     }
@@ -189,7 +186,6 @@ class Products implements ProductsInterface
             'token' => $lastProduct->channel_product_code,
             'channelProducts' => $channelProducts
         ]);
-
     }
 
     /**

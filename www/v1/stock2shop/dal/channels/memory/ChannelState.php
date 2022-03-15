@@ -229,31 +229,10 @@ class ChannelState
     {
         foreach (self::$stateProducts as $sp) {
             if(in_array($sp->product_group_id, $ids)) {
-                ChannelState::deleteProductsByIDs([$sp->id]);
+                self::deleteProductsByIDs([$sp->id]);
             }
         }
     }
-
-    /**
-     * Delete Images By Product IDs
-     *
-     * Removes matching image objects by product ID.
-     *
-     * @param string[] $ids
-     */
-//    public static function deleteImagesByProductIDs(array $productIDs)
-//    {
-//        $deletedImageIds = [];
-//        // Products.
-//        $productImages = ChannelState::getImages();
-//        foreach($productImages as $imageKey => $imageItem) {
-//            if(in_array($imageItem->product_id, $productIDs)) {
-//                unset(self::$stateImages[$imageKey]);
-//                $deletedImageIds[] = $imageKey;
-//            }
-//        }
-//        return $deletedImageIds;
-//    }
 
     /**
      * Delete Images By Group IDs
@@ -271,7 +250,7 @@ class ChannelState
         $imageIdsToDelete = array_column($imagesByGroupIDs, 'id');
 
         // Remove the items from the channel.
-        ChannelState::deleteImages($imageIdsToDelete);
+        self::deleteImages($imageIdsToDelete);
     }
 
     /**
@@ -282,12 +261,12 @@ class ChannelState
      * @param array $ids
      * @return MemoryProduct[]
      */
-    public static function getProductsByGroupID(array $ids)
+    public static function getProductsByGroupIDs(array $ids)
     {
         $products = [];
-        foreach (self::$stateProducts as $sp) {
-            if(in_array($sp->product_group_id, $ids)) {
-                $products[] = ChannelState::getProductsByIDs([$sp->id]);
+        foreach (self::$stateProducts as $stateProductKey => $stateProductValue) {
+            if(in_array($stateProductValue->product_group_id, $ids)) {
+                $products[$stateProductKey] = $stateProductValue;
             }
         }
         return $products;
@@ -304,21 +283,40 @@ class ChannelState
     public static function getImagesByGroupIDs(array $ids)
     {
         // Get all products matching the group IDs.
-        $products = self::getProductsByGroupID($ids);
+        $products = self::getProductsByGroupIDs($ids);
         $productIds = [];
         foreach($products as $prKey => $prValue) {
-            $productIds[] = array_values($prValue)[0]->id;
+            $productIds[] = $prValue->id;
         }
+
+        $stateGroupImages = self::getImagesByProductIDs($productIds);
 
         // Loop over the images and add the ones which
         // match the product id in "productIds".
         $images = [];
-        foreach (self::$stateImages as $si) {
-            if(in_array($si->product_id, $productIds)) {
-                $images[] = $si;
-            }
+        foreach ($stateGroupImages as $si) {
+            $images[$si->id] = $si;
         }
         return $images;
+    }
+
+    /**
+     * Get Images By Product IDs
+     *
+     * Returns all images linked to the product IDs
+     * in the array.
+     *
+     * @param array $productIDs
+     * @return array
+     */
+    public static function getImagesByProductIDs(array $productIDs) {
+        $productImages = [];
+        foreach(self::$stateImages as $stateImageKey => $stateImageValue) {
+            if(in_array($stateImageValue->product_id, $productIDs)) {
+                $productImages[$stateImageKey] = $stateImageValue;
+            }
+        }
+        return $productImages;
     }
 
     /**
@@ -352,6 +350,32 @@ class ChannelState
                 unset(self::$stateImages[$id]);
             }
         }
+    }
+
+    /**
+     * Delete Image By Url
+     *
+     * Delete an image by the src property.
+     * This maps to a "vo\ChannelImage" object's
+     * "src" property.
+     *
+     * @param string[] $url
+     * @return string[] $memoryImageId
+     */
+    public static function deleteImageByUrl(array $urls): array {
+
+        // Return image IDs.
+        $deletedImageIDs = [];
+
+        // Iterate over the images in the channel's state and remove if matching.
+        foreach(self::$stateImages as $stateImageKey => $stateImageValue) {
+            if(in_array($stateImageValue->url, $urls)) {
+                unset(self::$stateImages[$stateImageKey]);
+                $deletedImageIDs[] = $stateImageKey;
+            }
+        }
+
+        return $deletedImageIDs;
     }
 
     /**
