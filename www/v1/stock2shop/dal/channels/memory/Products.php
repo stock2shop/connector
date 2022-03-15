@@ -3,7 +3,6 @@
 namespace stock2shop\dal\channels\memory;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
-use stock2shop\exceptions;
 use stock2shop\helpers;
 use stock2shop\vo;
 
@@ -42,7 +41,7 @@ class Products implements ProductsInterface
 
             // Do we have a memory product with a product_group_id?
             $existingMemoryProducts = ChannelState::getProductsByGroupID([$product->channel_product_code]);
-            $currentGroupProductID  = $existingMemoryProducts[0]->product_group_id ?? false;
+            $currentGroupProductID = $existingMemoryProducts[0]->product_group_id ?? false;
             foreach ($product->variants as $variant) {
 
                 // Does the memory product exist?
@@ -53,7 +52,7 @@ class Products implements ProductsInterface
                         $variant->success = true;
                     }
                 } else {
-                    $pMapper       = new ProductMapper($product, $variant, $template);
+                    $pMapper = new ProductMapper($product, $variant, $template);
                     $memoryProduct = $pMapper->get();
                     if ($currentGroupProductID) {
                         $memoryProduct->product_group_id = $currentGroupProductID;
@@ -61,11 +60,11 @@ class Products implements ProductsInterface
                     if (count($existingMemoryProduct) === 1) {
                         $memoryProduct->id = $existingMemoryProduct[0]->id;
                     }
-                    $memoryProduct                 = ChannelState::update([$memoryProduct])[0];
-                    $currentGroupProductID         = $memoryProduct->product_group_id;
-                    $variant->success              = true;
+                    $memoryProduct = ChannelState::update([$memoryProduct])[0];
+                    $currentGroupProductID = $memoryProduct->product_group_id;
+                    $variant->success = true;
                     $variant->channel_variant_code = $memoryProduct->id;
-                    $product->success              = true;
+                    $product->success = true;
                     $product->channel_product_code = $currentGroupProductID;
                 }
             }
@@ -76,7 +75,7 @@ class Products implements ProductsInterface
     /**
      * See comments in ProductsInterface::get
      *
-     * @param string $channel_product_code
+     * @param string $token
      * @param int $limit
      * @param vo\Channel $channel
      * @return vo\ChannelProductGet $channelProducts
@@ -105,13 +104,33 @@ class Products implements ProductsInterface
 
         // Convert map into stock2shop VOs.
         foreach ($productMap as $productId => $variantIds) {
+
             // Map the product onto a `vo\ChannelProduct()` object.
             $variants = vo\ChannelVariant::createArray($variantIds);
+
+            // ----------------------------------------
+
+            // Get images by "product_group_id" (channel_product_code).
+            $images = ChannelState::getImagesByGroupIDs([$productId]);
+            $channelImages = [];
+            foreach ($images as $memoryImage) {
+                $channelImages[] = new vo\ChannelImage([
+                    'channel_image_code' => $memoryImage->id,
+                    'success' => true,
+                    'src' => $memoryImage->url
+                ]);
+            }
+
+            // ----------------------------------------
+
+            // Create ChannelProduct VO.
             $channelProducts[] = new vo\ChannelProduct([
                 'channel_product_code' => $productId,
                 'success' => true,
-                'variants' => $variants
+                'variants' => $variants,
+                'images' => $channelImages
             ]);
+
         }
 
         // ----------------------------------------
@@ -126,7 +145,7 @@ class Products implements ProductsInterface
         // Return the "token" and "products" in a
         // ChannelProductGet object.
         return new vo\ChannelProductGet([
-            'token' => $lastProduct->id,
+            'token' => $lastProduct->channel_product_code,
             'channelProducts' => $channelProducts
         ]);
 
@@ -142,15 +161,15 @@ class Products implements ProductsInterface
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
         $productsToRemove = [];
-        $imagesToRemove   = [];
+        $imagesToRemove = [];
         $variantsToRemove = [];
 
         // ---------------------------------------
 
         foreach ($channelProducts as $product) {
             $productFiles = ChannelState::getAllProducts();
-            $hasProduct   = false;
-            $hasVariant   = false;
+            $hasProduct = false;
+            $hasVariant = false;
             foreach ($productFiles as $filename => $data) {
                 foreach ($product->variants as $variant) {
                     $hasVariant = false;
