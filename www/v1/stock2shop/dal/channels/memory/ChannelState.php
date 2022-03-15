@@ -232,11 +232,10 @@ class ChannelState
     }
 
     /**
+     * Get Products By Group ID
+     *
      * Fetches products with matching product_group_id
      *
-     * @param string[] $ids
-     */
-    /**
      * @param array $ids
      * @return MemoryProduct[]
      */
@@ -249,6 +248,34 @@ class ChannelState
             }
         }
         return $products;
+    }
+
+    /**
+     * Get Images By Group IDs
+     *
+     * Return images from the channel which match the group IDs.
+     *
+     * @param array $ids The array of "product_group_ids" to return images for.
+     * @return MemoryImage[] $images The MemoryImages associated with the "product_group_ids".
+     */
+    public static function getImagesByGroupIDs(array $ids)
+    {
+        // Get all products matching the group IDs.
+        $products = self::getProductsByGroupID($ids);
+        $productIds = [];
+        foreach($products as $prKey => $prValue) {
+            $productIds[] = array_values($prValue)[0]->id;
+        }
+
+        // Loop over the images and add the ones which
+        // match the product id in "productIds".
+        $images = [];
+        foreach (self::$stateImages as $si) {
+            if(in_array($si->product_id, $productIds)) {
+                $images[] = $si;
+            }
+        }
+        return $images;
     }
 
     /**
