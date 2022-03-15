@@ -119,7 +119,7 @@ class ChannelState
             self::$stateImages[$item->id] = $item;
             $updated[] = $item;
         }
-        return $item;
+        return $updated;
     }
 
     /**
@@ -241,18 +241,19 @@ class ChannelState
      *
      * @param string[] $ids
      */
-    public static function deleteImagesByProductIDs(array $productIDs)
-    {
-        $deletedImageIds = [];
-        $productImages = ChannelState::getImages();
-        foreach($productImages as $imageKey => $imageItem) {
-            if(in_array($imageItem->product_id, $productIDs)) {
-                unset(self::$stateImages[$imageKey]);
-                $deletedImageIds[] = $imageKey;
-            }
-        }
-        return $deletedImageIds;
-    }
+//    public static function deleteImagesByProductIDs(array $productIDs)
+//    {
+//        $deletedImageIds = [];
+//        // Products.
+//        $productImages = ChannelState::getImages();
+//        foreach($productImages as $imageKey => $imageItem) {
+//            if(in_array($imageItem->product_id, $productIDs)) {
+//                unset(self::$stateImages[$imageKey]);
+//                $deletedImageIds[] = $imageKey;
+//            }
+//        }
+//        return $deletedImageIds;
+//    }
 
     /**
      * Delete Images By Group IDs
@@ -318,6 +319,23 @@ class ChannelState
             }
         }
         return $images;
+    }
+
+    /**
+     * Delete Images By Product IDs
+     *
+     * This method deletes multiple images which match
+     * the product IDs passed in the parameter.
+     *
+     * @param array $ids Array of product IDs.
+     * @return void
+     */
+    public static function deleteImagesByProductIDs(array $ids) {
+        foreach(self::$stateImages as $stateImageKey => $stateImageValue) {
+            if(in_array($stateImageValue->product_id, $ids)) {
+                unset(self::$stateImages[$stateImageKey]);
+            }
+        }
     }
 
     /**

@@ -115,6 +115,9 @@ class ChannelStateTest extends tests\TestCase
 
         }
 
+        // Cleanup.
+        memory\ChannelState::clean();
+
     }
 
     /**
@@ -169,17 +172,17 @@ class ChannelStateTest extends tests\TestCase
         memory\ChannelState::clean();
 
         // Setup.
-        $id = memory\ChannelState::createImage(new memory\MemoryImage([
+        $IDs = memory\ChannelState::updateImages([new memory\MemoryImage([
             'id' => null,
             'url' => 'http://aws.stock2sho..1',
             'product_id' => '1'
-        ]));
+        ])]);
 
-        $this->assertNotNull($id, 'Failed to create image.');
+        $this->assertNotEmpty($IDs, 'Failed to create image.');
 
         // Update the item.
         $update = new memory\MemoryImage([
-            'id' => $id,
+            'id' => $IDs[0]->id,
             'url' => 'http://aws.stock2sho..1',
             'product_id' => '2'
         ]);
@@ -187,7 +190,6 @@ class ChannelStateTest extends tests\TestCase
         $updatedIds = memory\ChannelState::updateImages([$update]);
         $this->assertNotNull($updatedIds);
         $this->assertCount(1, $updatedIds);
-        $this->assertEquals($updatedIds, [$id], "Image ID does not match.");
 
         // Cleanup the state.
         memory\ChannelState::clean();
@@ -273,6 +275,9 @@ class ChannelStateTest extends tests\TestCase
         // Each object must have its "id" property set to a string value.
         $this->assertEquals('string', gettype(array_values($outcome)[0]->id));
 
+        // Cleanup.
+        memory\ChannelState::clean();
+
     }
 
     /**
@@ -295,6 +300,9 @@ class ChannelStateTest extends tests\TestCase
         $expected = 50;
         $this->assertEquals('string', gettype($outcome));
         $this->assertEquals($expected, strlen($outcome));
+
+        // Cleanup.
+        memory\ChannelState::clean();
 
     }
 
@@ -415,13 +423,13 @@ class ChannelStateTest extends tests\TestCase
     }
 
     /**
-     * Test Delete Images By Group IDs
-     *
-     * This method removes images from the channel
-     * by "product_group_id".
-     *
-     * @return void
-     */
+ * Test Delete Images By Group IDs
+ *
+ * This method removes images from the channel
+ * by "product_group_id".
+ *
+ * @return void
+ */
     public function testDeleteImagesByGroupIDs() {
 
         // Cleanup.
@@ -476,6 +484,71 @@ class ChannelStateTest extends tests\TestCase
         // Assert
         $stateImages = memory\ChannelState::getImagesByGroupIDs($groupIDs);
         $this->assertEmpty($stateImages);
+
+        // Cleanup.
+        memory\ChannelState::clean();
+
+    }
+
+    /**
+     * Test Delete Images By Product IDs
+     *
+     * This method removes images from the channel
+     * by "product_id".
+     *
+     * 1. Create multiple images and products on channel.
+     * 2. Pass array of product IDs.
+     * 3. Check whether the images are removed.
+     *
+     * @return void
+     */
+    public function testDeleteImagesByProductIDs() {
+
+        // Cleanup.
+        memory\ChannelState::clean();
+
+        // Product IDs.
+        $productIDs = [];
+
+        // Create products.
+        $productIDs[] = memory\ChannelState::create(new memory\MemoryProduct([
+            'id' => null,
+            'product_group_id' => '123',
+            'name' => 'Product Name',
+            'price' => '5000.00',
+            'quantity' => 5
+        ]));
+
+        $productIDs[] = memory\ChannelState::create(new memory\MemoryProduct([
+            'id' => null,
+            'product_group_id' => '1234',
+            'name' => 'Product Name',
+            'price' => '5000.00',
+            'quantity' => 5
+        ]));
+
+        // Array of image IDs.
+        $imageIDs = [];
+
+        // Create four images for the first product.
+        for ($i=0; $i!==3; $i++) {
+            $imageIDs[] = memory\ChannelState::createImage(new memory\MemoryImage([
+                'id' => null,
+                'product_id' => $productIDs[0],
+                'url' => 'http://aws.stock2shop.../1'
+            ]));
+        }
+
+        // Check state.
+        $images = memory\ChannelState::getImages();
+        $this->assertCount(3, $images);
+
+        // Delete images.
+        memory\ChannelState::deleteImagesByProductIDs($productIDs);
+
+        // Check channel state is empty.
+        $images = memory\ChannelState::getImages();
+        $this->assertEmpty($images);
 
     }
 
