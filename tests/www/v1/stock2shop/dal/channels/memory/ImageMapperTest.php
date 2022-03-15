@@ -2,10 +2,10 @@
 
 namespace tests\v1\stock2shop\dal\channels\memory;
 
-use stock2shop\exceptions\UnprocessableEntity;
-use tests;
-use stock2shop\vo;
 use stock2shop\dal\channels\memory;
+use stock2shop\exceptions\UnprocessableEntity;
+use stock2shop\vo;
+use tests;
 
 /**
  * Image Mapper Test
@@ -27,8 +27,8 @@ class ImageMapperTest extends tests\TestCase
     public function testGet()
     {
         $channel_product_code = "4";
-        $channel_image_code   = "12";
-        $url                  = "https://gm-stock2shop.s3.amazonaws.com/7cd85464cfff0a7eb91a6964cbc17826480ce767.jpg";
+        $channel_image_code = "12";
+        $url = "https://gm-stock2shop.s3.amazonaws.com/7cd85464cfff0a7eb91a6964cbc17826480ce767.jpg";
 
         // Mock product.
         $mp = new memory\MemoryProduct([

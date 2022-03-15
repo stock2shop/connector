@@ -414,4 +414,69 @@ class ChannelStateTest extends tests\TestCase
 
     }
 
+    /**
+     * Test Delete Images By Group IDs
+     *
+     * This method removes images from the channel
+     * by "product_group_id".
+     *
+     * @return void
+     */
+    public function testDeleteImagesByGroupIDs() {
+
+        // Cleanup.
+        memory\ChannelState::clean();
+
+        // Group IDs.
+        $groupIDs = ['cpid1', 'cpid2'];
+
+        // Create products.
+        $p1 = memory\ChannelState::create(new memory\MemoryProduct([
+            'id' => null,
+            'product_group_id' => $groupIDs[0],
+            'name' => 'Product Name',
+            'price' => '5000.00',
+            'quantity' => 5
+        ]));
+
+        $p2 = memory\ChannelState::create(new memory\MemoryProduct([
+            'id' => null,
+            'product_group_id' => $groupIDs[1],
+            'name' => 'Product Name',
+            'price' => '5000.00',
+            'quantity' => 5
+        ]));
+
+        // Array of image IDs.
+        $imageIds = [];
+
+        // Create one image for p1 and two images for p2.
+        $imageIds[] = memory\ChannelState::createImage(new memory\MemoryImage([
+            'id' => null,
+            'product_id' => $p1,
+            'url' => 'http://aws.stock2shop.../1'
+        ]));
+
+        // p2 images
+        for ($i=0; $i!==2; $i++) {
+            memory\ChannelState::createImage(new memory\MemoryImage([
+                'id' => null,
+                'product_id' => $p2,
+                'url' => 'http://aws.stock2shop.../2'
+            ]));
+        }
+
+        // Check state.
+        $stateImages = memory\ChannelState::getImagesByGroupIDs($groupIDs);
+        $this->assertCount(3, $stateImages);
+
+        // Delete images.
+        memory\ChannelState::deleteImagesByGroupIDs($groupIDs);
+
+        // Assert
+        $stateImages = memory\ChannelState::getImagesByGroupIDs($groupIDs);
+        $this->assertEmpty($stateImages);
+
+    }
+
 }

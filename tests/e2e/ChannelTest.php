@@ -103,6 +103,7 @@ final class ChannelTest extends Framework\TestCase
      */
     public function getChannelTypes(): array
     {
+        return ['memory'];
         $channelsFolderPath = '/../../www/v1/stock2shop/dal/channels';
         $channels = [];
         // Check if the channel name override is set.
@@ -233,10 +234,11 @@ final class ChannelTest extends Framework\TestCase
      */
     public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel, string $name)
     {
+        // Get existing products off the channel.
         $existingProducts = $connector->getByCode($request, $channel);
-
-        // send to printer
         self::$printer->sendProductsToPrinter($request, $response, $existingProducts, $name);
+
+        // -----------------------------------------
 
         // Product, image and variant counters for existing and request products.
         $requestProductCnt = 0;
@@ -263,6 +265,8 @@ final class ChannelTest extends Framework\TestCase
             }
         }
 
+        // -----------------------------------------
+
         // Loop through existing products.
         // These are the products returned by interface method Products->getByCode()
         foreach ($existingProducts as $product) {
@@ -274,17 +278,19 @@ final class ChannelTest extends Framework\TestCase
                 $existingImageCnt++;
             }
         }
-        // -----------------------------------------
+
         // Assert on totals.
         $this->assertEquals($requestProductCnt, $existingProductCnt);
         $this->assertEquals($requestVariantCnt, $existingVariantCnt);
-//        $this->assertEquals($requestImageCnt, $existingImageCnt);
+        $this->assertEquals($requestImageCnt, $existingImageCnt);
+
+        // -----------------------------------------
+
         // Building product, variant and image maps.
         $responseProductMap = [];
         $responseVariantMap = [];
-//        $responseImageMap = [];
+        $responseImageMap = [];
 
-        // -----------------------------------------
         foreach ($response as $product) {
             $responseProductMap[$product->channel_product_code] = $product;
             foreach ($product->variants as $variant) {
@@ -304,8 +310,6 @@ final class ChannelTest extends Framework\TestCase
             $this->assertTrue($product instanceof vo\ChannelProduct);
             $this->assertTrue($product->hasSyncedToChannel());
 
-            // -----------------------------------------
-
             // Check product variant count.
             $this->assertEquals(count($existingProduct->variants), (count($product->variants)));
 
@@ -317,15 +321,15 @@ final class ChannelTest extends Framework\TestCase
                 $this->assertNotEmpty($variant->sku);
             }
 
-            // Check product image count.
+            // Check image count.
             $this->assertEquals(count($existingProduct->images), (count($product->images)));
 
-            // Check product images.
-//            foreach ($existingProduct->images as $existingImage) {
-//                $image = $responseImageMap[$existingImage->channel_image_code];
-//                $this->assertTrue($image instanceof vo\ChannelImage);
-//                $this->assertTrue($image->hasSyncedToChannel());
-//            }
+            // Check existing images.
+            foreach ($existingProduct->images as $existingImage) {
+                $image = $responseImageMap[$existingImage->channel_image_code];
+                $this->assertTrue($image instanceof vo\ChannelImage);
+                $this->assertTrue($image->hasSyncedToChannel());
+            }
         }
         return $response;
     }
@@ -338,7 +342,7 @@ final class ChannelTest extends Framework\TestCase
      *
      * @return void
      */
-    public function testGetProducts()
+    public function _testGetProducts()
     {
         $channelTypes = self::getChannelTypes();
         foreach ($channelTypes as $type) {
@@ -376,9 +380,9 @@ final class ChannelTest extends Framework\TestCase
             for ($i = 0; $i < count($channelProducts); $i++) {
 
                 // Keep track of the last token received (will be null for the first iteration).
-                $lastToken = null;
+                $lastToken = '';
                 // Start paging.
-                $channelProductGet = $connector->get($token, 1, $channel);
+                $channelProductGet = $connector->get($lastToken, 1, $channel);
                 // Token does not match the last token.
                 $this->assertNotEquals($lastToken, $channelProductGet->token);
                 // Update last token.
@@ -394,7 +398,7 @@ final class ChannelTest extends Framework\TestCase
                 $this->assertNotNull($channelProductGet->channelProducts[0]->channel_product_code);
 
                 // Compare the hashes of the product we synced and returned from the channel using 'get'.
-//                $this->assertEquals($channelProducts[$i]->computeHash(), $channelProductGet->channelProducts[0]->computeHash());
+                $this->assertEquals($channelProducts[$i]->computeHash(), $channelProductGet->channelProducts[0]->computeHash());
                 $this->assertEquals($channelProductGet->channelProducts[0]->channel_product_code, $channelProducts[$i]->channel_product_code);
 
                 // Count variants and images.

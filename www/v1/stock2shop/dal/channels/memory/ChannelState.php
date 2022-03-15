@@ -106,17 +106,20 @@ class ChannelState
      * This method updates images if found in the
      * $images class property.
      *
-     * @param MemoryImages[] $items An array of MemoryImage items to update.
-     * @return array An array of IDs from MemoryImage items which have been updated.
+     * @param MemoryImage[] $items An array of MemoryImage items to update.
+     * @return MemoryImage[]|[] An array of IDs from MemoryImage items which have been updated.
      */
     public static function updateImages(array $items)
     {
         $updated = [];
-        foreach ($items as $i) {
-            self::$stateImages[$i->id] = $i;
-            $updated[] = $i->id;
+        foreach ($items as $item) {
+            if(!$item->id) {
+                $item->id = self::generateID();
+            }
+            self::$stateImages[$item->id] = $item;
+            $updated[] = $item;
         }
-        return $updated;
+        return $item;
     }
 
     /**
@@ -216,7 +219,7 @@ class ChannelState
     }
 
     /**
-     * Delete Products By Ids
+     * Delete Products By Group IDs
      *
      * Removes matching product objects by ID.
      *
@@ -232,6 +235,45 @@ class ChannelState
     }
 
     /**
+     * Delete Images By Product IDs
+     *
+     * Removes matching image objects by product ID.
+     *
+     * @param string[] $ids
+     */
+    public static function deleteImagesByProductIDs(array $productIDs)
+    {
+        $deletedImageIds = [];
+        $productImages = ChannelState::getImages();
+        foreach($productImages as $imageKey => $imageItem) {
+            if(in_array($imageItem->product_id, $productIDs)) {
+                unset(self::$stateImages[$imageKey]);
+                $deletedImageIds[] = $imageKey;
+            }
+        }
+        return $deletedImageIds;
+    }
+
+    /**
+     * Delete Images By Group IDs
+     *
+     * Removes matching image objects by ID.
+     *
+     * @param string[] $ids
+     */
+    public static function deleteImagesByGroupIDs(array $ids)
+    {
+        // Get image IDs.
+        $imagesByGroupIDs = self::getImagesByGroupIDs($ids);
+
+        // Build array of IDs to remove.
+        $imageIdsToDelete = array_column($imagesByGroupIDs, 'id');
+
+        // Remove the items from the channel.
+        ChannelState::deleteImages($imageIdsToDelete);
+    }
+
+    /**
      * Get Products By Group ID
      *
      * Fetches products with matching product_group_id
@@ -244,7 +286,7 @@ class ChannelState
         $products = [];
         foreach (self::$stateProducts as $sp) {
             if(in_array($sp->product_group_id, $ids)) {
-                $products [] = ChannelState::getProductsByIDs([$sp->id]);
+                $products[] = ChannelState::getProductsByIDs([$sp->id]);
             }
         }
         return $products;

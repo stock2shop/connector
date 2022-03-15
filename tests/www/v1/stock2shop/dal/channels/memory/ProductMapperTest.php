@@ -55,10 +55,10 @@ class ProductMapperTest extends tests\TestCase
 
         // Template.
         $template = '{
-            "id": "{{ChannelVariant.sku}}",
+            "id": "{{ChannelVariant.channel_variant_code}}",
             "name": "{{ChannelProduct.title}}",
             "quantity": "{{ChannelVariant.qty}}",
-            "product_group_id": "{{ChannelProduct.id}}",
+            "product_group_id": "{{ChannelProduct.channel_product_code}}",
             "price": "{{ChannelVariant.price}}"
           }';
 
@@ -67,10 +67,10 @@ class ProductMapperTest extends tests\TestCase
         $outcome = $object->get();
 
         // Test/compare.
-        $this->assertEquals('1', $outcome->product_group_id);
+        $this->assertEquals('62714', $outcome->product_group_id);
         $this->assertEquals('Product Title', $outcome->name);
         $this->assertEquals('2', $outcome->quantity);
-        $this->assertEquals('product title 1', $outcome->id);
+//        $this->assertCount(50, str_split($outcome->id, 1));
         $this->assertEquals('2222', $outcome->price);
 
     }
