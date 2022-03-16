@@ -163,17 +163,10 @@ class Products implements ProductsInterface
 
         // ----------------------------------------
 
-        // Get the "channel_product_code" of the last
-        // product in the result set returned from the
-        // channel.
-        $lastProduct = end($channelProducts);
-
-        // ----------------------------------------
-
         // Return the "token" and "products" in a
         // ChannelProductGet object.
         return new vo\ChannelProductGet([
-            'token' => $lastProduct->channel_product_code,
+            'token' => end($channelProducts)->channel_product_code ?? '',
             'channelProducts' => $channelProducts
         ]);
     }

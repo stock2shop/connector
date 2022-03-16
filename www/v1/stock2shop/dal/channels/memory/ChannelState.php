@@ -135,17 +135,35 @@ class ChannelState
     {
         /** @var MemoryProduct[] $list */
         $products = [];
-        // TODO: A string offset is returned here, which causes array_slice()
-        //  to error. Write function to get the string offset's position in the
-        //  array of products in the state. "array_slice()" works with integer
-        //  values only.
         $start = ($offset === '') ? 0 : $offset;
-        $list = array_slice(self::$stateProducts, $start, $limit, true);
+        $list = array_slice(self::$stateProducts, self::getSliceIndex($start), $limit, true);
         foreach ($list as $item) {
             $products[] = $item;
         }
         return $products;
     }
+
+    /**
+     * Get Slice Index
+     *
+     * Returns the index of the product in
+     * stateProducts where the slicing should
+     * start.
+     *
+     * @param string $sliceKey
+     * @return int index
+     */
+    public static function getSliceIndex(string $sliceKey): int {
+        $keys = array_keys(self::$stateProducts);
+        foreach($keys as $stateProductIndex => $stateProductKey) {
+            $key = $stateProductKey;
+            if($sliceKey === $stateProductKey) {
+                return $stateProductIndex;
+            }
+        }
+        return 0;
+    }
+
 
     public static function getAllProducts()
     {
