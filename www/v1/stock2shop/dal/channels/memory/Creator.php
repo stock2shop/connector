@@ -10,7 +10,6 @@ use stock2shop\exceptions;
  */
 class Creator extends channel\Creator
 {
-
     /**
      * Create Products
      * @return channel\Products
@@ -39,5 +38,4 @@ class Creator extends channel\Creator
     {
         throw new exceptions\NotImplemented();
     }
-
 }

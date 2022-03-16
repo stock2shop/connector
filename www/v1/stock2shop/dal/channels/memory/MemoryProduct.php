@@ -9,7 +9,6 @@ namespace stock2shop\dal\channels\memory;
  */
 class MemoryProduct
 {
-
     /**
      * @var string
      */
@@ -49,12 +48,7 @@ class MemoryProduct
         $this->name = ($data["name"]) ?? null;
         $this->price = ($data["price"]) ?? null;
         $this->quantity = ($data["quantity"]) ?? null;
-
-        // Cast the product_group_id property to a string.
-        if(!empty($data['product_group_id'])) {
-            $tempGroupId = $data["product_group_id"];
-            $this->product_group_id = (string)$tempGroupId;
-        }
+        $this->product_group_id = ($data["product_group_id"]) ?? null;
     }
 
 }

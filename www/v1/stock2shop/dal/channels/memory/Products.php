@@ -32,11 +32,12 @@ class Products implements ProductsInterface
 
         // This example channel updates products one at a time.
         // In many channels your work on this should be done in bulk where possible.
-        foreach ($channelProducts as $product) {
+        foreach ($channelProducts as $productKey => $product) {
             if ($product->delete) {
                 ChannelState::deleteProductsByGroupIDs([$product->channel_product_code]);
                 ChannelState::deleteImagesByGroupIDs([$product->channel_product_code]);
                 $product->success = true;
+                unset($channelProducts[$productKey]);
                 continue;
             }
 

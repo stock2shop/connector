@@ -366,77 +366,63 @@ final class ChannelTest extends Framework\TestCase
 
             // return products one at a time.
             $token = '';
-            $retrievedProductsMap = [];
-            $retrievedImagesMap = [];
-            $retrievedVariantsMap = [];
 
-            // The following section of code evaluates the cursor-based pagination
-            // of the `get()` method of a Products connector. Maps are built up
-            // from the responses received by paging over the channel data one
-            // record at a time (limit = 1). When the loop is complete, we are
-            // expecting to have three maps with identical product, image and
-            // variant data to that which we originally synced to the channel above.
+            // Iterate over channelProducts.
             for ($i = 0; $i < count($channelProducts); $i++) {
-
-                // Keep track of the last token received (will be null for the first iteration).
-                $lastToken = '';
-                // Start paging.
+                $lastToken = $channelProducts[$i]->channel_product_code;
                 $channelProductGet = $connector->get($lastToken, 1, $channel);
-                // Token does not match the last token.
-                $this->assertNotEquals($lastToken, $channelProductGet->token);
-                // Update last token.
-                $lastToken = $channelProductGet->token;
+                self::verifyProductGet($lastToken, 1, $channelProductGet);
+            }
+        }
+    }
 
-                // Only expecting 1 record per request.
-                $this->assertCount(1, $channelProductGet->channelProducts);
+    /**
+     * Verify Product Get
+     *
+     * This method is used in `testGetProducts()` and
+     * evaluates the requested data along with the
+     * data which is on the channel.
+     *
+     * @oaram vo\ChannelProduct[] $response
+     * @return void
+     */
+    public function verifyProductGet(string $token, int $limit, vo\ChannelProductGet $fetchedProducts)
+    {
 
-                // Each response must be an array of vo\ChannelProducts.
-                $this->assertNotNull($channelProductGet->channelProducts);
-                $this->assertEquals('stock2shop\vo\ChannelProduct', get_class($channelProductGet->channelProducts[0]));
-                $this->assertTrue($channelProductGet->channelProducts[0]->success);
-                $this->assertNotNull($channelProductGet->channelProducts[0]->channel_product_code);
+        // Only return up to the limit.
+        $this->assertLessThanOrEqual($limit, count($fetchedProducts));
 
-                // Compare the hashes of the product we synced and returned from the channel using 'get'.
-//                $this->assertEquals($channelProducts[$i]->computeHash(), $channelProductGet->channelProducts[0]->computeHash());
-                $this->assertEquals($channelProductGet->channelProducts[0]->channel_product_code, $channelProducts[$i]->channel_product_code);
+        // Last position token.
+        $currentToken = $fetchedProducts->token;
+        $this->assertInstanceOf("stock2shop\\vo\\ChannelProductGet", $fetchedProducts);
 
-                // Count variants and images.
-                $this->assertCount(count($channelProducts[$i]->variants), $channelProductGet->channelProducts[0]->variants);
-                $this->assertCount(count($channelProducts[$i]->images), $channelProductGet->channelProducts[0]->images);
+        // Iterate over fetchedProducts.
+        foreach ($fetchedProducts as $product) {
 
-                // Add to maps.
-                $retrievedProductsMap[$channelProductGet->channelProducts[0]->channel_product_code] = $channelProductGet->channelProducts[0];
-                foreach ($channelProductGet->channelProducts[0]->variants as $vKey => $vValue) {
-                    $this->assertNotNull($channelProductGet->channelProducts[0]->variants[$vKey]->channel_variant_code);
-                    $this->assertTrue($channelProductGet->channelProducts[0]->variants[$vKey]->success);
-                    $retrievedVariantsMap[$vValue->channel_variant_code] = $vValue;
-                }
-                foreach ($channelProductGet->channelProducts[0]->images as $iKey => $iValue) {
-                    $this->assertNotNull($channelProductGet->channelProducts[0]->images[$iKey]->channel_image_code);
-                    $this->assertTrue($channelProductGet->channelProducts[0]->images[$iKey]->success);
-                    $retrievedImagesMap[$iValue->channel_image_code] = $iValue;
-                }
-//                $channel_product_code = $product->channel_product_code;
+            // Product token must not be less than token.
+            // Token in this case is channel_product_code.
+            $this->assertGreaterThan($token, $product->channel_product_code);
+
+            // Results must be ordered by token
+            $this->assertGreaterThan($currentToken, $product->token);
+            $currentToken = $product->token;
+
+            // Check whether the properties are set.
+            $this->assertNotEmpty($product->token);
+            $this->assertNotEmpty($product->channel_product_code);
+
+            // Check variant properties.
+            foreach ($product->variants as $variant) {
+                $this->assertNotEmpty($variant->channel_variant_code);
+                $this->assertNotEmpty($variant->sku);
+                $this->assertNotEmpty($variant->success);
             }
 
-            // loop through the products you synced to channel and make sure they exist in maps...
-            foreach ($channelProducts as $pKey => $pValue) {
-                $this->assertEquals($pValue, $retrievedProductsMap[$pValue->channel_product_code]);
-                foreach ($channelProducts[$pKey]->variants as $vKey => $vValue) {
-                    $this->assertEquals($channelProducts[$pKey]->variants[$vKey], $retrievedVariantsMap[$vValue->channel_variant_code]);
-                }
-                foreach ($channelProducts[$pKey]->images as $iKey => $iVal) {
-                    $this->assertEquals($channelProducts[$pKey]->images[$iKey], $retrievedImagesMap[$iVal->channel_image_code]);
-                }
+            // Check image properties.
+            foreach ($product->images as $image) {
+                $this->assertNotEmpty($image->channel_image_code);
+                $this->assertNotEmpty($image->success);
             }
-
-            // delete products from channel
-            foreach ($channelProducts as $product) {
-                $product->delete = true;
-            }
-            $connector->sync($channelProducts, $channel, $flagMap);
-            $existingChannelProducts = $connector->get('', 10, $channel);
-            $this->assertCount(0, $existingChannelProducts);
         }
     }
 

@@ -29,7 +29,7 @@ classes discussed in the previous section.
 The JSON template makes the product and variant properties which are synchronized to "MemoryProduct"s on the channel
 configurable. Due to the limitations of the channel (i.e. the flattened representation of product/variants), the
 "channel_product_code" property is hard-coded in the [memory\ProductMapper](./ProductMapper.php) class and is not
-included in the JSON config. 
+included in the JSON config.
 
 The following properties are configurable on channel-level:
 

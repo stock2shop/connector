@@ -88,10 +88,10 @@ class ChannelState
     {
         $updated = [];
         foreach ($items as $item) {
-            if(!$item->id) {
+            if (!$item->id) {
                 $item->id = self::generateID();
             }
-            if(!$item->product_group_id) {
+            if (!$item->product_group_id) {
                 $item->product_group_id = self::generateID();
             }
             self::$stateProducts[$item->id] = $item;
@@ -113,7 +113,7 @@ class ChannelState
     {
         $updated = [];
         foreach ($items as $item) {
-            if(!$item->id) {
+            if (!$item->id) {
                 $item->id = self::generateID();
             }
             self::$stateImages[$item->id] = $item;
@@ -135,7 +135,11 @@ class ChannelState
     {
         /** @var MemoryProduct[] $list */
         $products = [];
-        $start = ($offset === '')? 0: $offset;
+        // TODO: A string offset is returned here, which causes array_slice()
+        //  to error. Write function to get the string offset's position in the
+        //  array of products in the state. "array_slice()" works with integer
+        //  values only.
+        $start = ($offset === '') ? 0 : $offset;
         $list = array_slice(self::$stateProducts, $start, $limit, true);
         foreach ($list as $item) {
             $products[] = $item;
@@ -143,7 +147,8 @@ class ChannelState
         return $products;
     }
 
-    public static function getAllProducts() {
+    public static function getAllProducts()
+    {
         return self::$stateProducts;
     }
 
@@ -212,7 +217,7 @@ class ChannelState
     public static function deleteProductsByIDs(array $ids)
     {
         foreach ($ids as $id) {
-            if(isset(self::$stateProducts[$id])) {
+            if (isset(self::$stateProducts[$id])) {
                 unset(self::$stateProducts[$id]);
             }
         }
@@ -228,7 +233,7 @@ class ChannelState
     public static function deleteProductsByGroupIDs(array $ids)
     {
         foreach (self::$stateProducts as $sp) {
-            if(in_array($sp->product_group_id, $ids)) {
+            if (in_array($sp->product_group_id, $ids)) {
                 self::deleteProductsByIDs([$sp->id]);
             }
         }
@@ -265,7 +270,7 @@ class ChannelState
     {
         $products = [];
         foreach (self::$stateProducts as $stateProductKey => $stateProductValue) {
-            if(in_array($stateProductValue->product_group_id, $ids)) {
+            if (in_array($stateProductValue->product_group_id, $ids)) {
                 $products[$stateProductKey] = $stateProductValue;
             }
         }
@@ -285,7 +290,7 @@ class ChannelState
         // Get all products matching the group IDs.
         $products = self::getProductsByGroupIDs($ids);
         $productIds = [];
-        foreach($products as $prKey => $prValue) {
+        foreach ($products as $prKey => $prValue) {
             $productIds[] = $prValue->id;
         }
 
@@ -309,10 +314,11 @@ class ChannelState
      * @param array $productIDs
      * @return array
      */
-    public static function getImagesByProductIDs(array $productIDs) {
+    public static function getImagesByProductIDs(array $productIDs)
+    {
         $productImages = [];
-        foreach(self::$stateImages as $stateImageKey => $stateImageValue) {
-            if(in_array($stateImageValue->product_id, $productIDs)) {
+        foreach (self::$stateImages as $stateImageKey => $stateImageValue) {
+            if (in_array($stateImageValue->product_id, $productIDs)) {
                 $productImages[$stateImageKey] = $stateImageValue;
             }
         }
@@ -328,9 +334,10 @@ class ChannelState
      * @param array $ids Array of product IDs.
      * @return void
      */
-    public static function deleteImagesByProductIDs(array $ids) {
-        foreach(self::$stateImages as $stateImageKey => $stateImageValue) {
-            if(in_array($stateImageValue->product_id, $ids)) {
+    public static function deleteImagesByProductIDs(array $ids)
+    {
+        foreach (self::$stateImages as $stateImageKey => $stateImageValue) {
+            if (in_array($stateImageValue->product_id, $ids)) {
                 unset(self::$stateImages[$stateImageKey]);
             }
         }
@@ -346,7 +353,7 @@ class ChannelState
     public static function deleteImages(array $ids)
     {
         foreach ($ids as $id) {
-            if(isset(self::$stateImages[$id])) {
+            if (isset(self::$stateImages[$id])) {
                 unset(self::$stateImages[$id]);
             }
         }
@@ -362,19 +369,19 @@ class ChannelState
      * @param string[] $url
      * @return string[] $memoryImageId
      */
-    public static function deleteImageByUrl(array $urls): array {
+    public static function deleteImageByUrl(array $urls): array
+    {
 
         // Return image IDs.
         $deletedImageIDs = [];
 
         // Iterate over the images in the channel's state and remove if matching.
-        foreach(self::$stateImages as $stateImageKey => $stateImageValue) {
-            if(in_array($stateImageValue->url, $urls)) {
+        foreach (self::$stateImages as $stateImageKey => $stateImageValue) {
+            if (in_array($stateImageValue->url, $urls)) {
                 unset(self::$stateImages[$stateImageKey]);
                 $deletedImageIDs[] = $stateImageKey;
             }
         }
-
         return $deletedImageIDs;
     }
 

@@ -9,7 +9,6 @@ use stock2shop\vo;
  */
 class ImageMapper
 {
-
     /**
      * @var MemoryImage
      */
@@ -40,5 +39,4 @@ class ImageMapper
     {
         return $this->image;
     }
-
 }

@@ -121,35 +121,35 @@ class Products implements ProductsInterface
     public function get(string $token, int $limit, vo\Channel $channel): vo\ChannelProductGet
     {
         /** @var string $imageSeparator Channel separator for channel codes and storage. */
-        $storageSeparator    = helpers\Meta::get($channel->meta, self::META_STORAGE_SEPARATOR);
-        $channelProducts     = [];
+        $storageSeparator = helpers\Meta::get($channel->meta, self::META_STORAGE_SEPARATOR);
+        $channelProducts = [];
         $channelProductsData = [];
-        $cnt                 = 0;
+        $cnt = 0;
 
         // results are sorted by channel_product_code asc already
         $products = Helper::getJSONFiles('products');
 
         // build products, variants and images hierarchy
         foreach ($products as $filename => $data) {
-            $parts  = explode($storageSeparator, $filename);
+            $parts = explode($storageSeparator, $filename);
             $prefix = str_replace('.json', '', $parts[0]);
-            if ($prefix > $channel_product_code) {
+            if ($prefix > $token) {
                 if (count($parts) === 1) {
                     $channelProductsData[$prefix] = [
                         'channel_product_code' => $filename,
-                        'success'              => true,
-                        'variants'             => [],
-                        'images'               => []
+                        'success' => true,
+                        'variants' => [],
+                        'images' => []
                     ];
                 } elseif (count($parts) === 2) {
                     $channelProductsData[$prefix]['variants'][] = [
                         'channel_variant_code' => $filename,
-                        'success'              => true
+                        'success' => true
                     ];
                 } elseif (count($parts) === 3) {
                     $channelProductsData[$prefix]['images'][] = [
                         'channel_image_code' => $filename,
-                        'success'              => true
+                        'success' => true
                     ];
                 }
             }
@@ -188,11 +188,11 @@ class Products implements ProductsInterface
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
         $productsToRemove = [];
-        $imagesToRemove   = [];
+        $imagesToRemove = [];
         $variantsToRemove = [];
         foreach ($channelProducts as $product) {
             $productFiles = data\Helper::getJSONFilesByPrefix($product->id, 'products');
-            $hasProduct   = false;
+            $hasProduct = false;
             foreach ($productFiles as $filename => $data) {
                 if ($filename === $product->channel_product_code) {
                     $hasProduct = true;
