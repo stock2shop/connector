@@ -8,9 +8,6 @@ use tests;
 
 /**
  * Channel State Test
- *
- * This class evaluates the functionality in the
- * channel state singleton.
  */
 class ChannelStateTest extends tests\TestCase
 {
@@ -26,11 +23,8 @@ class ChannelStateTest extends tests\TestCase
      */
     public function testGetProducts()
     {
-
-        // Cleanup.
         memory\ChannelState::clean();
 
-        // Create products.
         $productCount = 11;
         $newMemoryProducts = [];
         for ($i = 0; $i < $productCount; $i++) {
@@ -45,14 +39,11 @@ class ChannelStateTest extends tests\TestCase
                 ]
             ]);
         }
-        memory\ChannelState::update($newMemoryProducts);
 
-        // Test getting products off the channel.
+        memory\ChannelState::update($newMemoryProducts);
         $this->assertCount(count($newMemoryProducts), memory\ChannelState::getProducts());
 
-        // Cleanup.
         memory\ChannelState::clean();
-
     }
 
     /**
@@ -61,17 +52,12 @@ class ChannelStateTest extends tests\TestCase
      */
     public function testUpdateImages()
     {
-        // Cleanup.
         memory\ChannelState::clean();
 
-        // MemoryImages to create.
         $memoryImageOne = new memory\MemoryImage(['id' => null, 'url' => 'http://aws.stock2sho..1', 'product_group_id' => '1']);
         $memoryImageTwo = new memory\MemoryImage(['id' => null, 'url' => 'http://aws.stock2sho..1', 'product_group_id' => '1']);
-
-        // Create images.
         memory\ChannelState::updateImages([$memoryImageOne, $memoryImageTwo]);
 
-        // Check state for images.
         $images = memory\ChannelState::getImages();
         foreach($images as $imageKey => $imageItem) {
             $this->assertTrue($imageItem instanceof memory\MemoryImage);
@@ -80,7 +66,6 @@ class ChannelStateTest extends tests\TestCase
             $this->assertNotNull($imageItem->product_group_id);
         }
 
-        // Cleanup the state.
         memory\ChannelState::clean();
     }
 
@@ -94,21 +79,11 @@ class ChannelStateTest extends tests\TestCase
      */
     public function testGenerateID()
     {
-
-        // Cleanup the state.
         memory\ChannelState::clean();
-
-        // Run the method.
         $outcome = memory\ChannelState::generateID();
-
-        // Evaluate outcome.
-        $expected = 50;
         $this->assertEquals('string', gettype($outcome));
-        $this->assertEquals($expected, strlen($outcome));
-
-        // Cleanup.
+        $this->assertEquals(50, strlen($outcome));
         memory\ChannelState::clean();
-
     }
 
     /**
@@ -119,59 +94,36 @@ class ChannelStateTest extends tests\TestCase
      *
      * @return void
      */
-    public function testGetImagesByGroupIDs()
+    public function testGetImages()
     {
-
-        // Cleanup.
         memory\ChannelState::clean();
 
-        // Group IDs.
         $groupIDs = ['cpid1', 'cpid2'];
-
-        // Create products.
-        memory\ChannelState::update([
-            new memory\MemoryProduct([
-                'id' => null,
-                'product_group_id' => $groupIDs[0],
-                'name' => 'Product Name',
-                'price' => '5000.00',
-                'quantity' => 5
-            ]),
-            new memory\MemoryProduct([
-                'id' => null,
-                'product_group_id' => $groupIDs[1],
-                'name' => 'Product Name',
-                'price' => '5000.00',
-                'quantity' => 5
-            ])]);
-
-        $imageIds = [];
-
-        $imageIds[] = memory\ChannelState::createImage(new memory\MemoryImage([
-            'id' => null,
-            'product_group_id' => $groupIDs[0],
-            'url' => 'http://aws.stock2shop.../1'
-        ]));
-
+        $groupImages = [];
         for ($i = 0; $i !== 2; $i++) {
-            memory\ChannelState::createImage(new memory\MemoryImage([
+            $groupImages[] = new memory\MemoryImage([
                 'id' => null,
-                'product_group_id' => $groupIDs[1],
+                'product_group_id' => $groupIDs[$i],
                 'url' => 'http://aws.stock2shop.../2'
-            ]));
+            ]);
         }
+        $groupImages = array_merge($groupImages, [new memory\MemoryImage([
+            'id' => null,
+            'product_group_id' => $groupIDs[1],
+            'url' => 'http://aws.stock2shop.../2'
+        ])]);
 
+        memory\ChannelState::updateImages($groupImages);
         $outcome = memory\ChannelState::getImagesByGroupIDs($groupIDs);
 
         $this->assertNotNull($outcome);
         $this->assertCount(3, $outcome);
         $this->assertEquals('stock2shop\dal\channels\memory\MemoryImage', get_class($outcome[0]));
-        $this->assertEquals($memoryProductIDs[0]->product_group_id, $outcome[0]->product_group_id);
-        $this->assertEquals($memoryProductIDs[1]->product_group_id, $outcome[1]->product_group_id);
-        $this->assertEquals($memoryProductIDs[1]->product_group_id, $outcome[2]->product_group_id);
+        $this->assertEquals($groupIDs[0], $outcome[0]->product_group_id);
+        $this->assertEquals($groupIDs[1], $outcome[1]->product_group_id);
+        $this->assertEquals($groupIDs[1], $outcome[2]->product_group_id);
 
         memory\ChannelState::clean();
-
     }
 
     /**
@@ -207,6 +159,5 @@ class ChannelStateTest extends tests\TestCase
         memory\ChannelState::clean();
 
     }
-
 
 }

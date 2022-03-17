@@ -65,7 +65,7 @@ class ChannelState
     /**
      * Update Images
      *
-     * Updates or inserts an image if not found
+     * Updates or inserts an image if not found.
      *
      * @param MemoryImage[] $memory_images
      * @throws Exception
