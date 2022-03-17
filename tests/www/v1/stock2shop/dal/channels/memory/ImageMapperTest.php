@@ -36,7 +36,7 @@ class ImageMapperTest extends tests\TestCase
             'name' => 'Product Title',
             'price' => '2222',
             'quantity' => 2,
-            'product_group_id' => '62714'
+            'product_group_id' => $channel_product_code
         ]);
 
         // Create object to map.
@@ -56,7 +56,7 @@ class ImageMapperTest extends tests\TestCase
 
         // Test/compare.
         $this->assertEquals($channel_image_code, $outcome->id);
-        $this->assertEquals($channel_product_code, $outcome->product_id);
+        $this->assertEquals($channel_product_code, $outcome->product_group_id);
         $this->assertEquals($url, $outcome->url);
 
     }

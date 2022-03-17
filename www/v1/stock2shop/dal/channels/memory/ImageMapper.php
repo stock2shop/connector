@@ -15,15 +15,19 @@ class ImageMapper
     private $image;
 
     /**
+     * Default Constructor
+     *
+     * Maps a Stock2Shop image onto the "memory" channel schema.
+     *
      * @param vo\ChannelImage $ci
-     * @param MemoryProduct $ep
+     * @param MemoryProduct $mp
      */
     public function __construct(vo\ChannelImage $ci, MemoryProduct $mp)
     {
         // Image mapping onto channel MemoryImage.
         $mapping = [
             "id" => $ci->channel_image_code,
-            "product_id" => $mp->id,
+            "product_group_id" => $mp->product_group_id,
             "url" => $ci->src
         ];
 

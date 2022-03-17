@@ -15,11 +15,6 @@ class MemoryProduct
     public $id;
 
     /**
-     * @var int
-     */
-    public $product_group_id;
-
-    /**
      * @var string
      */
     public $name;
@@ -35,6 +30,11 @@ class MemoryProduct
     public $quantity;
 
     /**
+     * @var int
+     */
+    public $product_group_id;
+
+    /**
      * Default Constructor
      *
      * Populates this object with associative array data.
@@ -44,10 +44,10 @@ class MemoryProduct
      */
     public function __construct(array $data = [])
     {
-        $this->id = ($data["id"]) ?? null;
-        $this->name = ($data["name"]) ?? null;
-        $this->price = ($data["price"]) ?? null;
-        $this->quantity = ($data["quantity"]) ?? null;
+        $this->id               = ($data["id"]) ?? null;
+        $this->name             = ($data["name"]) ?? null;
+        $this->price            = ($data["price"]) ?? null;
+        $this->quantity         = ($data["quantity"]) ?? null;
         $this->product_group_id = ($data["product_group_id"]) ?? null;
     }
 

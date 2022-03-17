@@ -61,9 +61,8 @@ class ChannelState
      * This method updates a batch of products if they
      * exist otherwise generate a new one and create unique id.
      *
-     * @param MemoryProduct[] $items The MemoryProduct items to update.
-     * @return array An array of IDs of updated MemoryProduct items.
-     * @throws \Exception
+     * @param MemoryProduct[] $items
+     * @return MemoryProduct[] $updated
      */
     public static function update(array $items): array
     {
@@ -262,17 +261,18 @@ class ChannelState
      *
      * Return images from the channel which match the group IDs.
      *
-     * @param array $ids The array of "product_group_ids" to return images for.
-     * @return MemoryImage[] $images The MemoryImages associated with the "product_group_ids".
+     * @param array $group_ids
+     * @return MemoryImage[] $images
      */
-    public static function getImagesByGroupIDs(array $ids)
+    public static function getImagesByGroupIDs(array $group_ids): array
     {
-        $products = self::getProductsByGroupIDs($ids);
-        $productIDs = [];
-        foreach ($products as $product) {
-            $productIDs[] = $product->id;
+        $images = [];
+        foreach (self::$stateImages as $stateImage) {
+            if (in_array($stateImage->product_group_id, $group_ids)) {
+                $images[] = $stateImage;
+            }
         }
-        return self::getImagesByProductIDs($productIDs);
+        return $images;
     }
 
     /**
