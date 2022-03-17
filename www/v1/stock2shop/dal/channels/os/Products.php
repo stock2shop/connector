@@ -113,7 +113,7 @@ class Products implements ProductsInterface
      *
      * See comments in ProductsInterface::get
      *
-     * @param string $channel_product_code only return results greater than this
+     * @param string $token only return results greater than this
      * @param int $limit max records to return
      * @param vo\Channel $channel
      * @return vo\ChannelProductGet $channelProductGet
@@ -160,8 +160,6 @@ class Products implements ProductsInterface
             }
             $cnt++;
         }
-
-        // ----------------------------------------
 
         // Return the "token" and "products" in a
         // ChannelProductGet object.

@@ -157,7 +157,7 @@ final class ChannelTest extends Framework\TestCase
      *
      * @return void
      */
-    public function testSyncProducts()
+    public function testSync()
     {
         $channelTypes = self::getChannelTypes();
         foreach ($channelTypes as $type) {
@@ -173,43 +173,57 @@ final class ChannelTest extends Framework\TestCase
             // --------------------------------------------------------
             // Create all products on the channel from data on Stock2Shop.
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
-            $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 1 - Create All Products On Channel [' . $type . ']');
+            $syncedChannelProducts = $connector->sync($request, $channel, $flagMap);
+            self::verifyProductSync($request, $syncedChannelProducts, $connector, $channel, 'TEST CASE 1 - Create All Products On Channel [' . $type . ']');
 
             // --------------------------------------------------------
             // Delete a single variant from a product.
             // The second product in the test data has two variants
-            self::$channelProductsData[1]['variants'][0]['delete'] = true;
-            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
-            $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
+            // the channel codes (channel_product_code, channel_variant_code, channel_image_code)
+            // should now be set from the previous sync
+            $syncedChannelProducts[1]->variants[0]->delete = true;
+            $request = $this->setSuccessFalse($syncedChannelProducts);
+            $syncedChannelProducts = $connector->sync($request, $channel, $flagMap);
+            unset($request[1]->variants[0]);
+            self::verifyProductSync($request, $syncedChannelProducts, $connector, $channel, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
 
             // --------------------------------------------------------
             // Delete a single image from a product.
             // The second product in the test data has two images
-            self::$channelProductsData[1]['images'][0]['delete'] = true;
-            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
-            $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 3 - Delete A Image [' . $type . ']');
+            $syncedChannelProducts[1]->images[0]->delete = true;
+            $request = $this->setSuccessFalse($syncedChannelProducts);
+            unset($request[1]->images[0]);
+            $syncedChannelProducts = $connector->sync($request, $channel, $flagMap);
+            self::verifyProductSync($request, $syncedChannelProducts, $connector, $channel, 'TEST CASE 3 - Delete A Image [' . $type . ']');
 
             // --------------------------------------------------------
             // Delete all products from Channel.
-            foreach (self::$channelProductsData as $key => $product) {
-                self::$channelProductsData[$key]['delete'] = true;
+            foreach ($syncedChannelProducts as $product) {
+                $product->delete = true;
             }
-            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
-            $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 4 - Remove All Products [' . $type . ']');
-
-            // --------------------------------------------------------
-            // Synchronize an empty payload of data from Stock2Shop.
-            $request = vo\ChannelProduct::createArray([]);
-            $response = $connector->sync($request, $channel, $flagMap);
-            self::verifyProductSync($request, $response, $connector, $channel, 'TEST CASE 5 - Sync Empty Payload [' . $type . ']');
+            $request = $this->setSuccessFalse($syncedChannelProducts);
+            $syncedChannelProducts = $connector->sync($request, $channel, $flagMap);
+            self::verifyProductSync([], $syncedChannelProducts, $connector, $channel, 'TEST CASE 4 - Remove All Products [' . $type . ']');
 
             // print results
             self::$printer->print();
         }
+    }
+
+    /**
+     * @param vo\ChannelProduct[] $channelProducts
+     */
+    function setSuccessFalse(array $channelProducts) {
+        foreach ($channelProducts as $cp) {
+            $cp->success = false;
+            foreach ($cp->variants as $cv) {
+                $cv->success = false;
+            }
+            foreach ($cp->images as $img) {
+                $img->success = false;
+            }
+        }
+        return $channelProducts;
     }
 
     /**

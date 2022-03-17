@@ -62,11 +62,9 @@ class ChannelState
      * exist otherwise generate a new one and create unique id.
      *
      * @param MemoryProduct[] $items
-     * @return MemoryProduct[] $updated
      */
-    public static function update(array $items): array
+    public static function update(array $items)
     {
-        $updated = [];
         foreach ($items as $item) {
             if (!$item->id) {
                 $item->id = self::generateID();
@@ -75,9 +73,7 @@ class ChannelState
                 $item->product_group_id = self::generateID();
             }
             self::$stateProducts[$item->id] = $item;
-            $updated[] = $item;
         }
-        return $updated;
     }
 
     /**
@@ -86,26 +82,22 @@ class ChannelState
      * Updates or inserts an image if not found
      *
      * @param MemoryImage[] $items An array of MemoryImage items to update.
-     * @return MemoryImage[]|[] An array of IDs from MemoryImage items which have been updated.
      * @throws \Exception
      */
     public static function updateImages(array $items)
     {
-        $updated = [];
         foreach ($items as $item) {
             if (is_null($item->id)) {
                 $item->id = self::generateID();
             }
             self::$stateImages[$item->id] = $item;
-            $updated[] = $item;
         }
-        return $updated;
     }
 
     /**
      * Returns all grouped products (grouped by product_group_id)
      *
-     * @return MemoryProduct[]
+     * @return array
      */
     public static function getProductGroups(): array
     {
@@ -178,11 +170,11 @@ class ChannelState
      */
     public static function getImages()
     {
-        $memoryImages = [];
-        foreach (self::$stateImages as $miKey => $miValue) {
-            $memoryImages[$miKey] = $miValue;
+        $mi = [];
+        foreach (self::$stateImages as $key => $img) {
+            $mi[$key] = $img;
         }
-        return $memoryImages;
+        return $mi;
     }
 
     /**
