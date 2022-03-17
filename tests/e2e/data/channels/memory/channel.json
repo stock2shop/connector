@@ -4,8 +4,8 @@
   "description": "Example Channel",
   "meta": [
     {
-      "key": "mustache_templatexx",
-      "value": "{\n            \"id\": \"{{ChannelVariant.channel_variant_code}}\",\n            \"name\": \"{{ChannelProduct.title}}\",\n            \"quantity\": \"{{ChannelVariant.qty}}\",\n            \"product_group_id\": \"{{ChannelVariant.product_id}}\",\n            \"price\": \"{{ChannelVariant.price}}\"\n          }"
+      "key": "mustache_template",
+      "value": "{\n            \"id\": \"{{ChannelVariant.channel_variant_code}}\",\n            \"name\": \"{{ChannelProduct.title}}\",\n            \"quantity\": \"{{ChannelVariant.qty}}\",\n            \"product_group_id\": \"{{ChannelVariant.channel_product_code}}\",\n            \"price\": \"{{ChannelVariant.price}}\"\n          }"
     }
   ],
   "modified": "2022-02-08 16:00:00",

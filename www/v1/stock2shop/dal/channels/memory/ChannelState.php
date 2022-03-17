@@ -68,10 +68,10 @@ class ChannelState
     {
         $updated = [];
         foreach ($items as $item) {
-            if (is_null($item->id)) {
+            if (!$item->id) {
                 $item->id = self::generateID();
             }
-            if (is_null($item->product_group_id)) {
+            if (!$item->product_group_id) {
                 $item->product_group_id = self::generateID();
             }
             self::$stateProducts[$item->id] = $item;
