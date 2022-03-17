@@ -70,7 +70,6 @@ class ProductMapperTest extends tests\TestCase
         $this->assertEquals('62714', $outcome->product_group_id);
         $this->assertEquals('Product Title', $outcome->name);
         $this->assertEquals('2', $outcome->quantity);
-//        $this->assertCount(50, str_split($outcome->id, 1));
         $this->assertEquals('2222', $outcome->price);
 
     }

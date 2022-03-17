@@ -144,6 +144,7 @@ class Products implements ProductsInterface
                 } elseif (count($parts) === 2) {
                     $channelProductsData[$prefix]['variants'][] = [
                         'channel_variant_code' => $filename,
+                        'sku' => $data['sku'],
                         'success' => true
                     ];
                 } elseif (count($parts) === 3) {
@@ -161,10 +162,20 @@ class Products implements ProductsInterface
             $cnt++;
         }
 
-        // Return the "token" and "products" in a
-        // ChannelProductGet object.
         return new vo\ChannelProductGet([
-            'token' => end($channelProducts)->channel_product_code ?? '',
+
+            // We are using end() here to set the pointer in the
+            // "channelProducts" array to the end of the array.
+            // This gives us the last channel product returned.
+            // However, the product might not exist (i.e. we've
+            // already returned the last product on the prev. page).
+            // If this is the case, then we return the same token
+            // so that the worker knows that the "token" value was
+            // the end of the items on the channel.
+            'token' => end($channelProducts)->channel_product_code ?? $token,
+
+            // "channelProducts" may be an empty array or
+            // an array of ($limit) products.
             'channelProducts' => $channelProducts
         ]);
     }

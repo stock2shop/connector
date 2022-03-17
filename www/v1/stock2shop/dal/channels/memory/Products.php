@@ -34,7 +34,7 @@ class Products implements ProductsInterface
         // In many channels you work on this should be done in bulk where possible.
         foreach ($channelProducts as $cp) {
             foreach ($cp->variants as $cv) {
-                $mapper         = new ProductMapper($cp, $cv, $template);
+                $mapper = new ProductMapper($cp, $cv, $template);
                 $exampleProduct = $mapper->get();
                 if ($cp->delete) {
                     ChannelState::deleteProductsByGroupIDs([$exampleProduct->product_group_id]);
@@ -44,11 +44,11 @@ class Products implements ProductsInterface
                     ChannelState::updateProducts([$exampleProduct]);
                 }
                 $cp->channel_product_code = $exampleProduct->product_group_id;
-                $cp->success              = true;
+                $cp->success = true;
                 $cv->channel_variant_code = $exampleProduct->id;
-                $cv->success              = true;
+                $cv->success = true;
                 foreach ($cp->images as $ci) {
-                    $mapper       = new ImageMapper($ci, $exampleProduct);
+                    $mapper = new ImageMapper($ci, $exampleProduct);
                     $exampleImage = $mapper->get();
                     if ($ci->delete) {
                         ChannelState::deleteImages([$exampleImage->id]);
@@ -56,7 +56,7 @@ class Products implements ProductsInterface
                         ChannelState::updateImages([$exampleImage]);
                     }
                     $ci->channel_image_code = $exampleImage->id;
-                    $ci->success            = true;
+                    $ci->success = true;
                 }
             }
         }
@@ -74,51 +74,64 @@ class Products implements ProductsInterface
      */
     public function get(string $token, int $limit, vo\Channel $channel): vo\ChannelProductGet
     {
-        /** @var vo\ChannelProductGet $channelProductGet */
-        $channelProductGet = new vo\ChannelProductGet([]);
-
-        // Get products from ChannelState by offset.
+        // Get products from ChannelState by "offset pagination/paging".
         if ($token === '') {
+            // Convert from empty string.
+            // This is to add support for cursor-based
+            // pagination in other connectors as well.
             $offset = 0;
         } else {
             $offset = (int)$token;
         }
+
+        // Get all products from the channel's state.
         $allProductGroups = ChannelState::getProductGroups();
 
-        // get products with appropriate index
+        // Get products with appropriate index.
         $productGroups = array_slice($allProductGroups, $offset, $limit, true);
 
-        // Build channel_products from groups
+        // Instantiate "vo\ChannelProductGet" object,
+        // which we use to return both the last "offset"
+        // and the "products" (if there are any).
+        $channelProductGet = new vo\ChannelProductGet([]);
+
+        // Build channel_products from groups.
         foreach ($productGroups as $product_group_id => $group) {
             $variants = [];
-            $images   = [];
+            $images = [];
             foreach ($group as $product) {
                 $variants[] = [
                     'channel_variant_code' => $product->id,
-                    'sku'                  => $product->id,
-                    'success'              => true
+                    'sku' => $product->id,
+                    'success' => true
                 ];
             }
             $groupImages = ChannelState::getImagesByGroupIDs([$product_group_id]);
             foreach ($groupImages as $image) {
                 $images[] = [
                     'channel_image_code' => $image->id,
-                    'success'            => true
+                    'success' => true
                 ];
             }
             $channelProductGet->channel_products[] = new vo\ChannelProduct([
                 'channel_product_code' => $product_group_id,
-                'success'              => true,
-                'variants'             => $variants,
-                'images'               => $images
+                'success' => true,
+                'variants' => $variants,
+                'images' => $images
             ]);
         }
 
-        // Set token
-        if(count($productGroups) === 0) {
+        // If there are no products returned for this
+        // page "$offset" then we set the token to the
+        // current "$token".
+        if (count($productGroups) === 0) {
             $channelProductGet->token = $token;
         } else {
-            $channelProductGet->token = (string) ($offset + $limit);
+
+            // If there are products returned from the channel,
+            // then the 'token' is calculated by adding the current
+            // page "$offset" to the "$limit".
+            $channelProductGet->token = (string)($offset + $limit);
         }
         return $channelProductGet;
     }
@@ -135,16 +148,16 @@ class Products implements ProductsInterface
         $groups = ChannelState::getProductGroups();
         $images = ChannelState::getImages();
         foreach ($channelProducts as $cp) {
-            if(isset($groups[$cp->channel_product_code])) {
+            if (isset($groups[$cp->channel_product_code])) {
                 $cp->success = true;
                 $memoryIDs = array_column($groups[$cp->channel_product_code], 'id');
                 foreach ($cp->variants as $cv) {
-                    if(in_array($cv->channel_variant_code, $memoryIDs)) {
+                    if (in_array($cv->channel_variant_code, $memoryIDs)) {
                         $cp->success = true;
                     }
                 }
                 foreach ($cp->images as $img) {
-                    if(isset($images[$img->channel_image_code])) {
+                    if (isset($images[$img->channel_image_code])) {
                         $img->success = true;
                     }
                 }

@@ -4,6 +4,7 @@ namespace tests\e2e;
 
 use PHPUnit\Framework;
 use stock2shop\dal;
+use stock2shop\exceptions\UnprocessableEntity;
 use stock2shop\vo;
 use tests\TestPrinter;
 
@@ -170,13 +171,11 @@ final class ChannelTest extends Framework\TestCase
             $channel = new vo\Channel(self::$channelData);
             $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
 
-            // --------------------------------------------------------
             // Create all products on the channel from data on Stock2Shop.
             $request = vo\ChannelProduct::createArray(self::$channelProductsData);
             $syncedChannelProducts = $connector->sync($request, $channel, $flagMap);
             self::verifyProductSync($request, $syncedChannelProducts, $connector, $channel, 'TEST CASE 1 - Create All Products On Channel [' . $type . ']');
 
-            // --------------------------------------------------------
             // Delete a single variant from a product.
             // The second product in the test data has two variants
             // the channel codes (channel_product_code, channel_variant_code, channel_image_code)
@@ -187,7 +186,6 @@ final class ChannelTest extends Framework\TestCase
             unset($request[1]->variants[0]);
             self::verifyProductSync($request, $syncedChannelProducts, $connector, $channel, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
 
-            // --------------------------------------------------------
             // Delete a single image from a product.
             // The second product in the test data has two images
             $syncedChannelProducts[1]->images[0]->delete = true;
@@ -196,7 +194,6 @@ final class ChannelTest extends Framework\TestCase
             $syncedChannelProducts = $connector->sync($request, $channel, $flagMap);
             self::verifyProductSync($request, $syncedChannelProducts, $connector, $channel, 'TEST CASE 3 - Delete A Image [' . $type . ']');
 
-            // --------------------------------------------------------
             // Delete all products from Channel.
             foreach ($syncedChannelProducts as $product) {
                 $product->delete = true;
@@ -213,7 +210,8 @@ final class ChannelTest extends Framework\TestCase
     /**
      * @param vo\ChannelProduct[] $channelProducts
      */
-    function setSuccessFalse(array $channelProducts) {
+    public function setSuccessFalse(array $channelProducts)
+    {
         foreach ($channelProducts as $cp) {
             $cp->success = false;
             foreach ($cp->variants as $cv) {
@@ -248,8 +246,6 @@ final class ChannelTest extends Framework\TestCase
         $existingProducts = $connector->getByCode($request, $channel);
         self::$printer->sendProductsToPrinter($request, $response, $existingProducts, $name);
 
-        // -----------------------------------------
-
         // Product, image and variant counters for existing and request products.
         $requestProductCnt = 0;
         $existingProductCnt = 0;
@@ -275,8 +271,6 @@ final class ChannelTest extends Framework\TestCase
             }
         }
 
-        // -----------------------------------------
-
         // Loop through existing products.
         // These are the products returned by interface method Products->getByCode()
         foreach ($existingProducts as $product) {
@@ -294,8 +288,6 @@ final class ChannelTest extends Framework\TestCase
         $this->assertEquals($requestVariantCnt, $existingVariantCnt);
         $this->assertEquals($requestImageCnt, $existingImageCnt);
 
-        // -----------------------------------------
-
         // Building product, variant and image maps.
         $responseProductMap = [];
         $responseVariantMap = [];
@@ -310,8 +302,6 @@ final class ChannelTest extends Framework\TestCase
                 $responseImageMap[$image->channel_image_code] = $image;
             }
         }
-
-        // -----------------------------------------
 
         foreach ($existingProducts as $existingProduct) {
             $product = $responseProductMap[$existingProduct->channel_product_code];
@@ -346,7 +336,7 @@ final class ChannelTest extends Framework\TestCase
 
     /**
      * Syncs test products to channel then uses get() to retrieve them all
-     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws UnprocessableEntity
      */
     public function testGetProducts()
     {
@@ -356,16 +346,16 @@ final class ChannelTest extends Framework\TestCase
             // Load test data and sync products to channel
             self::loadTestData($type);
             self::setFactory($type);
-            $creator         = self::$creator;
-            $connector       = $creator->createProducts();
-            $flagMap         = vo\Flag::createArray(self::$channelFlagMapData);
-            $channel         = new vo\Channel(self::$channelData);
+            $creator = self::$creator;
+            $connector = $creator->createProducts();
+            $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
+            $channel = new vo\Channel(self::$channelData);
             $channelProducts = vo\ChannelProduct::createArray(self::$channelProductsData);
             $connector->sync($channelProducts, $channel, $flagMap);
 
             // Cursor (or offset) used for pagination.
             // empty token means start a beginning
-            $token          = '';
+            $token = '';
             $previous_token = '';
 
             // Create index of retrieved products, keyed by appropriate channel codes
@@ -408,7 +398,7 @@ final class ChannelTest extends Framework\TestCase
                     }
                 }
                 $previous_token = $token;
-            } while(count($ChannelProductGet->channel_products) > 0);
+            } while (count($ChannelProductGet->channel_products) > 0);
 
             // Ensure that all the retrieved products match synced products
             foreach ($channelProducts as $product) {
