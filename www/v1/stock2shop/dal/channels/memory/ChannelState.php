@@ -2,6 +2,8 @@
 
 namespace stock2shop\dal\channels\memory;
 
+use Exception;
+
 /**
  * Stores the state for the channel in memory as an example
  * i.e. products, orders ad fulfillments
@@ -18,30 +20,12 @@ class ChannelState
     private static $stateImages = [];
 
     /**
-     * Create Image
-     *
-     * This method creates an image on the channel.
-     *
-     * @param MemoryImage $image
-     * @return string $id
-     */
-    public static function createImage(MemoryImage $image)
-    {
-        // Get id.
-        $image->id = self::generateID();
-
-        // Create image on channel.
-        self::$stateImages[$image->id] = $image;
-        return $image->id;
-    }
-
-    /**
      * Generate ID
      *
      * Creates a new ID for the product or image.
      *
      * @return string $id The unique ID string.
-     * @throws \Exception
+     * @throws Exception
      */
     public static function generateID(): string
     {
@@ -60,6 +44,8 @@ class ChannelState
      *
      * This method updates a batch of products if they
      * exist otherwise generate a new one and create unique id.
+     * A unique ID is also generated for the "product_group_id"
+     * if it does not exist.
      *
      * @param MemoryProduct[] $items
      */
@@ -81,13 +67,13 @@ class ChannelState
      *
      * Updates or inserts an image if not found
      *
-     * @param MemoryImage[] $items An array of MemoryImage items to update.
-     * @throws \Exception
+     * @param MemoryImage[] $memory_images
+     * @throws Exception
      */
-    public static function updateImages(array $items)
+    public static function updateImages(array $memory_images)
     {
-        foreach ($items as $item) {
-            if (is_null($item->id)) {
+        foreach ($memory_images as $item) {
+            if (!$item->id) {
                 $item->id = self::generateID();
             }
             self::$stateImages[$item->id] = $item;
@@ -95,7 +81,10 @@ class ChannelState
     }
 
     /**
-     * Returns all grouped products (grouped by product_group_id)
+     * Get Product Groups
+     *
+     * Returns a map of MemoryProduct[]
+     * keyed on "product_group_id".
      *
      * @return array
      */
@@ -113,33 +102,15 @@ class ChannelState
     }
 
     /**
-     * Get all products
+     * Get Products
      *
-     * @return MemoryProduct[]
+     * Accessor method for $stateProducts property.
+     *
+     * @return array
      */
-    public static function getProducts()
+    public static function getProducts(): array
     {
         return self::$stateProducts;
-    }
-
-    /**
-     * Get Products By IDs
-     *
-     * Returns an array of MemoryProduct items which match the
-     * IDs provided in the parameter.
-     *
-     * @param string[] $ids
-     * @return MemoryProduct[] associative array, key being id and value being MemoryProduct
-     */
-    public static function getProductsByIDs(array $ids): array
-    {
-        $exampleProducts = [];
-        foreach ($ids as $id) {
-            if (isset(self::$stateProducts[$id])) {
-                $exampleProducts[$id] = self::$stateProducts[$id];
-            }
-        }
-        return $exampleProducts;
     }
 
     /**
@@ -194,58 +165,19 @@ class ChannelState
     }
 
     /**
-     * Delete Products By Group IDs
-     *
-     * Removes matching product objects by ID.
-     *
-     * @param string[] $ids
-     */
-    public static function deleteProductsByGroupIDs(array $ids)
-    {
-        foreach (self::$stateProducts as $sp) {
-            if (in_array($sp->product_group_id, $ids)) {
-                self::deleteProductsByIDs([$sp->id]);
-            }
-        }
-    }
-
-    /**
-     * Delete Images By Group IDs
+     * Delete Images
      *
      * Removes matching image objects by ID.
      *
      * @param string[] $ids
      */
-    public static function deleteImagesByGroupIDs(array $ids)
+    public static function deleteImages(array $ids)
     {
-        // Get image IDs.
-        $imagesByGroupIDs = self::getImagesByGroupIDs($ids);
-
-        // Build array of IDs to remove.
-        $imageIdsToDelete = array_column($imagesByGroupIDs, 'id');
-
-        // Remove the items from the channel.
-        self::deleteImages($imageIdsToDelete);
-    }
-
-    /**
-     * Get Products By Group ID
-     *
-     * Fetches products with matching product_group_id
-     *
-     * @param array $group_product_ids
-     * @return MemoryProduct[]
-     */
-    public static function getProductsByGroupIDs(array $group_product_ids)
-    {
-        $products = [];
-        foreach (self::$stateProducts as $id => $product) {
-            if (in_array($product->product_group_id, $group_product_ids)) {
-                $products[$id] = $product;
+        foreach ($ids as $id) {
+            if (isset(self::$stateImages[$id])) {
+                unset(self::$stateImages[$id]);
             }
         }
-        ksort($products);
-        return $products;
     }
 
     /**
@@ -268,83 +200,19 @@ class ChannelState
     }
 
     /**
-     * Get Images By Product IDs
+     * Delete Products By Group IDs
      *
-     * Returns all images linked to the product IDs
-     * in the array.
-     *
-     * @param array $productIDs
-     * @return array
-     */
-    public static function getImagesByProductIDs(array $productIDs)
-    {
-        $productImages = [];
-        foreach (self::$stateImages as $key => $image) {
-            if (in_array($image->product_id, $productIDs)) {
-                $productImages[$key] = $image;
-            }
-        }
-        return $productImages;
-    }
-
-    /**
-     * Delete Images By Product IDs
-     *
-     * This method deletes multiple images which match
-     * the product IDs passed in the parameter.
-     *
-     * @param array $ids Array of product IDs.
-     * @return void
-     */
-    public static function deleteImagesByProductIDs(array $ids)
-    {
-        foreach (self::$stateImages as $stateImageKey => $stateImageValue) {
-            if (in_array($stateImageValue->product_id, $ids)) {
-                unset(self::$stateImages[$stateImageKey]);
-            }
-        }
-    }
-
-    /**
-     * Delete Images
-     *
-     * Removes matching image objects by ID.
+     * Removes matching MemoryProduct objects by ID.
      *
      * @param string[] $ids
      */
-    public static function deleteImages(array $ids)
+    public static function deleteProductsByGroupIDs(array $ids)
     {
-        foreach ($ids as $id) {
-            if (isset(self::$stateImages[$id])) {
-                unset(self::$stateImages[$id]);
+        foreach (self::$stateProducts as $sp) {
+            if (in_array($sp->product_group_id, $ids)) {
+                self::deleteProductsByIDs([$sp->id]);
             }
         }
-    }
-
-    /**
-     * Delete Image By Url
-     *
-     * Delete an image by the src property.
-     * This maps to a "vo\ChannelImage" object's
-     * "src" property.
-     *
-     * @param string[] $url
-     * @return string[] $memoryImageId
-     */
-    public static function deleteImageByUrl(array $urls): array
-    {
-
-        // Return image IDs.
-        $deletedImageIDs = [];
-
-        // Iterate over the images in the channel's state and remove if matching.
-        foreach (self::$stateImages as $stateImageKey => $stateImageValue) {
-            if (in_array($stateImageValue->url, $urls)) {
-                unset(self::$stateImages[$stateImageKey]);
-                $deletedImageIDs[] = $stateImageKey;
-            }
-        }
-        return $deletedImageIDs;
     }
 
     /**
