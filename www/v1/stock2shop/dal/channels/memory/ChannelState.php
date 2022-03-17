@@ -56,42 +56,23 @@ class ChannelState
     }
 
     /**
-     * Create
-     *
-     * This method creates a product on the channel.
-     *
-     * @param MemoryProduct $product
-     * @return string $id
-     */
-    public static function create(MemoryProduct $product): string
-    {
-        // Get id.
-//        $product->id = ChannelState::nextInsertId('products');
-
-        $product->id = self::generateID();
-
-        // Create product on channel.
-        self::$stateProducts[$product->id] = $product;
-        return $product->id;
-    }
-
-    /**
      * Update
      *
      * This method updates a batch of products if they
-     * exist in the $stateProducts class property.
+     * exist otherwise generate a new one and create unique id.
      *
      * @param MemoryProduct[] $items The MemoryProduct items to update.
      * @return array An array of IDs of updated MemoryProduct items.
+     * @throws \Exception
      */
     public static function update(array $items): array
     {
         $updated = [];
         foreach ($items as $item) {
-            if (!$item->id) {
+            if (is_null($item->id)) {
                 $item->id = self::generateID();
             }
-            if (!$item->product_group_id) {
+            if (is_null($item->product_group_id)) {
                 $item->product_group_id = self::generateID();
             }
             self::$stateProducts[$item->id] = $item;
@@ -103,17 +84,17 @@ class ChannelState
     /**
      * Update Images
      *
-     * This method updates images if found in the
-     * $images class property.
+     * Updates or inserts an image if not found
      *
      * @param MemoryImage[] $items An array of MemoryImage items to update.
      * @return MemoryImage[]|[] An array of IDs from MemoryImage items which have been updated.
+     * @throws \Exception
      */
     public static function updateImages(array $items)
     {
         $updated = [];
         foreach ($items as $item) {
-            if (!$item->id) {
+            if (is_null($item->id)) {
                 $item->id = self::generateID();
             }
             self::$stateImages[$item->id] = $item;
@@ -123,49 +104,29 @@ class ChannelState
     }
 
     /**
-     * List Products
+     * Returns all grouped products (grouped by product_group_id)
      *
-     * This method returns paginated products.
-     *
-     * @param string $offset The channel_product_code value to start from.
-     * @param int $limit The number of products to return from the channel.
-     * @return MemoryProduct[] $list
+     * @return MemoryProduct[]
      */
-    public static function getProductsList(string $offset, int $limit): array
+    public static function getProductGroups(): array
     {
-        /** @var MemoryProduct[] $list */
-        $products = [];
-        $start = ($offset === '') ? 0 : $offset;
-        $list = array_slice(self::$stateProducts, self::getSliceIndex($start), $limit, true);
-        foreach ($list as $item) {
-            $products[] = $item;
+        $groups = [];
+        foreach (self::$stateProducts as $product) {
+            if (!isset($groups[$product->product_group_id])) {
+                $groups[$product->product_group_id] = [];
+            }
+            $groups[$product->product_group_id][] = $product;
         }
-        return $products;
+        ksort($groups);
+        return $groups;
     }
 
     /**
-     * Get Slice Index
+     * Get all products
      *
-     * Returns the index of the product in
-     * stateProducts where the slicing should
-     * start.
-     *
-     * @param string $sliceKey
-     * @return int index
+     * @return MemoryProduct[]
      */
-    public static function getSliceIndex(string $sliceKey): int {
-        $keys = array_keys(self::$stateProducts);
-        foreach($keys as $stateProductIndex => $stateProductKey) {
-            $key = $stateProductKey;
-            if($sliceKey === $stateProductKey) {
-                return $stateProductIndex;
-            }
-        }
-        return 0;
-    }
-
-
-    public static function getAllProducts()
+    public static function getProducts()
     {
         return self::$stateProducts;
     }
@@ -281,17 +242,18 @@ class ChannelState
      *
      * Fetches products with matching product_group_id
      *
-     * @param array $ids
+     * @param array $group_product_ids
      * @return MemoryProduct[]
      */
-    public static function getProductsByGroupIDs(array $ids)
+    public static function getProductsByGroupIDs(array $group_product_ids)
     {
         $products = [];
-        foreach (self::$stateProducts as $stateProductKey => $stateProductValue) {
-            if (in_array($stateProductValue->product_group_id, $ids)) {
-                $products[$stateProductKey] = $stateProductValue;
+        foreach (self::$stateProducts as $id => $product) {
+            if (in_array($product->product_group_id, $group_product_ids)) {
+                $products[$id] = $product;
             }
         }
+        ksort($products);
         return $products;
     }
 
@@ -305,22 +267,12 @@ class ChannelState
      */
     public static function getImagesByGroupIDs(array $ids)
     {
-        // Get all products matching the group IDs.
         $products = self::getProductsByGroupIDs($ids);
-        $productIds = [];
-        foreach ($products as $prKey => $prValue) {
-            $productIds[] = $prValue->id;
+        $productIDs = [];
+        foreach ($products as $product) {
+            $productIDs[] = $product->id;
         }
-
-        $stateGroupImages = self::getImagesByProductIDs($productIds);
-
-        // Loop over the images and add the ones which
-        // match the product id in "productIds".
-        $images = [];
-        foreach ($stateGroupImages as $si) {
-            $images[$si->id] = $si;
-        }
-        return $images;
+        return self::getImagesByProductIDs($productIDs);
     }
 
     /**
@@ -335,9 +287,9 @@ class ChannelState
     public static function getImagesByProductIDs(array $productIDs)
     {
         $productImages = [];
-        foreach (self::$stateImages as $stateImageKey => $stateImageValue) {
-            if (in_array($stateImageValue->product_id, $productIDs)) {
-                $productImages[$stateImageKey] = $stateImageValue;
+        foreach (self::$stateImages as $key => $image) {
+            if (in_array($image->product_id, $productIDs)) {
+                $productImages[$key] = $image;
             }
         }
         return $productImages;

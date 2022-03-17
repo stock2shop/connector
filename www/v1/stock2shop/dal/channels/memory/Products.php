@@ -118,75 +118,57 @@ class Products implements ProductsInterface
      * @param int $limit
      * @param vo\Channel $channel
      * @return vo\ChannelProductGet $channelProducts
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function get(string $token, int $limit, vo\Channel $channel): vo\ChannelProductGet
     {
-        // Get products from the channel's state which are filtered
-        // starting from the position of channel_product_code and
-        // limited by the integer value.
-        $products = ChannelState::getProductsList($token, $limit);
+        /** @var vo\ChannelProductGet $channelProductGet */
+        $channelProductGet = new vo\ChannelProductGet([]);
 
-        // ----------------------------------------
-
-        // Iterate over the products returned from the channel
-        // and build a map. The key of the map will be the
-        // product_group_id and the value will be the product IDs.
-        $productMap = [];
-        foreach ($products as $memProduct) {
-            if (!array_key_exists($memProduct->product_group_id, $productMap)) {
-                $productMap[$memProduct->product_group_id] = [];
-            }
-            $productMap[$memProduct->product_group_id][] = ["channel_variant_code" => $memProduct->id, "success" => true];
+        // Get products from ChannelState by offset.
+        if ($token === '') {
+            $offset = 0;
+        } else {
+            $offset = (int)$token;
         }
+        $allProductGroups = ChannelState::getProductGroups();
 
-        // ----------------------------------------
+        // get products with appropriate index
+        $productGroups = array_slice($allProductGroups, $offset, $limit, true);
 
-        // Convert map into stock2shop VOs.
-        foreach ($productMap as $productId => $variantIds) {
-
-            // Map the product onto a `vo\ChannelProduct()` object.
-            $variants = vo\ChannelVariant::createArray($variantIds);
-
-            // ----------------------------------------
-
-            // Get images by "product_group_id" (channel_product_code).
-            $images = ChannelState::getImagesByGroupIDs([$productId]);
-            $channelImages = [];
-            foreach ($images as $memoryImage) {
-                $channelImages[] = new vo\ChannelImage([
-                    'channel_image_code' => $memoryImage->id,
-                    'success' => true,
-                    'src' => $memoryImage->url
-                ]);
+        // Build channel_products from groups
+        foreach ($productGroups as $product_group_id => $group) {
+            $variants = [];
+            $images   = [];
+            foreach ($group as $product) {
+                $variants[] = [
+                    'channel_variant_code' => $product->id,
+                    'sku'                  => $product->id,
+                    'success'              => true
+                ];
             }
-
-            // ----------------------------------------
-
-            // Create ChannelProduct VO.
-            $channelProducts[] = new vo\ChannelProduct([
-                'channel_product_code' => $productId,
-                'success' => true,
-                'variants' => $variants,
-                'images' => $channelImages
+            $groupImages = ChannelState::getImagesByGroupIDs([$product_group_id]);
+            foreach ($groupImages as $image) {
+                $images[] = [
+                    'channel_image_code' => $image->id,
+                    'success'            => true
+                ];
+            }
+            $channelProductGet->channel_products[] = new vo\ChannelProduct([
+                'channel_product_code' => $product_group_id,
+                'success'              => true,
+                'variants'             => $variants,
+                'images'               => $images
             ]);
-
         }
 
-        // ----------------------------------------
-
-        // Get the "channel_product_code" of the last
-        // product in the result set returned from the
-        // channel.
-        $lastProduct = end($channelProducts);
-
-        // ----------------------------------------
-
-        // Return the "token" and "products" in a
-        // ChannelProductGet object.
-        return new vo\ChannelProductGet([
-            'token' => $lastProduct->channel_product_code,
-            'channelProducts' => $channelProducts
-        ]);
+        // Set token
+        if(count($productGroups) === 0) {
+            $channelProductGet->token = $token;
+        } else {
+            $channelProductGet->token = (string) ($offset + $limit);
+        }
+        return $channelProductGet;
     }
 
     /**
@@ -205,7 +187,7 @@ class Products implements ProductsInterface
         // ---------------------------------------
 
         foreach ($channelProducts as $product) {
-            $productFiles = ChannelState::getAllProducts();
+            $productFiles = ChannelState::getProducts();
             $hasProduct = false;
             $hasVariant = false;
             foreach ($productFiles as $filename => $data) {
