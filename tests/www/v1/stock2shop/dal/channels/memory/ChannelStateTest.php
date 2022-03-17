@@ -3,7 +3,6 @@
 namespace tests\v1\stock2shop\dal\channels\memory;
 
 use stock2shop\dal\channels\memory;
-use stock2shop\exceptions\UnprocessableEntity;
 use tests;
 
 /**
@@ -13,12 +12,7 @@ class ChannelStateTest extends tests\TestCase
 {
 
     /**
-     * Test List Products
-     *
-     * This method returns a list of products based on
-     * the offset and limit passed to it. It is used by
-     * the `get()` method in the `memory\Products` class.
-     *
+     * Test Get Products
      * @return void
      */
     public function testGetProducts()
@@ -40,7 +34,7 @@ class ChannelStateTest extends tests\TestCase
             ]);
         }
 
-        memory\ChannelState::update($newMemoryProducts);
+        memory\ChannelState::updateProducts($newMemoryProducts);
         $this->assertCount(count($newMemoryProducts), memory\ChannelState::getProducts());
 
         memory\ChannelState::clean();
@@ -53,19 +47,16 @@ class ChannelStateTest extends tests\TestCase
     public function testUpdateImages()
     {
         memory\ChannelState::clean();
-
         $memoryImageOne = new memory\MemoryImage(['id' => null, 'url' => 'http://aws.stock2sho..1', 'product_group_id' => '1']);
         $memoryImageTwo = new memory\MemoryImage(['id' => null, 'url' => 'http://aws.stock2sho..1', 'product_group_id' => '1']);
         memory\ChannelState::updateImages([$memoryImageOne, $memoryImageTwo]);
-
         $images = memory\ChannelState::getImages();
-        foreach($images as $imageKey => $imageItem) {
+        foreach ($images as $imageKey => $imageItem) {
             $this->assertTrue($imageItem instanceof memory\MemoryImage);
             $this->assertNotNull($imageItem->id);
             $this->assertNotNull($imageItem->url);
             $this->assertNotNull($imageItem->product_group_id);
         }
-
         memory\ChannelState::clean();
     }
 
@@ -97,7 +88,6 @@ class ChannelStateTest extends tests\TestCase
     public function testGetImages()
     {
         memory\ChannelState::clean();
-
         $groupIDs = ['cpid1', 'cpid2'];
         $groupImages = [];
         for ($i = 0; $i !== 2; $i++) {
@@ -112,17 +102,14 @@ class ChannelStateTest extends tests\TestCase
             'product_group_id' => $groupIDs[1],
             'url' => 'http://aws.stock2shop.../2'
         ])]);
-
         memory\ChannelState::updateImages($groupImages);
         $outcome = memory\ChannelState::getImagesByGroupIDs($groupIDs);
-
         $this->assertNotNull($outcome);
         $this->assertCount(3, $outcome);
         $this->assertEquals('stock2shop\dal\channels\memory\MemoryImage', get_class($outcome[0]));
         $this->assertEquals($groupIDs[0], $outcome[0]->product_group_id);
         $this->assertEquals($groupIDs[1], $outcome[1]->product_group_id);
         $this->assertEquals($groupIDs[1], $outcome[2]->product_group_id);
-
         memory\ChannelState::clean();
     }
 
@@ -135,29 +122,23 @@ class ChannelStateTest extends tests\TestCase
      *
      * @return void
      */
-    public function testGetProductGroups() {
-
+    public function testGetProductGroups()
+    {
         memory\ChannelState::clean();
-
         $groupIDs = ['cpid1', 'cpid2'];
-
-        memory\ChannelState::update([
-            new memory\MemoryProduct(['id' => null, 'product_group_id' => $groupIDs[0], 'name' => 'Product Name', 'price' => '5000.00', 'quantity' => 5 ]),
-            new memory\MemoryProduct(['id' => null, 'product_group_id' => $groupIDs[0], 'name' => 'Product Name', 'price' => '5000.00', 'quantity' => 5 ]),
-            new memory\MemoryProduct(['id' => null, 'product_group_id' => $groupIDs[0], 'name' => 'Product Name', 'price' => '5000.00', 'quantity' => 5 ]),
-            new memory\MemoryProduct(['id' => null, 'product_group_id' => $groupIDs[1], 'name' => 'Product Name', 'price' => '5000.00', 'quantity' => 5 ])
+        memory\ChannelState::updateProducts([
+            new memory\MemoryProduct(['id' => null, 'product_group_id' => $groupIDs[0], 'name' => 'Product Name', 'price' => '5000.00', 'quantity' => 5]),
+            new memory\MemoryProduct(['id' => null, 'product_group_id' => $groupIDs[0], 'name' => 'Product Name', 'price' => '5000.00', 'quantity' => 5]),
+            new memory\MemoryProduct(['id' => null, 'product_group_id' => $groupIDs[0], 'name' => 'Product Name', 'price' => '5000.00', 'quantity' => 5]),
+            new memory\MemoryProduct(['id' => null, 'product_group_id' => $groupIDs[1], 'name' => 'Product Name', 'price' => '5000.00', 'quantity' => 5])
         ]);
-
         $productGroups = memory\ChannelState::getProductGroups();
-
         $this->assertNotNull($productGroups);
         $this->assertEquals($groupIDs[0], array_keys($productGroups)[0]);
         $this->assertEquals($groupIDs[1], array_keys($productGroups)[1]);
         $this->assertCount(3, array_values($productGroups)[0]);
         $this->assertCount(1, array_values($productGroups)[1]);
-
         memory\ChannelState::clean();
-
     }
 
 }

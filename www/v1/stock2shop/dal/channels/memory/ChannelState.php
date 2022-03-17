@@ -49,7 +49,7 @@ class ChannelState
      *
      * @param MemoryProduct[] $items
      */
-    public static function update(array $items)
+    public static function updateProducts(array $items)
     {
         foreach ($items as $item) {
             if (!$item->id) {
@@ -137,15 +137,11 @@ class ChannelState
      *
      * Returns all images on the channel.
      *
-     * @return MemoryImage[]|[]
+     * @return MemoryImage[]
      */
-    public static function getImages()
+    public static function getImages(): array
     {
-        $mi = [];
-        foreach (self::$stateImages as $key => $img) {
-            $mi[$key] = $img;
-        }
-        return $mi;
+        return self::$stateImages;
     }
 
     /**
@@ -153,11 +149,11 @@ class ChannelState
      *
      * Removes matching product objects by ID.
      *
-     * @param string[] $ids
+     * @param string[] $memory_product_ids
      */
-    public static function deleteProductsByIDs(array $ids)
+    public static function deleteProducts(array $memory_product_ids)
     {
-        foreach ($ids as $id) {
+        foreach ($memory_product_ids as $id) {
             if (isset(self::$stateProducts[$id])) {
                 unset(self::$stateProducts[$id]);
             }
@@ -169,11 +165,11 @@ class ChannelState
      *
      * Removes matching image objects by ID.
      *
-     * @param string[] $ids
+     * @param string[] $memory_image_ids
      */
-    public static function deleteImages(array $ids)
+    public static function deleteImages(array $memory_image_ids)
     {
-        foreach ($ids as $id) {
+        foreach ($memory_image_ids as $id) {
             if (isset(self::$stateImages[$id])) {
                 unset(self::$stateImages[$id]);
             }
@@ -210,7 +206,7 @@ class ChannelState
     {
         foreach (self::$stateProducts as $sp) {
             if (in_array($sp->product_group_id, $ids)) {
-                self::deleteProductsByIDs([$sp->id]);
+                self::deleteProducts([$sp->id]);
             }
         }
     }

@@ -39,9 +39,9 @@ class Products implements ProductsInterface
                 if ($cp->delete) {
                     ChannelState::deleteProductsByGroupIDs([$exampleProduct->product_group_id]);
                 } elseif ($cv->delete) {
-                    ChannelState::deleteProductsByIDs([$exampleProduct->id]);
+                    ChannelState::deleteProducts([$exampleProduct->id]);
                 } else {
-                    ChannelState::update([$exampleProduct]);
+                    ChannelState::updateProducts([$exampleProduct]);
                 }
                 $cp->channel_product_code = $exampleProduct->product_group_id;
                 $cp->success              = true;
