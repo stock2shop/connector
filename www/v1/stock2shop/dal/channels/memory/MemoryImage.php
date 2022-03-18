@@ -3,7 +3,10 @@
 namespace stock2shop\dal\channels\memory;
 
 /**
- * Data class describing the memory channels images which are linked to products
+ * Memory Image
+ *
+ * This is a Data Class containing the properties which
+ * define a "memory" channel "MemoryImage" object.
  *
  * @package stock2shop\dal\memory
  */
@@ -35,8 +38,8 @@ class MemoryImage
      */
     public function __construct(array $data = [])
     {
-        $this->id               = ($data['id']) ?? null;
-        $this->url              = ($data['url']) ?? null;
+        $this->id = ($data['id']) ?? null;
+        $this->url = ($data['url']) ?? null;
         $this->product_group_id = ($data['product_group_id']) ?? null;
     }
 

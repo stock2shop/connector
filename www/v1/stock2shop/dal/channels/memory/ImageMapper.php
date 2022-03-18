@@ -46,6 +46,6 @@ class ImageMapper
      */
     public function get(): MemoryImage
     {
-        return $this->image;
+        return $this->_image;
     }
 }
