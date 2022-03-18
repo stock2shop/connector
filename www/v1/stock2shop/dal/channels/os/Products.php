@@ -39,8 +39,6 @@ class Products implements ProductsInterface
         foreach ($channelProducts as $product) {
             $prefix = $product->id;
 
-            // ------------------------------------------------
-
             // Create channel_product_code for each product from the file name.
             // In your integration, this would be the ID or code that the target
             // system uses to uniquely identify the product.
@@ -50,14 +48,10 @@ class Products implements ProductsInterface
                 $variant->channel_variant_code = $prefix . $storageSeparator . $variant->id . '.json';
             }
 
-            // ------------------------------------------------
-
             // Do the same as the loop above to set the channel_image_code for each channel image.
             foreach ($product->images as $image) {
                 $image->channel_image_code = $prefix . $storageSeparator . $storageSeparator . $image->id . '.json';
             }
-
-            // ------------------------------------------------
 
             // Fetch the current files from the source (in this case, flat-file).
             $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, 'products');
