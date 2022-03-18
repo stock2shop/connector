@@ -30,102 +30,71 @@ channel, much the same as products above.
 
 ## Getting Started
 
+Follow these set up instruction to run the application.
+
 This setup assumes you already have an environment which is able to run PHP applications. See the section on "Submission
 Guidelines" in this readme file for specific information regarding your environment.
 
-1. Setup Environment
-
-The `S2S_PATH` variable must be the absolute path to the directory where this repository is located.
+### Create absolute path to your project.
 
 ```bash
-export S2S_PATH=/your/path/for/stock2shop
+export S2S_PATH=/your/path/for/the/project
 ```
 
-For example:
-
-On Mac OSX:
-
-```bash
-export S2S_PATH=/Users/yourUsername/stock2shop
-```
-
-On Ubuntu:
-
-```bash
-export S2S_PATH=/home/yourUsername/stock2shop
-```
-
-2. Clone Repository
+### Clone Repository
 
 ```bash
 git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 ```
 
-3. Run Channel Test
-
-Enter the following command to run the test - it should run without error:
+### Run Tests
 
 ```bash
 cd $S2S_PATH/connector/tests
-./phpunit-4.8.phar ./e2e
+export=S2S_CHANNEL_NAME= && ./phpunit-4.8.phar ./
 ```
 
-4. Creating Your Connector
+You should have successful results from your test.
+If not, raise an issue with your error.
+For more information on testing see the [test section](#tests)
+The above command ran tests for all channels (note we left the S2S_CHANNEL_NAME equal to nothing)
+
+### Creating Your Connector
 
 The `S2S_CHANNEL_NAME` variable is the name of the channel connector you will be creating in this repository. The
-variable must be a lowercase string with no spaces or non-alphanumeric characters.
+variable must be a lowercase string with no spaces.
 
 ```bash
-export S2S_CHANNEL_NAME=yourchannelname
+export S2S_CHANNEL_NAME=your_channel_name
 ```
 
-Copy the channel source files by executing this command which copies the `boilerplate` connector directory:
+Create boilerplate classes for your channel
 
 ```bash
-cp -r $S2S_PATH/connector/www/v1/stock2shop/dal/channels/boilerpate $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME 
+cp -r $S2S_PATH/connector/www/v1/stock2shop/dal/channels/boilerplate $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME 
 ```
 
-Substitute 'example' in the following PHP classes in the `S2S_CHANNEL_NAME` directory with your `S2S_CHANNEL_NAME`:
+Substitute 'boilerplate' in the namespace for the following PHP classes in the `S2S_CHANNEL_NAME` directory with your `S2S_CHANNEL_NAME`:
 
 ```bash
-vi $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME/Creator.php \ 
-$S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME/Products.php 
+sed -i "s/boilerplate/${S2S_CHANNEL_NAME}/g" $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME/Creator.php
+sed -i "s/boilerplate/${S2S_CHANNEL_NAME}/g" $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME/Products.php  
 ```
-
-Replace
-
-```php
-namespace stock2shop\dal\channels\example;
-```
-
-With your CHANNEL_NAME:
-
-```php
-namespace stock2shop\dal\channels\$CHANNEL_NAME;
-```
-
-5. Rerun Test For Your Connector
-
-If you run the command from step 3 again, you will notice that the tests fail:
+ 
+### Run rests Again
 
 ```bash
 cd $S2S_PATH/connector/tests
-./phpunit-4.8.phar ./e2e
+export=S2S_CHANNEL_NAME=your_channel_name && ./phpunit-4.8.phar ./
 ```
 
-This is because the `S2S_CHANNEL_NAME` variable has been set - meaning only your connector's source code is being
-exercised by the end-to-end test. To change this and run the example tests, unset the `S2S_CHANNEL_NAME` variable:
-
-```bash
-export S2S_CHANNEL_NAME= && ./phpunit-4.8.phar ./e2e
-```
-
-You can now start by editing the `Products.php` class with your integration.
+You will notice that the tests for your channel now fail.
+You can now start by editing the `Products.php` class with your integration and make the tests pass.
 
 ## Tests
 
-An end-to-end test is included. Do not modify this. Tests use [phpunit](https://devdocs.io/phpunit~8/) version 8. PHAR
-executables have been included for version 8.0.0 and 4.8 (for backwards compatibility).
+An end-to-end test is included. Do not modify this. Tests use [phpunit](https://devdocs.io/phpunit~8/). PHAR
+executables have been included for version 8.0.0 and 4.8.
 
 A test report is printed to the command-line if you set the `S2S_TEST_DEBUG` environment variable to 'true':
 
@@ -166,7 +135,6 @@ Please mock the channel data and order transform (if implemented) for your targe
 ### General
 
 - PHP version 7.4.
-- PHPUnit 8.0.0.
 - This project conforms to the PSR-12 style recommendation.
 - You can read more about it [here](https://www.php-fig.org/psr/psr-12/).
 - Please read the [architecture.md](./architecture.md) file before starting.
@@ -187,6 +155,6 @@ Please mock the channel data and order transform (if implemented) for your targe
 - Do not update the versions of libraries included in this repository.
 - We have included Guzzle for HTTP requests which is locked at version 6.2.3.
 
-## Frequently Asked Questions
+## Getting Help
 
-TBC
+Create an issue on Github.
