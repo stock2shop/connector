@@ -5,6 +5,10 @@ namespace stock2shop\dal\channels\memory;
 use stock2shop\vo;
 
 /**
+ * Image Mapper
+ *
+ * This is the mapper class for "MemoryImage" objects.
+ *
  * @package stock2shop\dal\memory
  */
 class ImageMapper
@@ -12,7 +16,7 @@ class ImageMapper
     /**
      * @var MemoryImage
      */
-    private $image;
+    private $_image;
 
     /**
      * Default Constructor
@@ -24,19 +28,20 @@ class ImageMapper
      */
     public function __construct(vo\ChannelImage $ci, MemoryProduct $mp)
     {
-        // Image mapping onto channel MemoryImage.
         $mapping = [
             "id" => $ci->channel_image_code,
             "product_group_id" => $mp->product_group_id,
             "url" => $ci->src
         ];
-
-        // Create new object.
         $mi = new MemoryImage($mapping);
-        $this->image = $mi;
+        $this->_image = $mi;
     }
 
     /**
+     * Get
+     *
+     * Accessor method for $_image property.
+     *
      * @return MemoryImage
      */
     public function get(): MemoryImage
