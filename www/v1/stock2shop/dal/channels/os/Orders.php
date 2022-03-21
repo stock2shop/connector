@@ -179,7 +179,9 @@ class Orders implements OrdersInterface
      * @return vo\SystemOrder $systemOrder
      * @throws exceptions\UnprocessableEntity
      */
-    public function transform($webhookOrder, vo\Channel $channel): vo\ChannelOrder {
+    public function transform($webhookOrder, vo\Channel $channel): vo\SystemOrder {
+
+        throw new exceptions\NotImplemented();
 
         // Channel Meta.
         $meta = $channel->meta;

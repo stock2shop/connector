@@ -535,44 +535,56 @@ final class ChannelTest extends Framework\TestCase
     /**
      * Test Transform Order
      *
-     * This method transforms an order of a specified connector type.
-     * It loops through the channel types configured in this e2e test
-     * and calls the corresponding method from the connector object.
+     * This method exercises the 'transform()' method in
+     * connectors which implement the dal\channel\Orders interface.
+     *
+     * The test mocks an incoming webhook for an order placed on
+     * the channel by importing the test data supplied in the
+     * tests/data directory and attempts to transform it into
+     * Stock2Shop format using the connector implementation.
+     *
+     * This test will not run for connectors where the
+     * NotImplemented exception is thrown.
      *
      * @return void
+     * @throws exceptions\UnprocessableEntity
      */
-    // TODO: Complete when interface is ready.
-//    public function _testTransformOrder()
-//    {
-//        foreach ($channelTypes as $type) {
-//
-//            // Load test data
-//            self::loadTestData($type);
-//
-//            // Set up the channel.
-//            self::setFactory($type);
-//
-//            // Set up an object of the connector we are testing.
-//            $connector  = self::$creator->createOrders();
-//
-//            // Prepare the data we are going to be passing to the
-//            // transform() method of the Orders connector implementation.
-//
-//            // Create channel object.
-//            $channel = new vo\Channel(self::$channelData);
-//
-//            // We are creating an array of vo\Order objects
-//            // and an array of vo\Meta objects and passing it
-//            // to the connector implementation.
-//            $channelOrder = $connector->transform(
-//                self::$channelOrderData,
-//                $channel
-//            );
-//
-//            // Call the verify method to evaluate the transformation.
-//            $this->verifyTransformOrder($channelOrder);
-//        }
-//    }
+    public function testTransformOrder()
+    {
+        // Loop over each connector type.
+        $channelTypes = self::getChannelTypes();
+        foreach ($channelTypes as $type) {
+
+            // Load test data
+            self::loadTestData($type);
+
+            // Set up the channel.
+            self::setFactory($type);
+
+            // Set up an object of the connector we are testing.
+            try {
+                $connector  = self::$creator->createOrders();
+            } catch (exceptions\NotImplemented $e) {
+                continue;
+            }
+
+            // Create channel object.
+            $channel = new vo\Channel(self::$channelData);
+
+            // Call the transform method on the webhook order.
+            try {
+                $channelOrder = $connector->transform(
+                    self::$channelOrderData,
+                    $channel
+                );
+            } catch (exceptions\NotImplemented $e) {
+                continue;
+            }
+
+            // Call the verify method to evaluate the transformation.
+            $this->verifyTransformOrder($channelOrder);
+        }
+    }
 
     /**
      * Test Get Orders By Code
@@ -644,18 +656,17 @@ final class ChannelTest extends Framework\TestCase
      * Verifies the order transformation is valid.
      * Criteria for a valid Stock2Shop Channel Orders is:
      *
-     * - Must be of vo\ChannelOrder type.
+     * - Must be of vo\SystemOrder type.
      * - Must have 'channel_order_code' set.
      *
-     * @param vo\ChannelOrder $channelOrder
+     * @param vo\SystemOrder $systemOrder
      * @return void
      */
-    // TODO: Complete when interface is ready.
-//    public function verifyTransformOrder(vo\ChannelOrder $channelOrder)
-//    {
-//        $this->assertInstanceOf("stock2shop\\vo\\ChannelOrder", $channelOrder);
-//        $this->assertNotEmpty($channelOrder->system_order->channel_order_code);
-//    }
+    public function verifyTransformOrder(vo\SystemOrder $systemOrder)
+    {
+        $this->assertInstanceOf("stock2shop\\vo\\SystemOrder", $systemOrder);
+        $this->assertNotEmpty($systemOrder->id);
+    }
 
     /**
      * Test Sync Fulfillments
