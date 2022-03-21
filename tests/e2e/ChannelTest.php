@@ -4,7 +4,7 @@ namespace tests\e2e;
 
 use PHPUnit\Framework;
 use stock2shop\dal;
-use stock2shop\exceptions\UnprocessableEntity;
+use stock2shop\exceptions;
 use stock2shop\vo;
 use tests\TestPrinter;
 
@@ -386,18 +386,19 @@ final class ChannelTest extends Framework\TestCase
      * remove the data afterwards. Make sure that the sync tests are
      * passing before running this test.
      *
-     * @throws UnprocessableEntity
+     * @return void
+     * @throws exceptions\UnprocessableEntity
      */
     public function testGetProducts()
     {
+        // Loop over each connector type.
         $channelTypes = self::getChannelTypes();
         foreach ($channelTypes as $type) {
 
             // Load test data and sync products to channel
             self::loadTestData($type);
             self::setFactory($type);
-            $creator = self::$creator;
-            $connector = $creator->createProducts();
+            $connector = self::$creator->createProducts();
             $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
             $channel = new vo\Channel(self::$channelData);
             $channelProducts = vo\ChannelProduct::createArray(self::$channelProductsData);
@@ -420,7 +421,15 @@ final class ChannelTest extends Framework\TestCase
             do {
 
                 // Fetch all products one at a time.
-                $ChannelProductGet = $connector->get($token, 1, $channel);
+                // We also need to handle the possibility of an exception here
+                // if the developer has not coded the implementation for the
+                // 'get()' method.
+                try {
+                    $ChannelProductGet = $connector->get($token, 1, $channel);
+                } catch(exceptions\NotImplemented $e) {
+                    // Skip to the next connector to test.
+                    continue 2;
+                }
 
                 // Update token to be used in the next iteration.
                 $token = $ChannelProductGet->token;

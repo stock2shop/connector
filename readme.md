@@ -15,11 +15,26 @@ website at [https://www.stock2shop.com](https://www.stock2shop.com) or our
 
 ## Data Flow
 
-[Channel Product data](www/v1/stock2shop/vo/ChannelProduct.php) is sent in batches to your connector. The connector then
-sends this data to your channel and marks each product if successful or not.
+[Channel Product data](www/v1/stock2shop/vo/ChannelProduct.php) is sent in batches to your connector when instructions
+are processed. The connector then sends this data to your channel and marks each product if successful or not.
 
-To verify the product has been updated to the channel we have methods to fetch data from your connector and your code
-needs to return a [Channel Product](www/v1/stock2shop/vo/ChannelProduct.php)
+Classes representing objects which are synchronized to Stock2Shop channels have a "channel code" property.
+(i.e. the [vo\ChannelProduct](www/v1/stock2shop/vo/ChannelProduct.php) class' "channel_product_code" property). Your
+code will need to set these properties for objects to indicate that they have been processed successfully. The "channel
+code"
+property must be set to the value of the 'unique identifier' for the object. The 'identifier' may be anything which is
+consistent in linking the object to the channel and by setting it on the "channel code" property you are making it
+possible for Stock2Shop to reference it in subsequent requests.
+
+We often use the 'sku' code for products as the 'channel_product_code' when synchronizing products, but whichever you
+use is dependent on the system and the data.
+
+It is important to remember that the "channel code" property is not only for syncing product or order data. When your
+connector processes a '[get](www/v1/stock2shop/dal/channel/Products.php)' instruction from the Stock2Shop's system, it
+will need to set the "channel codes" for each entity returned by the request.
+
+product has been updated to the channel we have methods to fetch data from your connector and your code needs to return
+a [Channel Product](www/v1/stock2shop/vo/ChannelProduct.php)
 with the `channel_product_code` set, if it exists on the channel.
 
 By the use of webhooks, Orders are sent from the channel to your connector, your connector needs to transform the order
@@ -30,7 +45,7 @@ channel, much the same as products above.
 
 ## Getting Started
 
-Follow these set up instruction to run the application.
+Follow these set up instructions to run the application.
 
 This setup assumes you already have an environment which is able to run PHP applications. See the section on "Submission
 Guidelines" in this readme file for specific information regarding your environment.
@@ -104,7 +119,7 @@ export S2S_TEST_DEBUG=true && ${S2S_PATH}/phpunit-8.phar ./
 
 The report gives a detailed summary of object's and which properties were synced to the channel which is useful for
 identifying mistakes in your code. Please use the layout of the report to understand what it means when data is '
-synchronized to a Stock2Shop channel'. 
+synchronized to a Stock2Shop channel'.
 
 ### Unit Tests
 
@@ -116,7 +131,7 @@ for an example of a unit test which evaluates the methods of the Helper class in
 The connector code for "memory" channels makes use of an in-memory state class which is designed to mimic the behavior
 of a RESTful API. There are unit tests for each method in
 the [ChannelState](tests/www/v1/stock2shop/dal/channels/memory/ChannelStateTest.php)
-class whave been provided for your reference.
+class, which been provided for your reference.
 
 Your unit tests must extend the [TestCase](tests/TestCase.php) class. There is no need to add tests for the methods
 which are already evaluated in the E2E test.
