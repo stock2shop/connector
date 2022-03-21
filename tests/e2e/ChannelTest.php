@@ -9,20 +9,29 @@ use stock2shop\vo;
 use tests\TestPrinter;
 
 /**
- * This "end to end" test runs through all channel types.
+ * Channel Test
+ *
+ * This "end to end" test runs through all connector types in
+ * this repository and exercises the methods of the 'Products',
+ * 'Orders' and 'Fulfillments' classes.
+ *
+ * This is a "full-stack test" because it mocks all components
+ * in the Stock2Shop system which are relevant to synchronizing
+ * data. It simulates the key processes and dependencies from our
+ * "Data Access Layer" and can be run on any local development
+ * environment.
+ *
  * @package tests\e2e
  */
 final class ChannelTest extends Framework\TestCase
 {
+    /** @var string IGNORE_CHANNEL Configures the test to ignore a connector codebase. */
     const IGNORE_CHANNEL = 'boilerplate';
 
-    /** @var dal\channel\Creator The object of the concrete class which extends the dal\channel\Creator factory abstract class. */
+    /** @var dal\channel\Creator The Creator factory of the connector type currently being tested. */
     public static $creator;
 
-    /** @var vo\Channel $channel The channel object being tested. */
-    public static $channel;
-
-    /** @var string[] $channelTypes The channel types which will be tested. (dal/channels/[type]) */
+    /** @var string[] $channelTypes The connector types which will be tested. (dal/channels/[type]) */
     public static $channelTypes;
 
     /** @var array $channelFulfillmentsData The raw testing data for fulfillments. */
@@ -31,14 +40,8 @@ final class ChannelTest extends Framework\TestCase
     /** @var array $channelProductsData The raw testing data for products data. */
     public static $channelProductsData;
 
-    /** @var array $channelMetaData The raw testing data for channel meta. */
-    public static $channelMetaData;
-
     /** @var array $channelOrderData The raw testing data for orders. */
     public static $channelOrderData;
-
-    /** @var string $currentChannelType The active channel type being tested. */
-    public static $currentChannelType;
 
     /** @var array $channelData The raw data used to create a vo\Channel object. */
     public static $channelData;
@@ -67,9 +70,11 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
-     * Tear Down After Class
+     * Set Up Before Class
      *
      * This event hook is used to setup the test printer.
+     * This method is only called once, before any of the
+     * tests are run.
      *
      * @return void
      */
@@ -79,6 +84,8 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
+     * Load JSON
+     *
      * Checks if custom json file exists for channel otherwise loads default.
      *
      * @param string $filename
@@ -99,6 +106,11 @@ final class ChannelTest extends Framework\TestCase
      * Get Channel Types
      *
      * Channel types are directories and classes found in /dal/channels/.
+     * Each connector added to this repository is loaded here, unless
+     * you override the 'S2S_CHANNEL_NAME' environment variable when
+     * you execute this test from the command-line.
+     *
+     * The 'boilerplate' connector is never exercised by this e2e test.
      *
      * @return array
      */
@@ -125,8 +137,8 @@ final class ChannelTest extends Framework\TestCase
      * Set Factory
      *
      * Creates a new factory object for a connector integration.
-     * This function will break the test if a Creator.php with a
-     * valid implementation is not found.
+     * This function will break the test if a Creator.php with an
+     * invalid implementation is not found.
      *
      * @param $type
      * @return void
@@ -143,18 +155,26 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
-     * Test Sync Products
+     * Test Sync
      *
-     * This test is a full end-to-end.
-     * It syncs products to a channel using Products->sync().
-     * To verify the sync is correct it uses Products->getByCodes() to confirm the products
-     * are found on the channel.
+     * This test mocks all the components in the Stock2Shop system
+     * which are relevant to synchronizing product, image and variant
+     * data to a channel.
      *
-     * If the environment var S2S_CHANNEL_NAME is set, it will only run the end-to-end test
-     * for one channel.
+     * The product data which Stock2Shop's platform will send via your
+     * connector code is loaded from JSON files in the 'tests/e2e/data/channels'
+     * directory of this repo. In production, this data will come from our
+     * cloud-based storage.
      *
-     * The goal of sync() is to synchronise the product data onto a Stock2Shop
-     * channel. Synchronisation in this context may refer to:
+     * The goal of 'sync()' is to efficiently update product data onto a
+     * channel. Products which are already in-sync are not rewritten and
+     * data on the channel is removed or added to where appropriate. The
+     * goal is that the 'response' returned must reflect that which was
+     * sent to the channel connector in the 'request'.
+     *
+     * If the environment var 'S2S_CHANNEL_NAME' is set to a valid connector
+     * name, then this test will only exercises the code for the specific
+     * connector.
      *
      * @return void
      */
@@ -208,9 +228,21 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
+     * Set Success False
+     *
+     * This is a helper function which loops over an array
+     * of channel products and sets the 'success' properties
+     * for each 'ChannelProduct', 'ChannelVariant' and
+     * 'ChannelImage' Value Object to false.
+     *
+     * It is used in the 'testSync()' method to reset an
+     * array of products between each of the test case
+     * 'scenarios'.
+     *
      * @param vo\ChannelProduct[] $channelProducts
+     * @return vo\ChannelProduct[] $channelProducts
      */
-    public function setSuccessFalse(array $channelProducts)
+    public function setSuccessFalse(array $channelProducts): array
     {
         foreach ($channelProducts as $cp) {
             $cp->success = false;
@@ -228,10 +260,17 @@ final class ChannelTest extends Framework\TestCase
      * Verify Product Sync
      *
      * This method verifies whether the synchronization of products was
-     * successful using the custom connectors in the stock2shop/dal/channels.
+     * successful using the custom connectors in stock2shop/dal/channels.
+     *
      * Please note that in the context of this test case, 'existing'
-     * ($existingProducts) refers to data which has been persisted on a
-     * channel.
+     * ($existingProducts) refers to data which has been persisted onto
+     * a channel.
+     *
+     * This method relies on the 'getByCode' method in your connector
+     * code in order to check which products have been synchronized to the
+     * channel. If 'getByCode' does not work, then you will need to debug
+     * or unit test it separately until it produces the expected output,
+     * before you run the channel 'sync' tests.
      *
      * @param vo\ChannelProduct[] $request
      * @param vo\ChannelProduct[] $response
@@ -292,7 +331,6 @@ final class ChannelTest extends Framework\TestCase
         $responseProductMap = [];
         $responseVariantMap = [];
         $responseImageMap = [];
-
         foreach ($response as $product) {
             $responseProductMap[$product->channel_product_code] = $product;
             foreach ($product->variants as $variant) {
@@ -302,7 +340,6 @@ final class ChannelTest extends Framework\TestCase
                 $responseImageMap[$image->channel_image_code] = $image;
             }
         }
-
         foreach ($existingProducts as $existingProduct) {
             $product = $responseProductMap[$existingProduct->channel_product_code];
 
@@ -335,7 +372,20 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
-     * Syncs test products to channel then uses get() to retrieve them all
+     * Test Get Products
+     *
+     * This method exercises the 'get()' method for the connectors.
+     *
+     * Connector 'get()' methods are evaluated by configuring the
+     * code to page over the items on the channel one-by-one. Both
+     * "offset pagination" or "cursor-based pagination" is supported
+     * by the 'get()' method and this test.
+     *
+     * It relies on the 'sync()' method being correctly implemented
+     * in order to synchronize product data to the channel and
+     * remove the data afterwards. Make sure that the sync tests are
+     * passing before running this test.
+     *
      * @throws UnprocessableEntity
      */
     public function testGetProducts()
@@ -354,11 +404,11 @@ final class ChannelTest extends Framework\TestCase
             $connector->sync($channelProducts, $channel, $flagMap);
 
             // Cursor (or offset) used for pagination.
-            // empty token means start a beginning
+            // Empty token means start at the beginning.
             $token = '';
             $previous_token = '';
 
-            // Create index of retrieved products, keyed by appropriate channel codes
+            // Create index of retrieved products, keyed by appropriate channel codes.
             /** @var vo\ChannelProduct[] $retrievedProductsMap */
             $retrievedProductsMap = [];
 
@@ -367,16 +417,16 @@ final class ChannelTest extends Framework\TestCase
 
             /** @var vo\ChannelVariant[] $retrievedVariantsMap */
             $retrievedVariantsMap = [];
-
-            // Fetch all products one at a time.
             do {
+
+                // Fetch all products one at a time.
                 $ChannelProductGet = $connector->get($token, 1, $channel);
 
                 // Update token to be used in the next iteration.
                 $token = $ChannelProductGet->token;
 
                 // There should always be one product returned, unless we are
-                // at the end of the list. in which case we should have already
+                // at the end of the list - in which case we should have already
                 // fetched all the products.
                 if (count($ChannelProductGet->channel_products) === 0) {
                     $this->assertGreaterThanOrEqual(count($channelProducts), count($retrievedProductsMap));
@@ -388,7 +438,10 @@ final class ChannelTest extends Framework\TestCase
                     $this->assertTrue($channelProduct->success);
                     $this->assertGreaterThan($previous_token, $ChannelProductGet->token);
 
-                    // Add to index
+                    // Add the product, its images and variants to the maps.
+                    // We use the maps later on in the code to check whether
+                    // the objects returned from the get method's implementation
+                    // match those we synced to the channel.
                     $retrievedProductsMap[$channelProduct->channel_product_code] = $channelProduct;
                     foreach ($channelProduct->variants as $channelProductVariant) {
                         $retrievedVariantsMap[$channelProductVariant->channel_variant_code] = $channelProductVariant;
@@ -397,10 +450,17 @@ final class ChannelTest extends Framework\TestCase
                         $retrievedImagesMap[$channelProductImage->channel_image_code] = $channelProductImage;
                     }
                 }
+
+                // Before we return to the start of the loop, we need
+                // to update the variable which keeps track of the
+                // last "offset" value used in paging.
                 $previous_token = $token;
             } while (count($ChannelProductGet->channel_products) > 0);
 
-            // Ensure that all the retrieved products match synced products
+            // Ensure that the products we synchronized to the channel
+            // are present in the results returned by the get() method.
+            // For variants, we also assert on the "sku" property of
+            // each Channel Product.
             foreach ($channelProducts as $product) {
                 $this->assertTrue(isset($retrievedProductsMap[$product->channel_product_code]));
                 $this->assertTrue($retrievedProductsMap[$product->channel_product_code]->success);
@@ -415,7 +475,8 @@ final class ChannelTest extends Framework\TestCase
                 }
             }
 
-            // Remove all test products by issuing a sync with delete=true for all products
+            // This is where we do the cleanup operation on the test channel.
+            // Remove all test products by issuing a sync with delete=true for all products.
             foreach ($channelProducts as $product) {
                 $product->delete = true;
             }

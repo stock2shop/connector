@@ -1,7 +1,7 @@
 # Stock2Shop - PHP Connectors
 
 The purpose of this repository is to allow you, the 3rd party developer, to create connector code which we can use to
-synchronize data between Stock2Shop and a channel.
+synchronize data between Stock2Shop and an eCommerce channel.
 
 ## Overview
 
@@ -41,25 +41,24 @@ Guidelines" in this readme file for specific information regarding your environm
 export S2S_PATH=/your/path/for/the/project
 ```
 
-### Clone Repository
+### Clone this repository
 
 ```bash
 git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 ```
 
-### Run Tests
+### Run tests
 
 ```bash
 cd $S2S_PATH/connector/tests
 export=S2S_CHANNEL_NAME= && ./phpunit-4.8.phar ./
 ```
 
-You should have successful results from your test.
-If not, raise an issue with your error.
-For more information on testing see the [test section](#tests)
+You should have successful results from your test. If not, raise an issue with your error. For more information on
+testing see the [test section](#tests)
 The above command ran tests for all channels (note we left the S2S_CHANNEL_NAME equal to nothing)
 
-### Creating Your Connector
+### Creating your connector
 
 The `S2S_CHANNEL_NAME` variable is the name of the channel connector you will be creating in this repository. The
 variable must be a lowercase string with no spaces.
@@ -74,27 +73,28 @@ Create boilerplate classes for your channel
 cp -r $S2S_PATH/connector/www/v1/stock2shop/dal/channels/boilerplate $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME 
 ```
 
-Substitute 'boilerplate' in the namespace for the following PHP classes in the `S2S_CHANNEL_NAME` directory with your `S2S_CHANNEL_NAME`:
+Substitute 'boilerplate' in the namespace for the following PHP classes in the `S2S_CHANNEL_NAME` directory with
+your `S2S_CHANNEL_NAME`:
 
 ```bash
 sed -i "s/boilerplate/${S2S_CHANNEL_NAME}/g" $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME/Creator.php
 sed -i "s/boilerplate/${S2S_CHANNEL_NAME}/g" $S2S_PATH/connector/www/v1/stock2shop/dal/channels/$S2S_CHANNEL_NAME/Products.php  
 ```
- 
-### Run rests Again
+
+### Run tests again
 
 ```bash
 cd $S2S_PATH/connector/tests
 export=S2S_CHANNEL_NAME=your_channel_name && ./phpunit-4.8.phar ./
 ```
 
-You will notice that the tests for your channel now fail.
-You can now start by editing the `Products.php` class with your integration and make the tests pass.
+You will notice that the tests for your channel now fail. You can now start by editing the `Products.php` class with
+your integration and make the tests pass.
 
 ## Tests
 
-An end-to-end test is included. Do not modify this. Tests use [phpunit](https://devdocs.io/phpunit~8/). PHAR
-executables have been included for version 8.0.0 and 4.8.
+An end-to-end test is included. Do not modify this. Tests use [phpunit](https://devdocs.io/phpunit~8/). PHAR executables
+have been included for version 8.0.0 and 4.8.
 
 A test report is printed to the command-line if you set the `S2S_TEST_DEBUG` environment variable to 'true':
 
@@ -103,7 +103,8 @@ export S2S_TEST_DEBUG=true && ${S2S_PATH}/phpunit-8.phar ./
 ```
 
 The report gives a detailed summary of object's and which properties were synced to the channel which is useful for
-identifying mistakes in your code.
+identifying mistakes in your code. Please use the layout of the report to understand what it means when data is '
+synchronized to a Stock2Shop channel'. 
 
 ### Unit Tests
 
@@ -112,8 +113,13 @@ Client to access the data. Please see the example we have provided for unit test
 [tests/unit/www/v1/stock2shop/dal/channels/os](tests/unit/www/v1/stock2shop/dal/channels/os/HelperTest.php)
 for an example of a unit test which evaluates the methods of the Helper class in the example connector that is provided.
 
+The connector code for "memory" channels makes use of an in-memory state class which is designed to mimic the behavior
+of a RESTful API. There are unit tests for each method in
+the [ChannelState](tests/www/v1/stock2shop/dal/channels/memory/ChannelStateTest.php)
+class whave been provided for your reference.
+
 Your unit tests must extend the [TestCase](tests/TestCase.php) class. There is no need to add tests for the methods
-which are already evaluated in the E2E test (see below).
+which are already evaluated in the E2E test.
 
 ### E2E Test
 
@@ -153,8 +159,13 @@ Please mock the channel data and order transform (if implemented) for your targe
 - Add your custom libraries through composer.
 - Please check if the library has not already been added to the composer.json file.
 - Do not update the versions of libraries included in this repository.
-- We have included Guzzle for HTTP requests which is locked at version 6.2.3.
+- We have included [Guzzle](https://docs.guzzlephp.org/en/6.5/) for HTTP requests which is locked at version 6.2.3.
+- Also included is version 2.4.1 of the [Mustache PHP](https://github.com/bobthecow/mustache.php) library.
 
 ## Getting Help
 
-Create an issue on Github.
+Create an issue on Github with a detailed explanation of the problem:
+
+- Copy the entire log if you are encountering an error.
+- Include the commands issued and all the output.
+- Summary or description of what you are struggling with.
