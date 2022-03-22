@@ -14,15 +14,13 @@ use tests\TestPrinter;
  */
 final class ChannelTest extends Framework\TestCase
 {
+    /** @var string IGNORE_CHANNEL Configures the test to ignore a connector codebase. */
     const IGNORE_CHANNEL = 'boilerplate';
 
-    /** @var dal\channel\Creator The object of the concrete class which extends the dal\channel\Creator factory abstract class. */
+    /** @var dal\channel\Creator Creator Factory used to create the channel*/
     public static $creator;
 
-    /** @var vo\Channel $channel The channel object being tested. */
-    public static $channel;
-
-    /** @var string[] $channelTypes The channel types which will be tested. (dal/channels/[type]) */
+    /** @var string[] $channelTypes The connector types which will be tested. (dal/channels/[type]) */
     public static $channelTypes;
 
     /** @var array $channelFulfillmentsData The raw testing data for fulfillments. */
@@ -31,14 +29,8 @@ final class ChannelTest extends Framework\TestCase
     /** @var array $channelProductsData The raw testing data for products data. */
     public static $channelProductsData;
 
-    /** @var array $channelMetaData The raw testing data for channel meta. */
-    public static $channelMetaData;
-
     /** @var array $channelOrderData The raw testing data for orders. */
     public static $channelOrderData;
-
-    /** @var string $currentChannelType The active channel type being tested. */
-    public static $currentChannelType;
 
     /** @var array $channelData The raw data used to create a vo\Channel object. */
     public static $channelData;
@@ -110,8 +102,6 @@ final class ChannelTest extends Framework\TestCase
      * Set Factory
      *
      * Creates a new factory object for a connector integration.
-     * This function will break the test if a Creator.php with a
-     * valid implementation is not found.
      *
      * @param $type
      * @return void
@@ -128,7 +118,7 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
-     * Test Sync Products
+     * Test Sync
      *
      * This test is a full end-to-end.
      * It syncs products to a channel using Products->sync().
@@ -139,7 +129,7 @@ final class ChannelTest extends Framework\TestCase
      * for one channel.
      *
      * The goal of sync() is to synchronise the product data onto a Stock2Shop
-     * channel. Synchronisation in this context may refer to:
+     * channel.
      *
      */
     public function testSync()
@@ -215,6 +205,7 @@ final class ChannelTest extends Framework\TestCase
      * This method verifies whether the synchronization of products was
      * successful to the channel.
      * It fetches all products used in channel->sync() by calling channel->getByCode()
+     * and compares the results
      *
      *
      * @param vo\ChannelProduct[] $request
@@ -276,7 +267,6 @@ final class ChannelTest extends Framework\TestCase
         $responseProductMap = [];
         $responseVariantMap = [];
         $responseImageMap = [];
-
         foreach ($response as $product) {
             $responseProductMap[$product->channel_product_code] = $product;
             foreach ($product->variants as $variant) {
@@ -286,7 +276,6 @@ final class ChannelTest extends Framework\TestCase
                 $responseImageMap[$image->channel_image_code] = $image;
             }
         }
-
         foreach ($existingProducts as $existingProduct) {
             $product = $responseProductMap[$existingProduct->channel_product_code];
 
@@ -338,11 +327,11 @@ final class ChannelTest extends Framework\TestCase
             $connector->sync($channelProducts, $channel, $flagMap);
 
             // Cursor (or offset) used for pagination.
-            // empty token means start a beginning
+            // Empty token means start at the beginning.
             $token = '';
             $previous_token = '';
 
-            // Create index of retrieved products, keyed by appropriate channel codes
+            // Create index of retrieved products, keyed by appropriate channel codes.
             /** @var vo\ChannelProduct[] $retrievedProductsMap */
             $retrievedProductsMap = [];
 
@@ -360,7 +349,7 @@ final class ChannelTest extends Framework\TestCase
                 $token = $ChannelProductGet->token;
 
                 // There should always be one product returned, unless we are
-                // at the end of the list. in which case we should have already
+                // at the end of the list - in which case we should have already
                 // fetched all the products.
                 if (count($ChannelProductGet->channel_products) === 0) {
                     $this->assertGreaterThanOrEqual(count($channelProducts), count($retrievedProductsMap));
