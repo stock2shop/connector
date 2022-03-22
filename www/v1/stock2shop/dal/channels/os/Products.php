@@ -9,6 +9,8 @@ use stock2shop\vo;
 
 /**
  *
+ * Read comments in stock2shop\dal\channel\Products()
+ *
  * @package stock2shop\dal\os
  */
 class Products implements ProductsInterface
@@ -20,7 +22,7 @@ class Products implements ProductsInterface
     const META_STORAGE_SEPARATOR = 'storage_separator';
 
     /**
-     * See comments in ProductsInterface::sync
+     * Read comments stock2shop\dal\channel\Products::sync
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
@@ -30,91 +32,86 @@ class Products implements ProductsInterface
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
 
-        /** @var string $imageSeparator Channel separator for channel codes and storage. */
+        /** @var string $storageSeparator Separator for channel codes and storage. */
         $storageSeparator = helpers\Meta::get($channel->meta, self::META_STORAGE_SEPARATOR);
-
-        // ------------------------------------------------
-
-        // Iterate through the channel products.
         foreach ($channelProducts as $product) {
+
+            // prefix used for file storage. All variants and images for a product are stored with
+            // the same prefix
             $prefix = $product->id;
 
-            // Create channel_product_code for each product from the file name.
-            // In your integration, this would be the ID or code that the target
-            // system uses to uniquely identify the product.
-            // i.e. in WooCommerce this would be the post ID of the product.
+            // Set channel_product_code for each product.
+            // In your integration, this would be the ID or code that the channel
+            // uses to uniquely identify the product.
             $product->channel_product_code = $prefix . '.json';
+
+            // Set channel_variant_code for each variant
             foreach ($product->variants as $variant) {
                 $variant->channel_variant_code = $prefix . $storageSeparator . $variant->id . '.json';
             }
 
-            // Do the same as the loop above to set the channel_image_code for each channel image.
+            // Set channel_image_code for each channel image.
             foreach ($product->images as $image) {
                 $image->channel_image_code = $prefix . $storageSeparator . $storageSeparator . $image->id . '.json';
             }
 
-            // Fetch the current files from the source (in this case, flat-file).
+            // Fetch existing products already saved to disk.
             $currentFiles = data\Helper::getJSONFilesByPrefix($prefix, 'products');
 
             // Check if the product has been flagged for delete.
+            // All products, variants and images are saved to disk with the same prefix.
+            // remove them all
             if ($product->delete === true) {
                 foreach ($currentFiles as $filename => $obj) {
-                    $fullpath = data\Helper::getDataPath() . '/products/' . $filename;
-                    if (file_exists($fullpath)) {
-                        unlink($fullpath);
+                    $path = data\Helper::getDataPath() . '/products/' . $filename;
+                    if (file_exists($path)) {
+                        unlink($path);
                     }
                 }
             } else {
-                $filename = data\Helper::getDataPath() . '/products/' . $product->channel_product_code;
-                file_put_contents($filename, json_encode($product));
+                $path = data\Helper::getDataPath() . '/products/' . $product->channel_product_code;
+                file_put_contents($path, json_encode($product));
                 foreach ($product->variants as $variant) {
-                    $filename = data\Helper::getDataPath() . '/products/' . $variant->channel_variant_code;
+                    $path = data\Helper::getDataPath() . '/products/' . $variant->channel_variant_code;
                     if ($variant->delete) {
-                        if (file_exists($filename)) {
-                            unlink($filename);
+                        if (file_exists($path)) {
+                            unlink($path);
                         }
                     } else {
-                        file_put_contents($filename, json_encode($variant));
+                        file_put_contents($path, json_encode($variant));
                     }
+                    $variant->success = true;
                 }
-
-                // Iterate through the product images.
                 foreach ($product->images as $image) {
-                    $filename = self::DATA_PATH . '/products/' . $image->channel_image_code;
+                    $path = self::DATA_PATH . '/products/' . $image->channel_image_code;
                     if ($image->delete) {
-                        if (file_exists($filename)) {
-                            unlink($filename);
+                        if (file_exists($path)) {
+                            unlink($path);
                         }
                     } else {
-                        file_put_contents($filename, json_encode($image));
+                        file_put_contents($path, json_encode($image));
                     }
+                    $image->success = true;
                 }
             }
-
-            // Mark product as successfully synced.
             $product->success = true;
-            foreach ($product->variants as $variant) {
-                $variant->success = true;
-            }
-            foreach ($product->images as $image) {
-                $image->success = true;
-            }
         }
         return $channelProducts;
     }
 
     /**
      *
-     * See comments in ProductsInterface::get
+     * Read comments in stock2shop\dal\channel\Products::get
      *
-     * @param string $token only return results greater than this
-     * @param int $limit max records to return
+     * @param string $token
+     * @param int $limit
      * @param vo\Channel $channel
-     * @return vo\ChannelProductGet $channelProductGet
+     * @return vo\ChannelProductGet
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     public function get(string $token, int $limit, vo\Channel $channel): vo\ChannelProductGet
     {
-        /** @var string $imageSeparator Channel separator for channel codes and storage. */
+        /** @var string $storageSeparator*/
         $storageSeparator = helpers\Meta::get($channel->meta, self::META_STORAGE_SEPARATOR);
         $channelProducts = [];
         $channelProductsData = [];
@@ -156,26 +153,15 @@ class Products implements ProductsInterface
             $cnt++;
         }
 
+        // If there are no products left, return the existing token
         return new vo\ChannelProductGet([
-
-            // We are using end() here to set the pointer in the
-            // "channelProducts" array to the end of the array.
-            // This gives us the last channel product returned.
-            // However, the product might not exist (i.e. we've
-            // already returned the last product on the prev. page).
-            // If this is the case, then we return the same token
-            // so that the worker knows that the "token" value was
-            // the end of the items on the channel.
             'token' => end($channelProducts)->channel_product_code ?? $token,
-
-            // "channelProducts" may be an empty array or
-            // an array of ($limit) products.
             'channelProducts' => $channelProducts
         ]);
     }
 
     /**
-     * See comments in ProductsInterface::getByCode
+     * Read comments in stock2shop\dal\channel\Products::getByCode
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
@@ -183,63 +169,31 @@ class Products implements ProductsInterface
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
-        $productsToRemove = [];
-        $imagesToRemove = [];
-        $variantsToRemove = [];
         foreach ($channelProducts as $product) {
             $productFiles = data\Helper::getJSONFilesByPrefix($product->id, 'products');
-            $hasProduct = false;
             foreach ($productFiles as $filename => $data) {
                 if ($filename === $product->channel_product_code) {
-                    $hasProduct = true;
+                    $product->success = true;
                     break;
                 }
             }
-            if (!$hasProduct) {
-                array_push($productsToRemove, $product->channel_product_code);
-            }
             foreach ($product->variants as $variant) {
-                $hasVariant = false;
                 foreach ($productFiles as $filename => $data) {
                     if ($filename === $variant->channel_variant_code) {
-                        $hasVariant = true;
+                        $variant->success = true;
                         break;
                     }
-                }
-                if (!$hasVariant) {
-                    array_push($variantsToRemove, $variant->channel_variant_code);
                 }
             }
             foreach ($product->images as $image) {
-                $hasImage = false;
                 foreach ($productFiles as $filename => $data) {
                     if ($filename === $image->channel_image_code) {
-                        $hasImage = true;
+                        $image->success = true;
                         break;
                     }
                 }
-                if (!$hasImage) {
-                    array_push($imagesToRemove, $image->channel_image_code);
-                }
             }
         }
-        // remove products, images and variants not on channel.
-        foreach ($channelProducts as $key => $product) {
-            foreach ($product->variants as $vk => $variant) {
-                if (in_array($variant->channel_variant_code, $variantsToRemove)) {
-                    unset($product->variants[$vk]);
-                }
-            }
-            foreach ($product->images as $ik => $image) {
-                if (in_array($image->channel_image_code, $imagesToRemove)) {
-                    unset($product->images[$ik]);
-                }
-            }
-            if (in_array($product->channel_product_code, $productsToRemove)) {
-                unset($channelProducts[$key]);
-            }
-        }
-
         return $channelProducts;
     }
 

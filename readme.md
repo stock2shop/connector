@@ -51,7 +51,7 @@ git clone https://github.com/stock2shop/connector.git ${S2S_PATH}/connector
 
 ```bash
 cd $S2S_PATH/connector/tests
-export=S2S_CHANNEL_NAME= && ./phpunit-4.8.phar ./
+export S2S_CHANNEL_NAME= && ./phpunit-4.8.phar ./
 ```
 
 You should have successful results from your test.
@@ -85,7 +85,7 @@ sed -i "s/boilerplate/${S2S_CHANNEL_NAME}/g" $S2S_PATH/connector/www/v1/stock2sh
 
 ```bash
 cd $S2S_PATH/connector/tests
-export=S2S_CHANNEL_NAME=your_channel_name && ./phpunit-4.8.phar ./
+export S2S_CHANNEL_NAME=your_channel_name && ./phpunit-4.8.phar ./
 ```
 
 You will notice that the tests for your channel now fail.

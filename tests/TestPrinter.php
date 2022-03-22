@@ -16,21 +16,12 @@ use stock2shop\vo;
 class TestPrinter
 {
     const DEBUG_ENV_VAR = 'S2S_TEST_DEBUG'; // if set to 'true' will print data objects
-
-    /** @var int $defaultPadding */
-    public $defaultPadding = 25;
-
-    /** @var int $headingPadding */
-    public $headingPadding = 135;
-
-    /** @var string $headingPadString */
-    public $headingPadString = "-";
-
-    /** @var string $defaultPadString */
-    public $defaultPadString = " ";
+    const DEFAULT_PADDING = 25;
+    const HEADING_PADDING = 135;
+    const DEFAULT_PAD_STRING = ' ';
 
     /** @var string $output */
-    public $output = "";
+    static $output = "";
 
     /**
      * Output Heading
@@ -38,13 +29,13 @@ class TestPrinter
      * @param string $heading
      * @return void
      */
-    private function outputHeading(string $heading)
+    static private function addHeading(string $heading)
     {
-        $this->output .= PHP_EOL;
-        $this->output .= str_pad('', $this->headingPadding, $this->defaultPadString) . PHP_EOL;
-        $this->output .= str_pad($heading, $this->headingPadding, $this->headingPadString, STR_PAD_BOTH) . PHP_EOL;
-        $this->output .= str_pad('', $this->headingPadding, $this->defaultPadString) . PHP_EOL;
-        $this->output .= PHP_EOL;
+        self::$output .= PHP_EOL;
+        self::$output .= str_pad('', self::HEADING_PADDING, self::DEFAULT_PAD_STRING) . PHP_EOL;
+        self::$output .= str_pad($heading, self::HEADING_PADDING, self::DEFAULT_PAD_STRING, STR_PAD_BOTH) . PHP_EOL;
+        self::$output .= str_pad('', self::HEADING_PADDING, self::DEFAULT_PAD_STRING) . PHP_EOL;
+        self::$output .= PHP_EOL;
     }
 
     /**
@@ -53,7 +44,7 @@ class TestPrinter
      * @param array $line
      * @return void
      */
-    private function outputLine(array $values)
+    static private function addLine(array $values)
     {
         foreach ($values as $value) {
             if (is_bool($value)) {
@@ -65,10 +56,10 @@ class TestPrinter
             } elseif (is_null($value)) {
                 $value = 'null';
             }
-            $o = str_pad($this->prepareValue($value), $this->defaultPadding);
-            $this->output .= $o;
+            $o = str_pad(self::prepareValue($value), self::DEFAULT_PADDING);
+            self::$output .= $o;
         }
-        $this->output .= PHP_EOL;
+        self::$output .= PHP_EOL;
     }
 
     /**
@@ -80,10 +71,10 @@ class TestPrinter
      * @param mixed $value
      * @return mixed The shortened string or the original value.
      */
-    private function prepareValue($value)
+    static private function prepareValue($value)
     {
-        if (is_string($value) && strlen($value) >= $this->defaultPadding) {
-            $value = substr($value, 0, ($this->defaultPadding - 10)) . "..";
+        if (is_string($value) && strlen($value) >= self::DEFAULT_PADDING) {
+            $value = substr($value, 0, (self::DEFAULT_PADDING - 10)) . "..";
         }
         return $value;
     }
@@ -95,7 +86,7 @@ class TestPrinter
      *
      * @return void
      */
-    public function print()
+    static public function print()
     {
         $debug = getenv(self::DEBUG_ENV_VAR);
         if ($debug === 'true') {
@@ -108,11 +99,11 @@ class TestPrinter
             stream_filter_append($stdout, 'TestPrinterStream');
 
             // Write content.
-            fwrite($stdout, $this->output);
+            fwrite($stdout, self::$output);
 
             // Output.
             print(TestStreamFilter::$cache);
-            $this->output = "";
+            self::$output = "";
         }
     }
 
@@ -124,9 +115,9 @@ class TestPrinter
      * @param vo\ChannelProduct[] $existing the items on the channel fethced by getByCode()
      * @return void
      */
-    public function sendProductsToPrinter(array $products, array $responses, array $existing, string $heading)
+   static public function sendProductsToPrinter(array $products, array $responses, array $existing, string $heading)
     {
-        $this->outputHeading($heading);
+        self::addHeading($heading);
         if(count($products) > 0) {
 
             // get a map of existing products
@@ -143,7 +134,7 @@ class TestPrinter
                 }
             }
 
-            $this->outputLine([
+            self::addLine([
                 'TYPE',
                 'CODE',
                 'PROPERTY',
@@ -154,7 +145,7 @@ class TestPrinter
             foreach ($products as $k => $p) {
                 $r = $responses[$k] ?? new vo\ChannelProduct([]);
                 $ep = $mapExistingProducts[$p->channel_product_code] ?? new vo\ChannelProduct([]);
-                $this->outputLine([
+                self::addLine([
                     'product',
                     $p->channel_product_code,
                     'channel_product_code',
@@ -162,7 +153,7 @@ class TestPrinter
                     $r->channel_product_code,
                     $ep->channel_product_code
                 ]);
-                $this->outputLine([
+                self::addLine([
                     'product',
                     $p->channel_product_code,
                     'success',
@@ -170,7 +161,7 @@ class TestPrinter
                     $r->success,
                     $ep->success
                 ]);
-                $this->outputLine([
+                self::addLine([
                     'product',
                     $p->channel_product_code,
                     'delete',
@@ -181,7 +172,7 @@ class TestPrinter
                 foreach ($p->variants as $kv => $v) {
                     $rv = $responses[$k]->variants[$kv] ?? new vo\ChannelVariant([]);
                     $ep = $mapExistingVariants[$v->channel_variant_code] ?? new vo\ChannelVariant([]);
-                    $this->outputLine([
+                    self::addLine([
                         'variant',
                         $v->channel_variant_code,
                         'channel_variant_code',
@@ -189,7 +180,7 @@ class TestPrinter
                         $rv->channel_variant_code,
                         $ep->channel_variant_code
                     ]);
-                    $this->outputLine([
+                    self::addLine([
                         'variant',
                         $v->channel_variant_code,
                         'success',
@@ -197,7 +188,7 @@ class TestPrinter
                         $rv->success,
                         $ep->success
                     ]);
-                    $this->outputLine([
+                    self::addLine([
                         'variant',
                         $v->channel_variant_code,
                         'delete',
@@ -209,7 +200,7 @@ class TestPrinter
                 foreach ($p->images as $ki => $img) {
                     $ri = $responses[$k]->images[$ki] ?? new vo\ChannelImage([]);
                     $ei = $mapExistingImages[$img->channel_image_code] ?? new vo\ChannelImage([]);
-                    $this->outputLine([
+                    self::addLine([
                         'image',
                         $img->channel_image_code,
                         'channel_image_code',
@@ -218,7 +209,7 @@ class TestPrinter
                         $ei->channel_image_code
 
                     ]);
-                    $this->outputLine([
+                    self::addLine([
                         'image',
                         $img->channel_image_code,
                         'success',
@@ -226,7 +217,7 @@ class TestPrinter
                         $ri->success,
                         $ei->success
                     ]);
-                    $this->outputLine([
+                    self::addLine([
                         'image',
                         $img->channel_image_code,
                         'delete',

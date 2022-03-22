@@ -46,9 +46,6 @@ final class ChannelTest extends Framework\TestCase
     /** @var array $channelFlagMapData The raw data used to create an array of vo\Flag objects. */
     public static $channelFlagMapData;
 
-    /** @var TestPrinter $printer The printer object used to output testing data. */
-    public static $printer;
-
     /**
      * Load Test Data
      *
@@ -57,25 +54,13 @@ final class ChannelTest extends Framework\TestCase
      * @param string $type
      * @return void
      */
-    public function loadTestData(string $type)
+    private function loadTestData(string $type)
     {
         self::$channelData = $this->loadJSON('channel.json', $type);
         self::$channelFlagMapData = $this->loadJSON('channelFlagMap.json', $type);
         self::$channelOrderData = $this->loadJSON('orderTransform.json', $type);
         self::$channelProductsData = $this->loadJSON('channelProducts.json', $type);
         self::$channelFulfillmentsData = $this->loadJSON('channelFulfillments.json', $type);
-    }
-
-    /**
-     * Tear Down After Class
-     *
-     * This event hook is used to setup the test printer.
-     *
-     * @return void
-     */
-    public static function setUpBeforeClass()
-    {
-        self::$printer = new TestPrinter();
     }
 
     /**
@@ -102,7 +87,7 @@ final class ChannelTest extends Framework\TestCase
      *
      * @return array
      */
-    public function getChannelTypes(): array
+    private function getChannelTypes(): array
     {
         $channelsFolderPath = '/../../www/v1/stock2shop/dal/channels';
         $channels = [];
@@ -131,7 +116,7 @@ final class ChannelTest extends Framework\TestCase
      * @param $type
      * @return void
      */
-    public function setFactory($type)
+    private function setFactory($type)
     {
         // Instantiate factory creator object.
         $creatorNameSpace = "stock2shop\\dal\\channels\\" . $type . "\\Creator";
@@ -156,7 +141,6 @@ final class ChannelTest extends Framework\TestCase
      * The goal of sync() is to synchronise the product data onto a Stock2Shop
      * channel. Synchronisation in this context may refer to:
      *
-     * @return void
      */
     public function testSync()
     {
@@ -203,14 +187,15 @@ final class ChannelTest extends Framework\TestCase
             self::verifyProductSync([], $syncedChannelProducts, $connector, $channel, 'TEST CASE 4 - Remove All Products [' . $type . ']');
 
             // print results
-            self::$printer->print();
+            TestPrinter::print();
         }
     }
 
     /**
-     * @param vo\ChannelProduct[] $channelProducts
+     * @param array $channelProducts
+     * @return vo\ChannelProduct[]
      */
-    public function setSuccessFalse(array $channelProducts)
+    private function setSuccessFalse(array $channelProducts): array
     {
         foreach ($channelProducts as $cp) {
             $cp->success = false;
@@ -228,10 +213,9 @@ final class ChannelTest extends Framework\TestCase
      * Verify Product Sync
      *
      * This method verifies whether the synchronization of products was
-     * successful using the custom connectors in the stock2shop/dal/channels.
-     * Please note that in the context of this test case, 'existing'
-     * ($existingProducts) refers to data which has been persisted on a
-     * channel.
+     * successful to the channel.
+     * It fetches all products used in channel->sync() by calling channel->getByCode()
+     *
      *
      * @param vo\ChannelProduct[] $request
      * @param vo\ChannelProduct[] $response
@@ -240,11 +224,11 @@ final class ChannelTest extends Framework\TestCase
      * @param string $name
      * @return vo\ChannelProduct[] $response
      */
-    public function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel, string $name)
+    private function verifyProductSync(array $request, array $response, dal\channel\Products $connector, vo\Channel $channel, string $name)
     {
         // Get existing products off the channel.
         $existingProducts = $connector->getByCode($request, $channel);
-        self::$printer->sendProductsToPrinter($request, $response, $existingProducts, $name);
+        TestPrinter::sendProductsToPrinter($request, $response, $existingProducts, $name);
 
         // Product, image and variant counters for existing and request products.
         $requestProductCnt = 0;
