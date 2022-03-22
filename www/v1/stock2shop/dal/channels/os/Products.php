@@ -8,8 +8,8 @@ use stock2shop\helpers;
 use stock2shop\vo;
 
 /**
- *
- * Read comments in stock2shop\dal\channel\Products()
+ * See comments in stock2shop\dal\channel\Product
+ * See readme.md on how to load custom configuration for your channel
  *
  * @package stock2shop\dal\os
  */
@@ -111,53 +111,52 @@ class Products implements ProductsInterface
      */
     public function get(string $token, int $limit, vo\Channel $channel): vo\ChannelProductGet
     {
-        /** @var string $storageSeparator*/
-        $storageSeparator = helpers\Meta::get($channel->meta, self::META_STORAGE_SEPARATOR);
-        $channelProducts = [];
+        /** @var string $storageSeparator */
+        $storageSeparator    = helpers\Meta::get($channel->meta, self::META_STORAGE_SEPARATOR);
         $channelProductsData = [];
-        $cnt = 0;
+        $cnt                 = 0;
 
         // results are sorted by channel_product_code asc already
         $products = Helper::getJSONFiles('products');
 
         // build products, variants and images hierarchy
         foreach ($products as $filename => $data) {
-            $parts = explode($storageSeparator, $filename);
+            $parts  = explode($storageSeparator, $filename);
             $prefix = str_replace('.json', '', $parts[0]);
             if ($prefix > $token) {
                 if (count($parts) === 1) {
                     $channelProductsData[$prefix] = [
                         'channel_product_code' => $filename,
-                        'success' => true,
-                        'variants' => [],
-                        'images' => []
+                        'success'              => true,
+                        'variants'             => [],
+                        'images'               => []
                     ];
                 } elseif (count($parts) === 2) {
                     $channelProductsData[$prefix]['variants'][] = [
                         'channel_variant_code' => $filename,
-                        'sku' => $data['sku'],
-                        'success' => true
+                        'sku'                  => $data['sku'],
+                        'success'              => true
                     ];
                 } elseif (count($parts) === 3) {
                     $channelProductsData[$prefix]['images'][] = [
                         'channel_image_code' => $filename,
-                        'success' => true
+                        'success'            => true
                     ];
                 }
             }
         }
+
+        // limit results and build response
+        $channelProductsGet = new vo\ChannelProductGet();
         foreach ($channelProductsData as $product) {
             if ($cnt < $limit) {
-                $channelProducts[] = new vo\ChannelProduct($product);
+                $cp = new vo\ChannelProduct($product);
+                $channelProductsGet->channel_products[] = $cp;
+                $channelProductsGet->token = $cp->channel_product_code;
             }
             $cnt++;
         }
-
-        // If there are no products left, return the existing token
-        return new vo\ChannelProductGet([
-            'token' => end($channelProducts)->channel_product_code ?? $token,
-            'channelProducts' => $channelProducts
-        ]);
+        return $channelProductsGet;
     }
 
     /**

@@ -9,7 +9,8 @@ class Creator extends channel\Creator
 {
 
     /**
-     * Create Products
+     * See comments in stock2shop\dal\channel\Creator::createProducts
+     *
      * @return channel\Products
      */
     public function createProducts(): channel\Products
@@ -18,21 +19,24 @@ class Creator extends channel\Creator
     }
 
     /**
-     * Create Orders
+     * See comments in stock2shop\dal\channel\Creator::createOrders
+     *
      * @return channel\Orders
+     * @throws exceptions\NotImplemented
      */
     public function createOrders(): channel\Orders
     {
-        return new Orders();
+        throw new exceptions\NotImplemented();
     }
 
     /**
-     * Create Fulfillments
-     * @return channel\Fulfillments
+     * See comments in stock2shop\dal\channel\Creator::createFulfillments
+     *
+     * @return channel\Orders
+     * @throws exceptions\NotImplemented
      */
     public function createFulfillments(): channel\Fulfillments
     {
         throw new exceptions\NotImplemented();
     }
-
 }

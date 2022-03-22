@@ -5,13 +5,12 @@ namespace stock2shop\dal\channels\memory;
 use stock2shop\dal\channel;
 use stock2shop\exceptions;
 
-/**
- * Creator
- */
 class Creator extends channel\Creator
 {
+
     /**
-     * Create Products
+     * See comments in stock2shop\dal\channel\Creator::createProducts
+     *
      * @return channel\Products
      */
     public function createProducts(): channel\Products
@@ -20,7 +19,8 @@ class Creator extends channel\Creator
     }
 
     /**
-     * Create Orders
+     * See comments in stock2shop\dal\channel\Creator::createOrders
+     *
      * @return channel\Orders
      * @throws exceptions\NotImplemented
      */
@@ -30,7 +30,8 @@ class Creator extends channel\Creator
     }
 
     /**
-     * Create Fulfillments
+     * See comments in stock2shop\dal\channel\Creator::createFulfillments
+     *
      * @return channel\Orders
      * @throws exceptions\NotImplemented
      */

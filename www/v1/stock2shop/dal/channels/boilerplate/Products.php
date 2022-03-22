@@ -4,9 +4,10 @@ namespace stock2shop\dal\channels\boilerplate;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
 use stock2shop\vo;
+use stock2shop\exceptions;
 
 /**
- * See comments in ProductsInterface
+ * See comments in stock2shop\dal\channel\Product
  * See readme.md on how to load custom configuration for your channel
  *
  * @package stock2shop\dal\example
@@ -14,12 +15,13 @@ use stock2shop\vo;
 class Products implements ProductsInterface
 {
     /**
-     * See comments in ProductsInterface::sync
+     * See comments in stock2shop\dal\channel\Product::sync
      *
      * @param vo\ChannelProduct[] $channelProducts
      * @param vo\Channel $channel
      * @param vo\Flag[] $flagsMap
      * @return vo\ChannelProduct[] $channelProducts
+     * @throws exceptions\NotImplemented
      */
     public function sync(array $channelProducts, vo\Channel $channel, array $flagsMap): array
     {
@@ -27,11 +29,11 @@ class Products implements ProductsInterface
         // See examples in:
         // stock2shop\dal\channels\os\Products->sync()
         // stock2shop\dal\channels\memory\Products->sync()
-        return $channelProducts;
+        throw new exceptions\NotImplemented();
     }
 
     /**
-     * See comments in ProductsInterface::get
+     * See comments in stock2shop\dal\channel\Product::get
      *
      * @param string $token
      * @param int $limit
@@ -45,7 +47,7 @@ class Products implements ProductsInterface
         // See examples in:
         // stock2shop\dal\channels\os\Products->get()
         // stock2shop\dal\channels\memory\Products->get()
-        return [];
+        throw new exceptions\NotImplemented();
     }
 
     /**
@@ -61,7 +63,7 @@ class Products implements ProductsInterface
         // See examples in:
         // stock2shop\dal\channels\os\Products->getByCode()
         // stock2shop\dal\channels\memory\Products->getByCode()
-        return $channelProducts;
+        throw new exceptions\NotImplemented();
     }
 
 }

@@ -4,7 +4,7 @@ namespace tests\e2e;
 
 use PHPUnit\Framework;
 use stock2shop\dal;
-use stock2shop\exceptions\UnprocessableEntity;
+use stock2shop\exceptions;
 use stock2shop\vo;
 use tests\TestPrinter;
 
@@ -14,49 +14,56 @@ use tests\TestPrinter;
  */
 final class ChannelTest extends Framework\TestCase
 {
-    /** @var string IGNORE_CHANNEL Configures the test to ignore a connector codebase. */
+    /** @var string IGNORE_CHANNEL ignore this channel in the tests */
     const IGNORE_CHANNEL = 'boilerplate';
 
-    /** @var dal\channel\Creator Creator Factory used to create the channel*/
-    public static $creator;
-
-    /** @var string[] $channelTypes The connector types which will be tested. (dal/channels/[type]) */
-    public static $channelTypes;
-
-    /** @var array $channelFulfillmentsData The raw testing data for fulfillments. */
-    public static $channelFulfillmentsData;
-
-    /** @var array $channelProductsData The raw testing data for products data. */
-    public static $channelProductsData;
-
-    /** @var array $channelOrderData The raw testing data for orders. */
-    public static $channelOrderData;
-
-    /** @var array $channelData The raw data used to create a vo\Channel object. */
-    public static $channelData;
-
-    /** @var array $channelFlagMapData The raw data used to create an array of vo\Flag objects. */
-    public static $channelFlagMapData;
-
     /**
-     * Load Test Data
-     *
-     * This function gets the test data from the JSON files in the /data directory.
-     *
      * @param string $type
-     * @return void
+     * @return array
      */
-    private function loadTestData(string $type)
+    private function getTestDataChannel(string $type)
     {
-        self::$channelData = $this->loadJSON('channel.json', $type);
-        self::$channelFlagMapData = $this->loadJSON('channelFlagMap.json', $type);
-        self::$channelOrderData = $this->loadJSON('orderTransform.json', $type);
-        self::$channelProductsData = $this->loadJSON('channelProducts.json', $type);
-        self::$channelFulfillmentsData = $this->loadJSON('channelFulfillments.json', $type);
+        return $this->loadJSON('channel.json', $type);
     }
 
     /**
-     * Checks if custom json file exists for channel otherwise loads default.
+     * @param string $type
+     * @return array
+     */
+    private function getTestDataChannelFlagMap(string $type)
+    {
+        return $this->loadJSON('channelFlagMap.json', $type);
+    }
+
+    /**
+     * @param string $type
+     * @return array
+     */
+    private function getTestDataChannelProducts(string $type)
+    {
+        return $this->loadJSON('channelProducts.json', $type);
+    }
+
+    /**
+     * @param string $type
+     * @return array
+     */
+    private function getTestDataOrderTransform(string $type)
+    {
+        return $this->loadJSON('orderTransform.json', $type);
+    }
+
+    /**
+     * @param string $type
+     * @return array
+     */
+    private function getTestDataChannelFulfillments(string $type)
+    {
+        return $this->loadJSON('channelFulfillments.json', $type);
+    }
+
+    /**
+     * Checks if custom json file exists for channel otherwise loads default json file.
      *
      * @param string $filename
      * @param string $type
@@ -65,7 +72,7 @@ final class ChannelTest extends Framework\TestCase
     private function loadJSON(string $filename, string $type): array
     {
         $custom = __DIR__ . '/data/channels/' . $type . '/' . $filename;
-        $path = __DIR__ . '/data/' . $filename;
+        $path   = __DIR__ . '/data/' . $filename;
         if (file_exists($custom)) {
             $path = $custom;
         }
@@ -75,14 +82,14 @@ final class ChannelTest extends Framework\TestCase
     /**
      * Get Channel Types
      *
-     * Channel types are directories and classes found in /dal/channels/.
+     * Channel types are directories found in /dal/channels/.
      *
      * @return array
      */
     private function getChannelTypes(): array
     {
         $channelsFolderPath = '/../../www/v1/stock2shop/dal/channels';
-        $channels = [];
+        $channels           = [];
         // Check if the channel name override is set.
         $channelName = getenv('S2S_CHANNEL_NAME');
         if ($channelName) {
@@ -99,22 +106,12 @@ final class ChannelTest extends Framework\TestCase
     }
 
     /**
-     * Set Factory
-     *
-     * Creates a new factory object for a connector integration.
-     *
      * @param $type
-     * @return void
+     * @return string
      */
-    private function setFactory($type)
+    private function getChannelNamespace($type): string
     {
-        // Instantiate factory creator object.
-        $creatorNameSpace = "stock2shop\\dal\\channels\\" . $type . "\\Creator";
-        self::$creator = new $creatorNameSpace();
-
-        // Evaluate whether the object is a valid concrete class
-        // implementation of the Creator class.
-        $this->assertInstanceOf("stock2shop\\dal\\channel\\Creator", self::$creator);
+        return "stock2shop\\dal\\channels\\$type\\";
     }
 
     /**
@@ -136,17 +133,21 @@ final class ChannelTest extends Framework\TestCase
     {
         $channelTypes = self::getChannelTypes();
         foreach ($channelTypes as $type) {
-
-            // Load test data
-            self::loadTestData($type);
-            self::setFactory($type);
-            $connector = self::$creator->createProducts();
+            $ns        = self::getChannelNamespace($type);
+            $ns        .= 'Creator';
+            $creator   = new $ns();
+            $connector = $creator->createProducts();
             $this->assertInstanceOf("stock2shop\\dal\\channels\\" . $type . "\\Products", $connector);
-            $channel = new vo\Channel(self::$channelData);
-            $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
+
+            // load test data
+            $testDataChannel         = self::getTestDataChannel($type);
+            $testDataChannelFlagMap  = self::getTestDataChannelFlagMap($type);
+            $testDataChannelProducts = self::getTestDataChannelProducts($type);
+            $channel                 = new vo\Channel($testDataChannel);
+            $flagMap                 = vo\Flag::createArray($testDataChannelFlagMap);
 
             // Create all products on the channel from data on Stock2Shop.
-            $request = vo\ChannelProduct::createArray(self::$channelProductsData);
+            $request               = vo\ChannelProduct::createArray($testDataChannelProducts);
             $syncedChannelProducts = $connector->sync($request, $channel, $flagMap);
             self::verifyProductSync($request, $syncedChannelProducts, $connector, $channel, 'TEST CASE 1 - Create All Products On Channel [' . $type . ']');
 
@@ -155,15 +156,15 @@ final class ChannelTest extends Framework\TestCase
             // the channel codes (channel_product_code, channel_variant_code, channel_image_code)
             // should now be set from the previous sync
             $syncedChannelProducts[1]->variants[0]->delete = true;
-            $request = $this->setSuccessFalse($syncedChannelProducts);
-            $syncedChannelProducts = $connector->sync($request, $channel, $flagMap);
+            $request                                       = $this->setSuccessFalse($syncedChannelProducts);
+            $syncedChannelProducts                         = $connector->sync($request, $channel, $flagMap);
             unset($request[1]->variants[0]);
             self::verifyProductSync($request, $syncedChannelProducts, $connector, $channel, 'TEST CASE 2 - Delete A Variant [' . $type . ']');
 
             // Delete a single image from a product.
             // The second product in the test data has two images
             $syncedChannelProducts[1]->images[0]->delete = true;
-            $request = $this->setSuccessFalse($syncedChannelProducts);
+            $request                                     = $this->setSuccessFalse($syncedChannelProducts);
             unset($request[1]->images[0]);
             $syncedChannelProducts = $connector->sync($request, $channel, $flagMap);
             self::verifyProductSync($request, $syncedChannelProducts, $connector, $channel, 'TEST CASE 3 - Delete A Image [' . $type . ']');
@@ -172,7 +173,7 @@ final class ChannelTest extends Framework\TestCase
             foreach ($syncedChannelProducts as $product) {
                 $product->delete = true;
             }
-            $request = $this->setSuccessFalse($syncedChannelProducts);
+            $request               = $this->setSuccessFalse($syncedChannelProducts);
             $syncedChannelProducts = $connector->sync($request, $channel, $flagMap);
             self::verifyProductSync([], $syncedChannelProducts, $connector, $channel, 'TEST CASE 4 - Remove All Products [' . $type . ']');
 
@@ -222,12 +223,12 @@ final class ChannelTest extends Framework\TestCase
         TestPrinter::sendProductsToPrinter($request, $response, $existingProducts, $name);
 
         // Product, image and variant counters for existing and request products.
-        $requestProductCnt = 0;
+        $requestProductCnt  = 0;
         $existingProductCnt = 0;
-        $requestVariantCnt = 0;
+        $requestVariantCnt  = 0;
         $existingVariantCnt = 0;
-        $requestImageCnt = 0;
-        $existingImageCnt = 0;
+        $requestImageCnt    = 0;
+        $existingImageCnt   = 0;
 
         // Loop through the request products and add to productCnt and variantCnt.
         foreach ($request as $product) {
@@ -266,7 +267,7 @@ final class ChannelTest extends Framework\TestCase
         // Building product, variant and image maps.
         $responseProductMap = [];
         $responseVariantMap = [];
-        $responseImageMap = [];
+        $responseImageMap   = [];
         foreach ($response as $product) {
             $responseProductMap[$product->channel_product_code] = $product;
             foreach ($product->variants as $variant) {
@@ -309,26 +310,30 @@ final class ChannelTest extends Framework\TestCase
 
     /**
      * Syncs test products to channel then uses get() to retrieve them all
-     * @throws UnprocessableEntity
+     * @throws exceptions\UnprocessableEntity
      */
-    public function testGetProducts()
+    public function testGet()
     {
         $channelTypes = self::getChannelTypes();
         foreach ($channelTypes as $type) {
 
-            // Load test data and sync products to channel
-            self::loadTestData($type);
-            self::setFactory($type);
-            $creator = self::$creator;
-            $connector = $creator->createProducts();
-            $flagMap = vo\Flag::createArray(self::$channelFlagMapData);
-            $channel = new vo\Channel(self::$channelData);
-            $channelProducts = vo\ChannelProduct::createArray(self::$channelProductsData);
+            // Load test data and sync products with channel
+            // this means we have some data to fetch using get()
+            $testDataChannel         = self::getTestDataChannel($type);
+            $testDataChannelFlagMap  = self::getTestDataChannelFlagMap($type);
+            $testDataChannelProducts = self::getTestDataChannelProducts($type);
+            $ns                      = self::getChannelNamespace($type);
+            $ns                      .= 'Creator';
+            $creator                 = new $ns();
+            $connector               = $creator->createProducts();
+            $flagMap                 = vo\Flag::createArray($testDataChannelFlagMap);
+            $channel                 = new vo\Channel($testDataChannel);
+            $channelProducts         = vo\ChannelProduct::createArray($testDataChannelProducts);
             $connector->sync($channelProducts, $channel, $flagMap);
 
             // Cursor (or offset) used for pagination.
             // Empty token means start at the beginning.
-            $token = '';
+            $token          = '';
             $previous_token = '';
 
             // Create index of retrieved products, keyed by appropriate channel codes.
@@ -353,17 +358,20 @@ final class ChannelTest extends Framework\TestCase
                 // fetched all the products.
                 if (count($ChannelProductGet->channel_products) === 0) {
                     $this->assertGreaterThanOrEqual(count($channelProducts), count($retrievedProductsMap));
-                    $this->assertEquals($previous_token, $ChannelProductGet->token);
                 } else {
                     $channelProduct = $ChannelProductGet->channel_products[0];
                     $this->assertCount(1, $ChannelProductGet->channel_products);
                     $this->assertNotEmpty($channelProduct->channel_product_code);
-                    $this->assertTrue($channelProduct->success);
                     $this->assertGreaterThan($previous_token, $ChannelProductGet->token);
+
+                    // This product should not be set
+                    // Paging is a unique list of channel_product_codes
+                    $this->assertFalse(isset($retrievedProductsMap[$channelProduct->channel_product_code]));
 
                     // Add to index
                     $retrievedProductsMap[$channelProduct->channel_product_code] = $channelProduct;
                     foreach ($channelProduct->variants as $channelProductVariant) {
+                        $this->assertFalse(isset($retrievedVariantsMap[$channelProductVariant->channel_variant_code]));
                         $retrievedVariantsMap[$channelProductVariant->channel_variant_code] = $channelProductVariant;
                     }
                     foreach ($channelProduct->images as $channelProductImage) {
@@ -379,12 +387,12 @@ final class ChannelTest extends Framework\TestCase
                 $this->assertTrue($retrievedProductsMap[$product->channel_product_code]->success);
                 foreach ($product->variants as $variant) {
                     $this->assertTrue(isset($retrievedVariantsMap[$variant->channel_variant_code]));
-                    $this->assertTrue($retrievedVariantsMap[$variant->channel_variant_code]->success);
+                    $this->assertNotEmpty($retrievedVariantsMap[$variant->channel_variant_code]->channel_variant_code);
                     $this->assertNotEmpty($retrievedVariantsMap[$variant->channel_variant_code]->sku);
                 }
                 foreach ($product->images as $image) {
                     $this->assertTrue(isset($retrievedImagesMap[$image->channel_image_code]));
-                    $this->assertTrue($retrievedImagesMap[$image->channel_image_code]->success);
+                    $this->assertNotEmpty($retrievedImagesMap[$image->channel_image_code]->channel_image_code);
                 }
             }
 

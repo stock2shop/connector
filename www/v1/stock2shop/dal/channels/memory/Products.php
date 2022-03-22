@@ -7,7 +7,8 @@ use stock2shop\helpers;
 use stock2shop\vo;
 
 /**
- * See comments in ProductsInterface
+ * See comments in stock2shop\dal\channel\Product
+ * See readme.md on how to load custom configuration for your channel
  *
  * @package stock2shop\dal\memory
  */

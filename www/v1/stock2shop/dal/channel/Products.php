@@ -66,7 +66,7 @@ interface Products {
      * ChannelProduct->channel_product_code (channels unique identifier for the product).
      *
      * To confirm that a product, its variants and images are synced with
-     * a channel, set the following properties:-
+     * a channel, set the following properties on the returned vo\ChannelProductCode:-
      *
      * - ChannelProduct->success = true
      * - ChannelProduct->variants[]->success = true
@@ -83,17 +83,42 @@ interface Products {
      * In other words, a way for us to see what exists on a channel.
      *
      * Paging:
-     * The results must be sorted by ChannelProduct->channel_product_code ascending.
-     * ChannelProduct->channel_product_code is the unique identifier on the channel for the product.
-     * We use channel_product_code as a pointer and only products with a
-     * greater channel_product_code should be returned.
+     * In order to use getByCode() correctly, your channel needs to support cursor based pagination
+     * or offset based pagination.
      *
-     * For example, if your channel uses an integer for channel_product_code, and it had 22 products in sequence,
-     * then paging would look like this.
-     * 1. get('', 10, $channel) -> last product returned has channel_product_code=10
-     * 2. get('10', 10, $channel) -> last product returned has channel_product_code=20
-     * 3. get('20', 10, $channel) -> last product returned has channel_product_code=22
-     * 4. get('22', 10, $channel) -> no more products returned
+     * ChannelProductGet->channel_products[]->channel_product_code is the unique identifier on the channel
+     * for the product. Your pagination should return a unique channel_product_code for each product during
+     * the pagination process.
+     *
+     * Token:
+     * Token is our cursor used for the pagination process (we use cursor based pagination).
+     * You need to return the token with your results so that when used in the next iteration
+     * a next set of products would be returned, and so on.
+     *
+     * For example, if your channel uses page based pagination. The token value would be the page_number.
+     * If you had 22 products in total, the sequence of requests to the get() function may look like this:-
+     *
+     * 1. get('', 10, $channel) -> token returned = 1 (for page_number 1) 10 products returned (fetches 10 products for page 0)
+     * 2. get('1', 10, $channel) -> token returned = 2, 10 products returned (fetches 10 products for page 1)
+     * 3. get('2', 10, $channel) -> token returned = 3, 2 products returned (fetches 10 products for page 2)
+     *
+     * In the last request, the returned products is less than the limit (10), so we stop processing.
+     * In an example where you have 10 products in total, the sequence is:-
+     *
+     * 1. get('', 10, $channel) -> token returned = 1, 10 products returned (fetches all products for page 0)
+     * 2. get('1', 10, $channel) -> token returned = 1, 0 products returned (fetches all products for page 1)
+     *
+     * Since zero products are returned on the last step above, we stop processing.
+     * The token returned is not relevant.
+     *
+     * The same process works if your channel uses cursor based paging.
+     * For example, consider your channel allows fetching products where sku is greater than x.
+     * Internally, the channels results would need to be sorted by sku ascending.
+     *
+     * Our paging in this case, may look like this:-
+     * 1. get('', 10, $channel) -> token returned = abc123 (the last products sku) 10 products returned
+     * 2. get('abc123', 10, $channel) -> token returned = edf456, 10 products returned (fetches 10 products where sku greater than abc123)
+     * 3. get('edf456', 10, $channel) -> token returned = xyz789, 2 products returned (fetches 2 products where sku greater than edf456)
      *
      * The following properties must be set on the returned ChannelProducts:-
      * - ChannelProduct->channel_product_code
@@ -102,7 +127,7 @@ interface Products {
      *
      * You can optionally set ChannelProduct->images[]->channel_image_code if the image exists.
      *
-     * If $channel_product_code is blank, the first products in the ordered list must be returned.
+     * If $token is blank, the first products in the ordered list must be returned.
      *
      * @param string $token only return results greater than this
      * @param int $limit max records to return

@@ -5,14 +5,11 @@ namespace stock2shop\dal\channels\boilerplate;
 use stock2shop\dal\channel;
 use stock2shop\exceptions;
 
-/**
- * Creator
- */
 class Creator extends channel\Creator
 {
 
     /**
-     * See comments in Creator::createProducts
+     * See comments in stock2shop\dal\channel\Creator::createProducts
      *
      * @return channel\Products
      */
@@ -22,28 +19,24 @@ class Creator extends channel\Creator
     }
 
     /**
-     * See comments in Creator::createOrders
+     * See comments in stock2shop\dal\channel\Creator::createOrders
      *
      * @return channel\Orders
      * @throws exceptions\NotImplemented
      */
     public function createOrders(): channel\Orders
     {
-        // If your connector implementation does not support synchronising
-        // order or fulfillment data, then you will throw an exception here.
         throw new exceptions\NotImplemented();
     }
 
     /**
-     * See comments in Creator::createFulfillments
+     * See comments in stock2shop\dal\channel\Creator::createFulfillments
      *
      * @return channel\Orders
      * @throws exceptions\NotImplemented
      */
     public function createFulfillments(): channel\Fulfillments
     {
-        // See comment above.
         throw new exceptions\NotImplemented();
     }
-
 }
