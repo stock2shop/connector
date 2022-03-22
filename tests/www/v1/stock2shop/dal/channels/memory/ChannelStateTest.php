@@ -36,7 +36,6 @@ class ChannelStateTest extends tests\TestCase
 
         memory\ChannelState::updateProducts($newMemoryProducts);
         $this->assertCount(count($newMemoryProducts), memory\ChannelState::getProducts());
-
         memory\ChannelState::clean();
     }
 
@@ -70,11 +69,9 @@ class ChannelStateTest extends tests\TestCase
      */
     public function testGenerateID()
     {
-        memory\ChannelState::clean();
         $outcome = memory\ChannelState::generateID();
         $this->assertEquals('string', gettype($outcome));
         $this->assertEquals(50, strlen($outcome));
-        memory\ChannelState::clean();
     }
 
     /**
@@ -88,9 +85,10 @@ class ChannelStateTest extends tests\TestCase
     public function testGetImages()
     {
         memory\ChannelState::clean();
+        $imageCount = 2;
         $groupIDs = ['cpid1', 'cpid2'];
         $groupImages = [];
-        for ($i = 0; $i !== 2; $i++) {
+        for ($i = 0; $i !== $imageCount; $i++) {
             $groupImages[] = new memory\MemoryImage([
                 'id' => null,
                 'product_group_id' => $groupIDs[$i],

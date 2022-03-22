@@ -33,10 +33,6 @@ It is important to remember that the "channel code" property is not only for syn
 connector processes a '[get](www/v1/stock2shop/dal/channel/Products.php)' instruction from the Stock2Shop's system, it
 will need to set the "channel codes" for each entity returned by the request.
 
-product has been updated to the channel we have methods to fetch data from your connector and your code needs to return
-a [Channel Product](www/v1/stock2shop/vo/ChannelProduct.php)
-with the `channel_product_code` set, if it exists on the channel.
-
 By the use of webhooks, Orders are sent from the channel to your connector, your connector needs to transform the order
 into [Stock2Shop order](www/v1/stock2shop/vo/SystemOrder.php).
 
@@ -128,13 +124,35 @@ Client to access the data. Please see the example we have provided for unit test
 [tests/unit/www/v1/stock2shop/dal/channels/os](tests/unit/www/v1/stock2shop/dal/channels/os/HelperTest.php)
 for an example of a unit test which evaluates the methods of the Helper class in the example connector that is provided.
 
-The connector code for "memory" channels makes use of an in-memory state class which is designed to mimic the behavior
-of a RESTful API. There are unit tests for each method in
+The connector code for "memory" channels makes use of an in-memory state class. There are unit tests for each method in
 the [ChannelState](tests/www/v1/stock2shop/dal/channels/memory/ChannelStateTest.php)
 class, which been provided for your reference.
 
-Your unit tests must extend the [TestCase](tests/TestCase.php) class. There is no need to add tests for the methods
-which are already evaluated in the E2E test.
+When you write unit tests, it is important to keep the following in mind:-
+
+- Your unit tests must extend the [TestCase](tests/TestCase.php) class.
+
+- There is no need to add tests for the methods which are already evaluated in the E2E test.
+
+- The path for the test class must be similar to the path for the class that is being tested.
+
+- For example, if you were to write a test for:
+
+```bash
+${S2S_PATH}/connector/www/v1/stock2shop/dal/channels/os/data/Helper.php
+```
+
+- You would create a new test class here:
+
+```bash
+${S2S_PATH}/connector/tests/v1/stock2shop/dal/channels/os/data/Helper.php
+```
+
+- Note the naming convention used for testing a function:
+
+```php
+test[FunctionName]()
+```
 
 ### E2E Test
 
