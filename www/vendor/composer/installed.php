@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '99b665f1465e14a50e9f9ef4b1b43e0057fc2ecd',
+        'reference' => 'f5d2898495f6e6273c0c43f20ad5adb309d74b67',
         'name' => '__root__',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '99b665f1465e14a50e9f9ef4b1b43e0057fc2ecd',
+            'reference' => 'f5d2898495f6e6273c0c43f20ad5adb309d74b67',
             'dev_requirement' => false,
         ),
         'guzzlehttp/guzzle' => array(
@@ -47,12 +47,12 @@
             'dev_requirement' => false,
         ),
         'mustache/mustache' => array(
-            'pretty_version' => 'v2.4.1',
-            'version' => '2.4.1.0',
+            'pretty_version' => 'v2.14.1',
+            'version' => '2.14.1.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../mustache/mustache',
             'aliases' => array(),
-            'reference' => '14bc3b4f6a4770b535fc433bfd0435471ed386c6',
+            'reference' => '579ffa5c96e1d292c060b3dd62811ff01ad8c24e',
             'dev_requirement' => false,
         ),
         'psr/http-message' => array(
