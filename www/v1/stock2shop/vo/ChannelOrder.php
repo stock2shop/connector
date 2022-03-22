@@ -2,40 +2,30 @@
 
 namespace stock2shop\vo;
 
-/**
- * TODO anything additional fields here?
- *
- * Class ChannelOrder
- * @package stock2shop\vo
- */
-class ChannelOrder extends Order
-{
+use stock2shop\base\ValueObject;
 
+class ChannelOrder extends ValueObject
+{
+    /** @var array|null $params */
+    public $params;
+
+    /** @var ChannelOrderChannel|null $channel */
+    public $channel;
+
+    /** @var ChannelOrderOrder $system_order */
+    public $system_order;
 
     /**
-     * Product constructor.
+     * ChannelOrder constructor
+     *
      * @param array $data
+     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws \stock2shop\exceptions\Validation
      */
     function __construct(array $data)
     {
-        parent::__construct($data);
-
+        $this->params = self::arrayFrom($data, 'params');
+        $this->channel = self::arrayFrom($data, 'channel');
+        $this->system_order = new ChannelOrderOrder(self::arrayFrom($data, 'system_order'));
     }
-
-    /**
-     * Creates an array of this class.
-     *
-     * @param array $data
-     *
-     * @return Order[]
-     */
-    static function createArray(array $data): array
-    {
-        $returnable = [];
-        foreach ($data as $item) {
-            $returnable[] = new ChannelOrder((array)$item);
-        }
-        return $returnable;
-    }
-
 }

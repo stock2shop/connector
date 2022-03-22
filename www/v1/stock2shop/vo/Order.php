@@ -6,64 +6,58 @@ use stock2shop\base\ValueObject;
 
 class Order extends ValueObject
 {
-    /** @var Address $billing_address */
-    public $billing_address;
-
-    /** @var string $channel_order_code */
-    public $channel_order_code;
-
-    /** @var Customer $customer */
-    public $customer;
-
-    /** @var OrderLineItem[] $line_items */
-    public $line_items;
-
-    /** @var OrderMetaItem[] $meta */
-    public $meta;
-
-    /** @var string $title */
+    /** @var string|null $notes */
     public $notes;
 
-    /** @var string $status */
-    public $status;
+    /** @var float|null $total_discount */
+    public $total_discount;
+
+    /** @var OrderItem $instruction */
+    public $instruction;
+
+    /** @var Address $billing_address */
+    public $billing_address;
 
     /** @var Address $shipping_address */
     public $shipping_address;
 
-    /** @var OrderLineItem[] $shipping_lines */
+    /** @var OrderItem $line_items */
+    public $line_items;
+
+    /** @var OrderItem $shipping_lines */
     public $shipping_lines;
 
     /**
-     * Product constructor.
+     * Order constructor
+     *
      * @param array $data
+     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws \stock2shop\exceptions\Validation
      */
     function __construct(array $data)
     {
-        $this->billing_address    = new Address(self::arrayFrom($data, "billing_address"));
-        $this->channel_order_code = self::stringFrom($data, "channel_order_code");
-        $this->customer           = new Customer(self::arrayFrom($data, "customer"));
-        $this->line_items         = OrderLineItem::createArray(self::arrayFrom($data, "line_items"));
-        $this->meta               = OrderMetaItem::createArray(self::arrayFrom($data, "meta"));
-        $this->notes              = self::stringFrom($data, "notes");
-        $this->status             = self::stringFrom($data, "status");
-        $this->shipping_address   = new Address(self::arrayFrom($data, "shipping_address"));
-        $this->shipping_lines     = OrderLineItem::createArray(self::arrayFrom($data, "shipping_lines"));
+        $this->notes = self::stringFrom($data, 'notes');
+        $this->total_discount = self::floatFrom($data, 'total_discount');
+        $this->instruction = self::stringFrom($data, 'instruction');
+        $this->billing_address = new Address(self::arrayFrom($data, 'billing_address'));
+        $this->shipping_address = new Address(self::arrayFrom($data, 'shipping_address'));
+        $this->line_items = OrderItem::createArray(self::arrayFrom($data, 'line_items'));
+        $this->shipping_lines = OrderItem::createArray(self::arrayFrom($data, 'shipping_lines'));
     }
 
     /**
-     * Creates an array of this class.
-     *
      * @param array $data
-     *
-     * @return Order[]
+     * @return ChannelProduct[]
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
     static function createArray(array $data): array
     {
-        $returnable = [];
+        $a = [];
         foreach ($data as $item) {
-            $returnable[] = new Order((array)$item);
+            $cv  = new Order((array)$item);
+            $a[] = $cv;
         }
-        return $returnable;
+        return $a;
     }
 
 }

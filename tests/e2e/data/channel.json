@@ -1,0 +1,46 @@
+{
+  "active": 1,
+  "created": "2022-02-11 06:30:51",
+  "description": "Default Channel",
+  "meta": [
+    {
+      "key": "api_url",
+      "value": "https://www.your-store.com/wc-api/v3"
+    },
+    {
+      "key": "authentication",
+      "value": "query_params"
+    },
+    {
+      "key": "channelmeta",
+      "value": "K48MH_0"
+    },
+    {
+      "key": "consumer_key",
+      "value": "xxx"
+    },
+    {
+      "key": "consumer_secret",
+      "value": "xxx"
+    },
+    {
+      "key": "variant_separator",
+      "value": "~"
+    },
+    {
+      "key": "image_separator",
+      "value": "="
+    },
+    {
+      "key": "config_notes",
+      "value": "<p>sasdasdas</p>"
+    },
+    {
+      "key": "products_endpoint", "value": "products"
+    }
+  ],
+  "modified": "2022-02-11 06:56:05",
+  "price_tier": null,
+  "qty_availability": null,
+  "type": "woocommerce"
+}

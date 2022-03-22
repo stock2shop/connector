@@ -2,73 +2,74 @@
 
 namespace stock2shop\vo;
 
-use stock2shop\vo\MetaItem;
-use stock2shop\vo\ProductOption;
 use stock2shop\base\ValueObject;
 
 class Product extends ValueObject
 {
-    /** @var bool $active */
+    /** @var bool|null $active */
     public $active;
 
-    /** @var string $title */
+    /** @var string|null $title */
     public $title;
 
-    /** @var string $body */
+    /** @var string|null $body */
     public $body_html;
 
-    /** @var string $collection */
+    /** @var string|null $collection */
     public $collection;
 
-    /** @var string $productType */
+    /** @var string|null $productType */
     public $product_type;
 
-    /** @var string $tags */
+    /** @var string|null $tags */
     public $tags;
 
-    /** @var string $vendor */
+    /** @var string|null $vendor */
     public $vendor;
 
     /** @var ProductOption[] $options */
     public $options;
 
-    /** @var MetaItem[] $meta */
+    /** @var Meta[] $meta */
     public $meta;
 
     /**
      * Product constructor.
      * @param array $data
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    function __construct(array $data) {
-        $this->active = self::boolFrom($data, "active");
-        $this->title = self::stringFrom($data, "title");
-        $this->body_html = self::stringFrom($data, "body_html");
-        $this->collection = self::stringFrom($data, "collection");
+    function __construct(array $data)
+    {
+        $this->active       = self::boolFrom($data, "active");
+        $this->title        = self::stringFrom($data, "title");
+        $this->body_html    = self::stringFrom($data, "body_html");
+        $this->collection   = self::stringFrom($data, "collection");
         $this->product_type = self::stringFrom($data, "product_type");
-        $this->tags = self::stringFrom($data, "tags");
-        $this->vendor = self::stringFrom($data, "vendor");
-        $this->options =
-            ProductOption::createArray(self::arrayFrom($data, "options"));
-        $this->meta = MetaItem::createArray(self::arrayFrom($data, "meta"));
+        $this->tags         = self::stringFrom($data, "tags");
+        $this->vendor       = self::stringFrom($data, "vendor");
+        $this->options      = ProductOption::createArray(self::arrayFrom($data, "options"));
+        $this->meta         = Meta::createArray(self::arrayFrom($data, "meta"));
     }
 
     /**
      * sort array properties of Product
      */
-    public function sort() {
+    public function sort()
+    {
         $this->sortArray($this->options, "name");
         $this->sortArray($this->meta, "key");
     }
 
     /**
-     * Computes a hash of the system product excluding the variants.
-     *
      * @return string
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    public function computeHash(): string {
+    public function computeHash(): string
+    {
         $p = new Product((array)$this);
         $p->sort();
         $json = json_encode($p);
+
         return md5($json);
     }
 }

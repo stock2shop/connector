@@ -6,56 +6,25 @@ use stock2shop\base\ValueObject;
 
 class Customer extends ValueObject
 {
-    /** @var bool $accepts_marketing */
-    public $accepts_marketing;
-
-    /** @var bool $active */
-    public $active;
-
-    /** @var CustomerAddress[] $addresses */
-    public $addresses;
-
-    /** @var string $email */
+    /** @var string|null $email */
     public $email;
 
-    /** @var string $first_name */
+    /** @var string|null $first_name */
     public $first_name;
 
-    /** @var string $last_name */
+    /** @var string|null $last_name */
     public $last_name;
 
-    /** @var CustomerMetaItem[] $meta */
-    public $meta;
-
     /**
-     * Product constructor.
+     * Customer constructor.
      * @param array $data
+     * @throws \stock2shop\exceptions\UnprocessableEntity
+     * @throws \stock2shop\exceptions\Validation
      */
-    function __construct(array $data)
+    public function __construct(array $data)
     {
-        $this->accepts_marketing = self::boolFrom($data, "accepts_marketing");
-        $this->active            = self::boolFrom($data, "active");
-        $this->addresses         = CustomerAddress::createArray(self::arrayFrom($data, "addresses"));
-        $this->email             = self::stringFrom($data, "email");
-        $this->first_name        = self::stringFrom($data, "first_name");
-        $this->last_name         = self::stringFrom($data, "last_name");
-        $this->meta              = CustomerMetaItem::createArray(self::arrayFrom($data, "meta"));
+        $this->email                 = static::stringFrom($data, 'email');
+        $this->first_name            = static::stringFrom($data, 'first_name');
+        $this->last_name             = static::stringFrom($data, 'last_name');
     }
-
-    /**
-     * Creates an array of this class.
-     *
-     * @param array $data
-     *
-     * @return Order[]
-     */
-    static function createArray(array $data): array
-    {
-        $returnable = [];
-        foreach ($data as $item) {
-            $returnable[] = new Order((array)$item);
-        }
-        return $returnable;
-    }
-
 }

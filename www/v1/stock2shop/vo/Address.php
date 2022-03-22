@@ -6,80 +6,93 @@ use stock2shop\base\ValueObject;
 
 class Address extends ValueObject
 {
-    /** @var string $address1 */
+    /** @var int|null $customer_id */
+    public $customer_id;
+
+    /** @var string|null $address1 */
     public $address1;
 
-    /** @var string $address2 */
+    /** @var string|null $address2 */
     public $address2;
 
-    /** @var string $city */
+    /** @var string|null $city */
     public $city;
 
-    /** @var string $company */
+    /** @var string|null $company */
     public $company;
 
-    /** @var string $country */
+    /** @var string|null $country */
     public $country;
 
-    /** @var string $first_name */
+    /** @var string|null $first_name */
     public $first_name;
 
-    /** @var string $last_name */
+    /** @var string|null $last_name */
     public $last_name;
 
-    /** @var string $phone */
+    /** @var string|null $phone */
     public $phone;
 
-    /** @var string $province */
+    /** @var string|null $province */
     public $province;
 
-    /** @var string $zip */
+    /** @var string|null $zip */
     public $zip;
 
-    /** @var string $country_code */
+    /** @var string|null $country_code */
     public $country_code;
 
-    /** @var string $province_code */
+    /** @var string|null $province_code */
     public $province_code;
 
-    /** @var string $type */
+    /** @var int|null $client_id */
+    public $client_id;
+
+    /** @var string|null $address_code */
+    public $address_code;
+
+    /** @var string|null $type */
     public $type;
 
+    /** @var bool|null $default */
+    public $default;
+
     /**
-    * Creates the data object to spec.
-    *
-    * @param array $data
-    *
-    * @return void
-    */
+     * Address constructor.
+     * @param array $data
+     * @throws \stock2shop\exceptions\UnprocessableEntity
+     */
     public function __construct(array $data)
     {
-        $this->address1 = self::stringFrom($data, 'address1');
-        $this->address2 = self::stringFrom($data, 'address2');
-        $this->city = self::stringFrom($data, 'city');
-        $this->company = self::stringFrom($data, 'company');
-        $this->country = self::stringFrom($data, 'country');
-        $this->first_name = self::stringFrom($data, 'first_name');
-        $this->last_name = self::stringFrom($data, 'last_name');
-        $this->phone = self::stringFrom($data, 'phone');
-        $this->province = self::stringFrom($data, 'province');
-        $this->zip = self::intFrom($data, 'zip');
-        $this->country_code = self::stringFrom($data, 'country_code');
+        $this->customer_id   = self::intFrom($data, 'customer_id');
+        $this->address1      = self::stringFrom($data, 'address1');
+        $this->address2      = self::stringFrom($data, 'address2');
+        $this->city          = self::stringFrom($data, 'city');
+        $this->company       = self::stringFrom($data, 'company');
+        $this->country       = self::stringFrom($data, 'country');
+        $this->first_name    = self::stringFrom($data, 'first_name');
+        $this->last_name     = self::stringFrom($data, 'last_name');
+        $this->phone         = self::stringFrom($data, 'phone');
+        $this->province      = self::stringFrom($data, 'province');
+        $this->zip           = self::stringFrom($data, 'zip');
+        $this->country_code  = self::stringFrom($data, 'country_code');
         $this->province_code = self::stringFrom($data, 'province_code');
-        $this->type = self::stringFrom($data, 'type');
+        $this->client_id     = self::intFrom($data, 'client_id');
+        $this->address_code  = self::stringFrom($data, 'address_code');
+        $this->type          = self::stringFrom($data, 'type');
+        $this->default       = self::boolFrom($data, 'default');
     }
 
     /**
-     * Creates an array of this class.
-     *
      * @param array $data
-     *
      * @return Address[]
+     * @throws \stock2shop\exceptions\UnprocessableEntity
      */
-    static function createArray(array $data): array {
+    static function createArray(array $data): array
+    {
         $returnable = [];
         foreach ($data as $item) {
-            $returnable[] = new Address((array) $item);
+            $returnable[] = new Address((array)$item);
         }
         return $returnable;
     }

@@ -6,9 +6,19 @@ abstract class Creator
 {
 
     /**
-     * @return Connector
+     * @return Products
      */
-    abstract public function getChannel(): Connector;
+    abstract public function createProducts(): Products;
+
+    /**
+     * @return Orders
+     */
+    abstract public function createOrders(): Orders;
+
+    /**
+     * @return Fulfillments
+     */
+    abstract public function createFulfillments(): Fulfillments;
 
 }
 
