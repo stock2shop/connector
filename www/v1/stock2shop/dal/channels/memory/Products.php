@@ -4,6 +4,7 @@ namespace stock2shop\dal\channels\memory;
 
 use stock2shop\dal\channel\Products as ProductsInterface;
 use stock2shop\helpers;
+use stock2shop\lib;
 use stock2shop\vo;
 
 /**
@@ -15,6 +16,12 @@ use stock2shop\vo;
 class Products implements ProductsInterface
 {
     const META_MUSTACHE_TEMPLATE = 'mustache_template';
+
+    /** @var string Debug mode enbabled meta. */
+    const META_DEBUG_MODE_ENABLED = 'debug_mode_enabled';
+
+    /** @var lib\LogWriter $logger Log writer class object. */
+    public $logWriter;
 
     /**
      * See comments in ProductsInterface::sync
@@ -30,6 +37,15 @@ class Products implements ProductsInterface
         // You could have all sorts of meta here, for example, username and password to
         // authenticate with some 3rd party shopping cart.
         $template = helpers\Meta::get($channel->meta, self::META_MUSTACHE_TEMPLATE);
+
+        // Meta for logging and debug.
+        $debugEnabled = helpers\Meta::isTrue($channel->meta, self::META_DEBUG_MODE_ENABLED);
+
+        if (!$template) {
+            $this->log(lib\LogWriter::LOG_LEVEL_DEBUG, 'Missing product template/map. token=123123');
+            $this->logWriter->flush();
+            return $channelProducts;
+        }
 
         // This example channel updates products one at a time.
         // In many channels you work on this should be done in bulk where possible.
@@ -54,13 +70,30 @@ class Products implements ProductsInterface
                     if ($ci->delete) {
                         ChannelState::deleteImages([$exampleImage->id]);
                     } else {
-                        ChannelState::updateImages([$exampleImage]);
+
+                        // TODO: add logging example which handles an exception thrown by
+                        //  one of the connector's custom classes.
+                        try {
+                            ChannelState::updateImages([$exampleImage]);
+                        } catch(\Exception $e) {
+
+                            // TODO: add the stack trace as the payload.
+
+                        }
                     }
                     $ci->channel_image_code = $exampleImage->id;
                     $ci->success = true;
                 }
             }
         }
+
+
+        // Logging.
+        if ($debugEnabled) {
+            $this->log(lib\LogWriter::LOG_LEVEL_DEBUG, 'End of sync() method call.', ['products synced' => count($channelProducts)]);
+        }
+
+        $this->logWriter->flush();
         return $channelProducts;
     }
 
@@ -75,6 +108,15 @@ class Products implements ProductsInterface
      */
     public function get(string $token, int $limit, vo\Channel $channel): vo\ChannelProductGet
     {
+        // Meta for logging and debug.
+        $debugEnabled = helpers\Meta::isTrue($channel->meta, self::META_DEBUG_MODE_ENABLED);
+
+        // Logging.
+        if ($debugEnabled) {
+            $this->log(lib\LogWriter::LOG_LEVEL_DEBUG, 'Start of get() method call.');
+            $this->logWriter->flush();
+        }
+
         // Get products from ChannelState by "offset pagination/paging".
         if ($token === '') {
             // Convert from empty string.
@@ -134,6 +176,12 @@ class Products implements ProductsInterface
             // page "$offset" to the "$limit".
             $channelProductGet->token = (string)($offset + $limit);
         }
+
+        if ($debugEnabled) {
+            $this->log(lib\LogWriter::LOG_LEVEL_DEBUG, 'GET method call.', ['products' => count($channelProductGet->channel_products), 'token'=>$channelProductGet->token]);
+        }
+
+        $this->logWriter->flush();
         return $channelProductGet;
     }
 
@@ -146,6 +194,9 @@ class Products implements ProductsInterface
      */
     public function getByCode(array $channelProducts, vo\Channel $channel): array
     {
+
+        $debugEnabled = helpers\Meta::isTrue($channel->meta, self::META_DEBUG_MODE_ENABLED);
+
         $groups = ChannelState::getProductGroups();
         $images = ChannelState::getImages();
         foreach ($channelProducts as $cp) {
@@ -164,7 +215,53 @@ class Products implements ProductsInterface
                 }
             }
         }
+
+        if ($debugEnabled) {
+            $this->log(lib\LogWriter::LOG_LEVEL_DEBUG, 'End of getByCode() method call.', $channelProducts);
+            $this->logWriter->flush();
+        }
+
         return $channelProducts;
+    }
+
+    /**
+     * Log
+     *
+     * Sends a log line to the log writer object.
+     *
+     * @param int $level
+     * @param string $message
+     * @param array|null $payload
+     * @return bool
+     */
+    public function log(int $level, string $message, array $payload=null, array $trace=null)
+    {
+        // Check if there is a log writer configured on this class.
+        if (!$this->logWriter) {
+            return false;
+        }
+
+        // Create new LogItem object.
+        $log = new lib\LogItem();
+        $log->level = $level;
+        $log->message = $message;
+
+        // TODO: not sure how to structure this.
+        $log->context['subject'] = 'products';
+
+        // Check payload and trace.
+        if ($payload) {
+            $log->context['payload'] = $payload;
+        }
+        if ($trace) {
+            $log->context['trace'] = json_encode($trace);
+        }
+
+        // TODO: this adds the log line to the $items property of the LogWriter object.
+        //  The log has not been sent to the logging target/destination yet. This is done
+        //  by calling flush() at the end of the sync().
+        $this->logWriter->write($log);
+        return true;
     }
 
 }

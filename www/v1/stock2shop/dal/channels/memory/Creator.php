@@ -4,6 +4,7 @@ namespace stock2shop\dal\channels\memory;
 
 use stock2shop\dal\channel;
 use stock2shop\exceptions;
+use stock2shop\lib;
 
 class Creator extends channel\Creator
 {
@@ -15,7 +16,11 @@ class Creator extends channel\Creator
      */
     public function createProducts(): channel\Products
     {
-        return new Products();
+        $products = new Products();
+        if ($this->channel) {
+            $products->logWriter = lib\LogWriterFactory::create('debug', $this->channel);
+        }
+        return $products;
     }
 
     /**

@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'f5d2898495f6e6273c0c43f20ad5adb309d74b67',
+        'reference' => '32e75fdae7aae3605902d74b4a46c47336e88eb0',
         'name' => '__root__',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'f5d2898495f6e6273c0c43f20ad5adb309d74b67',
+            'reference' => '32e75fdae7aae3605902d74b4a46c47336e88eb0',
             'dev_requirement' => false,
         ),
         'guzzlehttp/guzzle' => array(
@@ -46,6 +46,15 @@
             'reference' => '1afdd860a2566ed3c2b0b4a3de6e23434a79ec85',
             'dev_requirement' => false,
         ),
+        'monolog/monolog' => array(
+            'pretty_version' => '1.27.0',
+            'version' => '1.27.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../monolog/monolog',
+            'aliases' => array(),
+            'reference' => '52ebd235c1f7e0d5e1b16464b695a28335f8e44a',
+            'dev_requirement' => false,
+        ),
         'mustache/mustache' => array(
             'pretty_version' => 'v2.14.1',
             'version' => '2.14.1.0',
@@ -68,6 +77,21 @@
             'dev_requirement' => false,
             'provided' => array(
                 0 => '1.0',
+            ),
+        ),
+        'psr/log' => array(
+            'pretty_version' => '1.1.4',
+            'version' => '1.1.4.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../psr/log',
+            'aliases' => array(),
+            'reference' => 'd49695b909c3b7628b6289db5479a1c204601f11',
+            'dev_requirement' => false,
+        ),
+        'psr/log-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '1.0.0',
             ),
         ),
         'ralouphie/getallheaders' => array(

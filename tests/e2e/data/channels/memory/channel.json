@@ -6,6 +6,22 @@
     {
       "key": "mustache_template",
       "value": "{\n            \"id\": \"{{ChannelVariant.channel_variant_code}}\",\n            \"name\": \"{{ChannelProduct.title}}\",\n            \"quantity\": \"{{ChannelVariant.qty}}\",\n            \"product_group_id\": \"{{ChannelProduct.channel_product_code}}\",\n            \"price\": \"{{ChannelVariant.price}}\"\n          }"
+    },
+    {
+      "key": "log_file_path",
+      "value": "memory.json"
+    },
+    {
+      "key": "debug_mode_enabled",
+      "value": true
+    },
+    {
+      "key": "consumer_key",
+      "value": "ck_123123123123"
+    },
+    {
+      "key": "consumer_secret",
+      "value": "cs_234234234234"
     }
   ],
   "modified": "2022-02-08 16:00:00",

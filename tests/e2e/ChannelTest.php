@@ -6,6 +6,7 @@ use PHPUnit\Framework;
 use stock2shop\dal;
 use stock2shop\exceptions;
 use stock2shop\vo;
+use stock2shop\dal\channel;
 use tests\TestPrinter;
 
 /**
@@ -136,8 +137,6 @@ final class ChannelTest extends Framework\TestCase
             $ns        = self::getChannelNamespace($type);
             $ns        .= 'Creator';
             $creator   = new $ns();
-            $connector = $creator->createProducts();
-            $this->assertInstanceOf("stock2shop\\dal\\channels\\" . $type . "\\Products", $connector);
 
             // load test data
             $testDataChannel         = self::getTestDataChannel($type);
@@ -145,6 +144,11 @@ final class ChannelTest extends Framework\TestCase
             $testDataChannelProducts = self::getTestDataChannelProducts($type);
             $channel                 = new vo\Channel($testDataChannel);
             $flagMap                 = vo\Flag::createArray($testDataChannelFlagMap);
+
+            /** @var channel\Creator $connector */
+            $creator->channel = $channel;
+            $connector = $creator->createProducts();
+            $this->assertInstanceOf("stock2shop\\dal\\channels\\" . $type . "\\Products", $connector);
 
             // Create all products on the channel from data on Stock2Shop.
             $request               = vo\ChannelProduct::createArray($testDataChannelProducts);
@@ -323,11 +327,14 @@ final class ChannelTest extends Framework\TestCase
             $testDataChannelFlagMap  = self::getTestDataChannelFlagMap($type);
             $testDataChannelProducts = self::getTestDataChannelProducts($type);
             $ns                      = self::getChannelNamespace($type);
+            $channel                 = new vo\Channel($testDataChannel);
+
             $ns                      .= 'Creator';
             $creator                 = new $ns();
+            $creator->channel        = $channel;
             $connector               = $creator->createProducts();
+
             $flagMap                 = vo\Flag::createArray($testDataChannelFlagMap);
-            $channel                 = new vo\Channel($testDataChannel);
             $channelProducts         = vo\ChannelProduct::createArray($testDataChannelProducts);
             $connector->sync($channelProducts, $channel, $flagMap);
 
