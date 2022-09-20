@@ -1,0 +1,196 @@
+{
+  "channel_products": [
+    {
+      "id": 62714,
+      "channel": {
+        "channel_id": 1,
+        "channel_product_code": null,
+        "delete": false
+      },
+      "active": true,
+      "source_product_code": "db11",
+      "body_html": "<p>Testing<\/p>",
+      "collection": "Software",
+      "title": "Database Software V11",
+      "product_type": "Database Software",
+      "vendor": "",
+      "tags": "",
+      "options": [],
+      "meta": [
+        {
+          "key": "foo",
+          "value": "bar",
+          "template_name": null
+        }
+      ],
+      "images": [
+        {
+          "channel": {
+            "channel_id": 1,
+            "channel_image_code": null,
+            "delete": false
+          },
+          "src_50x50": "https:\/\/gm-stock2shop.s3.amazonaws.com\/2af89afa79a0b8ef23df5ab93a0e338624939568-50x50.jpg",
+          "src_160x160": "https:\/\/gm-stock2shop.s3.amazonaws.com\/2af89afa79a0b8ef23df5ab93a0e338624939568-160x160.jpg",
+          "id": 10204,
+          "source_image_code": null,
+          "storage_code": "2af89afa79a0b8ef23df5ab93a0e338624939568.jpg",
+          "src": "https:\/\/gm-stock2shop.s3.amazonaws.com\/2af89afa79a0b8ef23df5ab93a0e338624939568.jpg",
+          "product_id": 62714,
+          "active": true
+        }
+      ],
+      "variants": [
+        {
+          "id": 67745,
+          "channel": {
+            "channel_id": 1,
+            "channel_variant_code": null,
+            "delete": false
+          },
+          "source_variant_code": "4210173",
+          "price": 900,
+          "barcode": "",
+          "sku": "DB\/9\/0\/11",
+          "qty": 5,
+          "grams": 0,
+          "inventory_management": true,
+          "active": true,
+          "product_id": 62714,
+          "image_id": 10204,
+          "price_tiers": [
+            {
+              "tier": "Wholesale",
+              "price": 800
+            }
+          ],
+          "qty_availability": [
+            {
+              "qty": 2,
+              "description": "jhb"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 62713,
+      "channel": {
+        "channel_id": 1,
+        "channel_product_code": null,
+        "delete": false
+      },
+      "active": true,
+      "source_product_code": "CD",
+      "body_html": "<p>This is a great product from the 1990s.<\/p>",
+      "collection": "Peripherals",
+      "title": "CD-ROM Drive",
+      "product_type": "Drives",
+      "vendor": "",
+      "tags": "",
+      "options": [
+        {
+          "name": "Selection",
+          "position": 1
+        }
+      ],
+      "meta": [
+        {
+          "key": "Dimensions",
+          "value": "15cm x 6cm x 15cm",
+          "template_name": null
+        }
+      ],
+      "images": [
+        {
+          "channel": {
+            "channel_id": 1,
+            "channel_image_code": null,
+            "delete": false
+          },
+          "src_50x50": "https:\/\/gm-stock2shop.s3.amazonaws.com\/7cd85464cfff0a7eb91a6964cbc17826480ce767-50x50.jpg",
+          "src_160x160": "https:\/\/gm-stock2shop.s3.amazonaws.com\/7cd85464cfff0a7eb91a6964cbc17826480ce767-160x160.jpg",
+          "id": 10203,
+          "source_image_code": null,
+          "storage_code": "7cd85464cfff0a7eb91a6964cbc17826480ce767.jpg",
+          "src": "https:\/\/gm-stock2shop.s3.amazonaws.com\/7cd85464cfff0a7eb91a6964cbc17826480ce767.jpg",
+          "product_id": 62713,
+          "active": true
+        },
+        {
+          "channel": {
+            "channel_id": 1,
+            "channel_image_code": null,
+            "delete": false
+          },
+          "src_50x50": "https:\/\/gm-stock2shop.s3.amazonaws.com\/6ac24a339bebc0917fc35650e28754b4e1774c59-50x50.jpg",
+          "src_160x160": "https:\/\/gm-stock2shop.s3.amazonaws.com\/6ac24a339bebc0917fc35650e28754b4e1774c59-160x160.jpg",
+          "id": 75772,
+          "source_image_code": null,
+          "storage_code": "6ac24a339bebc0917fc35650e28754b4e1774c59.jpg",
+          "src": "https:\/\/gm-stock2shop.s3.amazonaws.com\/6ac24a339bebc0917fc35650e28754b4e1774c59.jpg",
+          "product_id": 62713,
+          "active": true
+        }
+      ],
+      "variants": [
+        {
+          "id": 67743,
+          "source_variant_code": "4210168",
+          "price": 400,
+          "barcode": "",
+          "sku": "CDROM\/POR25",
+          "qty": 4,
+          "grams": 0,
+          "inventory_management": true,
+          "active": true,
+          "product_id": 62713,
+          "image_id": 75772,
+          "option1": "25x",
+          "price_tiers": [
+            {
+              "tier": "Wholesale",
+              "price": 400
+            }
+          ],
+          "qty_availability": [
+            {
+              "qty": 10,
+              "description": "jhb"
+            },
+            {
+              "qty": 30,
+              "description": "pta"
+            }
+          ]
+        },
+        {
+          "id": 67744,
+          "source_variant_code": "4210169",
+          "price": 300,
+          "barcode": "",
+          "sku": "CDROM\/POR5",
+          "qty": 50,
+          "grams": 0,
+          "inventory_management": true,
+          "active": true,
+          "product_id": 62713,
+          "image_id": null,
+          "client_id": 21,
+          "option1": "5x",
+          "price_tiers": [
+            {
+              "tier": "Wholesale",
+              "price": 290
+            },
+            {
+              "tier": "Was",
+              "price": 0
+            }
+          ],
+          "qty_availability": []
+        }
+      ]
+    }
+  ]
+}

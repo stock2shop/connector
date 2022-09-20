@@ -1,11 +1,5 @@
-tests/.phpunit.result.cache
-www/composer.phar
+.phpunit.result.cache
 .idea
 .run
-
-www/v1/stock2shop/dal/channels/os/data/fulfillments
-www/v1/stock2shop/dal/channels/os/data/orders
-www/v1/stock2shop/dal/channels/os/data/products
-!www/v1/stock2shop/dal/channels/os/data/fulfillments/readme.md
-!www/v1/stock2shop/dal/channels/os/data/orders/readme.md
-!www/v1/stock2shop/dal/channels/os/data/products/readme.md
+src/data/
+/vendor/
