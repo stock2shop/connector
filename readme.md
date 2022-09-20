@@ -23,7 +23,7 @@ a [Channel](https://github.com/stock2shop/share/blob/master/src/DTO/Channel.php)
 [here](https://github.com/stock2shop/share/blob/master/src/Channel/ChannelProductsInterface.php).
 
 For our system to verify that the products exist on the channel, there are two methods available,
-[get()](https://github.com/stock2shop/share/blob/2ec36d6d4d60cff9ddea9df73786cfedef323fab/src/Channel/ChannelProductsInterface.php#L104) 
+[get](https://github.com/stock2shop/share/blob/2ec36d6d4d60cff9ddea9df73786cfedef323fab/src/Channel/ChannelProductsInterface.php#L104) 
 and [getByCode](https://github.com/stock2shop/share/blob/2ec36d6d4d60cff9ddea9df73786cfedef323fab/src/Channel/ChannelProductsInterface.php#L75) 
 
 [Channel Products](https://github.com/stock2shop/share/blob/master/src/DTO/ChannelProducts.php) are sent in batches 
@@ -45,4 +45,4 @@ composer install
 ## General
 
 - PHP version 8.1
-- use strict types `declare(strict_types=1);`
+- Use strict types `declare(strict_types=1);`

@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace Stock2Shop\Tests\Connector;
 
 use Stock2Shop\Connector\ChannelCreator;
@@ -7,7 +9,6 @@ use Stock2Shop\Share;
 
 final class ChannelTest extends Base
 {
-
 
     public function testSync()
     {
