@@ -23,27 +23,27 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
                     unlink($path);
                 }
                 $product->channel->channel_product_code = null;
-                foreach ($product->variants as &$v) {
+                foreach ($product->variants as $v) {
                     $v->channel->channel_variant_code = null;
                 }
-                foreach ($product->images as &$i) {
+                foreach ($product->images as $i) {
                     $i->channel->channel_image_code = null;
                 }
             } else {
                 $product->channel->channel_product_code = (string)$product->id;
-                foreach ($product->variants as &$v) {
+                foreach ($product->variants as $v) {
                     $v->channel->channel_variant_code = (string)$v->id;
                 }
-                foreach ($product->images as &$i) {
+                foreach ($product->images as $i) {
                     $i->channel->channel_image_code = (string)$i->id;
                 }
                 file_put_contents($path, json_encode($product));
             }
             $product->channel->success = true;
-            foreach ($product->variants as &$v) {
+            foreach ($product->variants as $v) {
                 $v->channel->success = true;
             }
-            foreach ($product->images as &$i) {
+            foreach ($product->images as $i) {
                 $i->channel->success = true;
             }
         }
