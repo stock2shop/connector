@@ -8,10 +8,9 @@ use Stock2Shop\Share;
 
 class ChannelProducts implements Share\Channel\ChannelProductsInterface
 {
-
     public function sync(
         Share\DTO\ChannelProducts $channelProducts,
-        Share\DTO\Channel $channel
+        Share\DTO\Channel         $channel
     ): Share\DTO\ChannelProducts {
         Helper::setDataDir();
         foreach ($channelProducts->channel_products as $product) {
@@ -51,8 +50,8 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
     }
 
     public function get(
-        string $channel_product_code,
-        int $limit,
+        string            $channel_product_code,
+        int               $limit,
         Share\DTO\Channel $channel
     ): Share\DTO\ChannelProducts {
         Helper::setDataDir();
@@ -84,7 +83,7 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
 
     public function getByCode(
         Share\DTO\ChannelProducts $channelProducts,
-        Share\DTO\Channel $channel
+        Share\DTO\Channel         $channel
     ): Share\DTO\ChannelProducts {
         Helper::setDataDir();
         foreach ($channelProducts->channel_products as $product) {
@@ -94,7 +93,7 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
             } catch (\Exception) {
                 $data = [];
             }
-            $existing                  = new Share\DTO\ChannelProduct($data);
+            $existing         = new Share\DTO\ChannelProduct($data);
             $product->success = ($existing->channel_product_code === $product->channel_product_code);
             foreach ($product->variants as $variant) {
                 $found = false;

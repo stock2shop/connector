@@ -9,7 +9,6 @@ use Stock2Shop\Share;
 
 final class ChannelTest extends Base
 {
-
     public function testSync()
     {
         $creator         = new ChannelCreator();
