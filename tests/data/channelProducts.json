@@ -2,19 +2,13 @@
   "channel_products": [
     {
       "id": 62714,
-      "channel": {
-        "channel_id": 1,
-        "channel_product_code": null,
-        "delete": false
-      },
       "active": true,
-      "source_product_code": "db11",
+      "title": "Database Software V11",
       "body_html": "<p>Testing<\/p>",
       "collection": "Software",
-      "title": "Database Software V11",
       "product_type": "Database Software",
-      "vendor": "",
       "tags": "",
+      "vendor": "",
       "options": [],
       "meta": [
         {
@@ -23,13 +17,22 @@
           "template_name": null
         }
       ],
+      "channel_id": 1,
+      "channel_product_code": null,
+      "delete": false,
+      "success": true,
+      "client_id": 21,
+      "created": "created",
+      "hash": "hash",
+      "modified": "modified",
+      "source_id": 57,
+      "source_product_code": "db11",
       "images": [
         {
-          "channel": {
-            "channel_id": 1,
-            "channel_image_code": null,
-            "delete": false
-          },
+          "channel_id": 1,
+          "channel_image_code": null,
+          "delete": false,
+          "success": true,
           "src_50x50": "https:\/\/gm-stock2shop.s3.amazonaws.com\/2af89afa79a0b8ef23df5ab93a0e338624939568-50x50.jpg",
           "src_160x160": "https:\/\/gm-stock2shop.s3.amazonaws.com\/2af89afa79a0b8ef23df5ab93a0e338624939568-160x160.jpg",
           "id": 10204,
@@ -43,11 +46,10 @@
       "variants": [
         {
           "id": 67745,
-          "channel": {
-            "channel_id": 1,
-            "channel_variant_code": null,
-            "delete": false
-          },
+          "channel_id": 1,
+          "channel_variant_code": null,
+          "delete": false,
+          "success": true,
           "source_variant_code": "4210173",
           "price": 900,
           "barcode": "",
@@ -75,11 +77,10 @@
     },
     {
       "id": 62713,
-      "channel": {
-        "channel_id": 1,
-        "channel_product_code": null,
-        "delete": false
-      },
+      "channel_id": 1,
+      "channel_product_code": null,
+      "delete": false,
+      "success": true,
       "active": true,
       "source_product_code": "CD",
       "body_html": "<p>This is a great product from the 1990s.<\/p>",
@@ -103,11 +104,10 @@
       ],
       "images": [
         {
-          "channel": {
-            "channel_id": 1,
-            "channel_image_code": null,
-            "delete": false
-          },
+          "channel_id": 1,
+          "channel_image_code": null,
+          "delete": false,
+          "success": true,
           "src_50x50": "https:\/\/gm-stock2shop.s3.amazonaws.com\/7cd85464cfff0a7eb91a6964cbc17826480ce767-50x50.jpg",
           "src_160x160": "https:\/\/gm-stock2shop.s3.amazonaws.com\/7cd85464cfff0a7eb91a6964cbc17826480ce767-160x160.jpg",
           "id": 10203,
@@ -118,11 +118,10 @@
           "active": true
         },
         {
-          "channel": {
-            "channel_id": 1,
-            "channel_image_code": null,
-            "delete": false
-          },
+          "channel_id": 1,
+          "channel_image_code": null,
+          "delete": false,
+          "success": true,
           "src_50x50": "https:\/\/gm-stock2shop.s3.amazonaws.com\/6ac24a339bebc0917fc35650e28754b4e1774c59-50x50.jpg",
           "src_160x160": "https:\/\/gm-stock2shop.s3.amazonaws.com\/6ac24a339bebc0917fc35650e28754b4e1774c59-160x160.jpg",
           "id": 75772,

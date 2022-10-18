@@ -8,10 +8,9 @@ use Stock2Shop\Share;
 
 class Helper
 {
+    public const DATA_DIR = __DIR__ . '/data';
 
-    const DATA_DIR = __DIR__ . '/data';
-
-    static function setDataDir()
+    public static function setDataDir()
     {
         if (!is_dir(self::DATA_DIR)) {
             mkdir(self::DATA_DIR);
@@ -21,7 +20,7 @@ class Helper
     /**
      * Path for storing product
      */
-    static function getProductPath(Share\DTO\ChannelProduct $product): string
+    public static function getProductPath(Share\DTO\ChannelProduct $product): string
     {
         return sprintf('%s/%s.json', self::DATA_DIR, $product->id);
     }
@@ -29,7 +28,7 @@ class Helper
     /**
      * Retrieves all .json files from data dir and parses them.
      */
-    static function getJSONFiles(): array
+    public static function getJSONFiles(): array
     {
         $files     = [];
         $fileNames = array_diff(scandir(self::DATA_DIR, SCANDIR_SORT_ASCENDING), array('..', '.'));
