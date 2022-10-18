@@ -18,9 +18,10 @@ import (
 
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/products", PutProducts).Methods("POST")
-	router.HandleFunc("/products", GetProducts).Methods("GET")
-	router.HandleFunc("/products/page", GetProductsPage).Methods("GET")
+	router.HandleFunc("/products", PutProducts).Methods(http.MethodPost)
+	router.HandleFunc("/products", GetProducts).Methods(http.MethodGet)
+	router.HandleFunc("/products/page", GetProductsPage).Methods(http.MethodGet)
+	router.HandleFunc("/products", DeleteProducts).Methods(http.MethodDelete)
 
 	// os.Args[0] is the program
 	port := os.Args[1]
@@ -55,7 +56,7 @@ type Product struct {
 
 type Products []Product
 
-type GetProduct []string
+type ProductIDs []string
 
 func (p *Product) Validate() error {
 	if p.Title == "" {
@@ -121,7 +122,7 @@ func PutProducts(w http.ResponseWriter, r *http.Request) {
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
 	dataPath := fmt.Sprintf("%s", os.Args[2])
-	getProducts := GetProduct{}
+	getProducts := ProductIDs{}
 
 	// populate products with data from request
 	err := json.NewDecoder(r.Body).Decode(&getProducts)
@@ -250,4 +251,56 @@ func GetProductsPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Response(w, http.StatusAccepted, products)
+}
+
+func DeleteProducts(w http.ResponseWriter, r *http.Request) {
+	dataPath := fmt.Sprintf("%s", os.Args[2])
+
+	ids := ProductIDs{}
+
+	// populate products with data from request
+	err := json.NewDecoder(r.Body).Decode(&ids)
+	if err != nil {
+		Response(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// check that there are id's to find
+	if len(ids) < 1 {
+		Response(w, http.StatusAccepted, nil)
+		return
+	}
+
+	// get all files
+	var files []string
+	err = filepath.Walk(dataPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		if !info.IsDir() && strings.HasSuffix(path, ".json") {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		Response(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// remove files
+	for _, id := range ids {
+		for _, file := range files {
+			if strings.Contains(file, id) {
+				err := os.Remove(file)
+				if err != nil {
+					Response(w, http.StatusBadRequest, err.Error())
+					return
+				}
+			}
+		}
+	}
+
+	Response(w, http.StatusAccepted, nil)
 }
