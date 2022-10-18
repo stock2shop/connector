@@ -24,6 +24,14 @@ func main() {
 
 	// os.Args[0] is the program
 	port := os.Args[1]
+	if port == "" {
+		log.Fatal("server port must be specified as the first argument")
+	}
+
+	path := os.Args[2]
+	if path == "" {
+		log.Fatal("data storage path must be specified as the second argument")
+	}
 
 	log.Printf("server stating on port %s", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), router))
