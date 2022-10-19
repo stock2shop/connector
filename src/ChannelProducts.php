@@ -12,8 +12,6 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         Share\DTO\ChannelProducts $channelProducts,
         Share\DTO\Channel         $channel
     ): Share\DTO\ChannelProducts {
-        Helper::setDataDir();
-
         // keep track of which codes need to be deleted
         $deleteCodes   = [];
         $touchProducts = [];
@@ -133,7 +131,6 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         Share\DTO\ChannelProducts $channelProducts,
         Share\DTO\Channel         $channel
     ): Share\DTO\ChannelProducts {
-        Helper::setDataDir();
         // channel only allows us to read products by channel_product_code or in pages
         // get channel_product_codes
         $codes = [];

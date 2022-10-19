@@ -8,15 +8,6 @@ use Stock2Shop\Share;
 
 class Helper
 {
-    public const DATA_DIR = __DIR__ . '/data';
-
-    public static function setDataDir()
-    {
-        if (!is_dir(self::DATA_DIR)) {
-            mkdir(self::DATA_DIR);
-        }
-    }
-
     /**
      * This function will create a stdClass object with fields specified by the channel.
      * Field values are set using the ChannelProduct passed as a param
@@ -128,6 +119,7 @@ class Helper
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, 'http://localhost:1234/clean');
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_exec($ch);
     }
 }
