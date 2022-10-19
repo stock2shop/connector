@@ -70,7 +70,7 @@ Copy dependencies to vendor dir
 go mod vendor
 ```
 
-## build
+## Run
 
 In the `example_ecommerce_store` first build the program 
 ```bash
