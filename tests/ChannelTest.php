@@ -91,7 +91,8 @@ final class ChannelTest extends Base
         $existing = $con->getByCode($cps, $channel);
         $this->assertSameSize(
             $existing->channel_products,
-            $cps->channel_products);
+            $cps->channel_products
+        );
 
 
         foreach ($cps->channel_products as $k => $cp) {

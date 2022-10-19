@@ -11,8 +11,7 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
     public function sync(
         Share\DTO\ChannelProducts $channelProducts,
         Share\DTO\Channel         $channel
-    ): Share\DTO\ChannelProducts
-    {
+    ): Share\DTO\ChannelProducts {
         Helper::setDataDir();
 
         // keep track of which codes need to be deleted
@@ -81,9 +80,7 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         string            $channel_product_code,
         int               $limit,
         Share\DTO\Channel $channel
-    ): Share\DTO\ChannelProducts
-    {
-
+    ): Share\DTO\ChannelProducts {
         // create url with params
         $endpoint = 'http://localhost:1234/products/page?';
         $params   = [
@@ -135,8 +132,7 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
     public function getByCode(
         Share\DTO\ChannelProducts $channelProducts,
         Share\DTO\Channel         $channel
-    ): Share\DTO\ChannelProducts
-    {
+    ): Share\DTO\ChannelProducts {
         Helper::setDataDir();
         // channel only allows us to read products by channel_product_code or in pages
         // get channel_product_codes
