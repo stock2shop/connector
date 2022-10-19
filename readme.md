@@ -38,6 +38,9 @@ composer install
 ```
 
 ## running Tests
+
+In order to run the tests you first need to start the [Example Ecommerce Store](#example-ecommerce-store)
+
 ```
 ./vendor/bin/phpunit
 ```
@@ -48,7 +51,6 @@ composer install
 - Use strict types `declare(strict_types=1);`
 
 ***
-
 ## Example Ecommerce store
 
 Using go modules for dependencies, the following commands should be run in the `connector/example_ecommerce_store` directory.
