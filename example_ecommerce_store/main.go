@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 	"os"
@@ -17,12 +17,12 @@ import (
 )
 
 func main() {
-	router := mux.NewRouter()
-	router.HandleFunc("/products", PutProducts).Methods(http.MethodPost)
-	router.HandleFunc("/products", GetProducts).Methods(http.MethodGet)
-	router.HandleFunc("/products/page", GetProductsPage).Methods(http.MethodGet)
-	router.HandleFunc("/products", DeleteProducts).Methods(http.MethodDelete)
-	router.HandleFunc("/clean", CleanupDataDir).Methods(http.MethodDelete)
+	router := httprouter.New()
+	router.POST("/products", PutProducts)
+	router.GET("/products", GetProducts)
+	router.GET("/products/page", GetProductsPage)
+	router.DELETE("/products", DeleteProducts)
+	router.DELETE("/clean", CleanupDataDir)
 
 	// os.Args[0] is the program
 	port := os.Args[1]
@@ -92,7 +92,7 @@ func (p *Products) Validate() error {
 	return nil
 }
 
-func PutProducts(w http.ResponseWriter, r *http.Request) {
+func PutProducts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	dataPath := fmt.Sprintf("%s", os.Args[2])
 	products := Products{}
 
@@ -145,7 +145,7 @@ func PutProducts(w http.ResponseWriter, r *http.Request) {
 	Response(w, http.StatusAccepted, products)
 }
 
-func GetProducts(w http.ResponseWriter, r *http.Request) {
+func GetProducts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	dataPath := fmt.Sprintf("%s", os.Args[2])
 	getProducts := ProductIDs{}
 
@@ -192,7 +192,7 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetProductsPage(w http.ResponseWriter, r *http.Request) {
+func GetProductsPage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	dataPath := fmt.Sprintf("%s", os.Args[2])
 
 	// get channel_product_code, in this case it is an offset, default to 0 if not included in url params
@@ -215,7 +215,6 @@ func GetProductsPage(w http.ResponseWriter, r *http.Request) {
 	var files []string
 	err = filepath.Walk(dataPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			fmt.Println(err)
 			return err
 		}
 
@@ -279,7 +278,7 @@ func GetProductsPage(w http.ResponseWriter, r *http.Request) {
 	Response(w, http.StatusAccepted, products)
 }
 
-func DeleteProducts(w http.ResponseWriter, r *http.Request) {
+func DeleteProducts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	dataPath := fmt.Sprintf("%s", os.Args[2])
 
 	ids := ProductIDs{}
@@ -331,7 +330,7 @@ func DeleteProducts(w http.ResponseWriter, r *http.Request) {
 	Response(w, http.StatusAccepted, nil)
 }
 
-func CleanupDataDir(w http.ResponseWriter, r *http.Request) {
+func CleanupDataDir(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	dataPath := fmt.Sprintf("%s", os.Args[2])
 
 	// get all files
@@ -356,7 +355,6 @@ func CleanupDataDir(w http.ResponseWriter, r *http.Request) {
 	for _, file := range files {
 		err := os.Remove(file)
 		if err != nil {
-			log.Printf("err: %v", err)
 			Response(w, http.StatusBadRequest, err.Error())
 			return
 		}
