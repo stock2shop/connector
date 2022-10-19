@@ -37,10 +37,13 @@ cd share
 composer install
 ```
 
-## running Tests
+## running tests
 
-In order to run the tests you first need to start the [Example Ecommerce Store](#example-ecommerce-store)
-
+First start the example server provided, binaries for `macOS`, `windows` and `linux` systems can be found at `connector/example_ecommerce_store/bin/`.
+```bash
+./example_ecommerce_store/bin/<os>
+```
+Once the server has been started you can run the tests
 ```
 ./vendor/bin/phpunit
 ```
