@@ -1,5 +1,5 @@
-./example_ecommerce_store/vendor
-./example_ecommerce_store/main
+example_ecommerce_store/vendor/
+example_ecommerce_store/build/
 /.php-cs-fixer.cache
 .phpunit.result.cache
 .idea

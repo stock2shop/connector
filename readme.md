@@ -72,12 +72,12 @@ go mod vendor
 
 In the `example_ecommerce_store` first build the program 
 ```bash
-    go build -o <EXECUTIBLE_NAME>
+    go build -o build/<EXECUTIBLE_NAME>
 ```
 
 Once built run the executable by passing two arguments
 1. port at which you would like the server to run
 2. path at which you would like the program to save product data
 ```bash
-    ./<EXECUTIBLE_NAME> <SERVER_PORT> <DATA_PATH>
+    ./build/<EXECUTIBLE_NAME> <SERVER_PORT> <DATA_PATH>
 ```

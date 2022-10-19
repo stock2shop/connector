@@ -18,27 +18,117 @@ class Helper
     }
 
     /**
-     * Path for storing product
+     * This function will create a stdClass object with fields specified by the channel.
+     * Field values are set using the ChannelProduct passed as a param
      */
-    public static function getProductPath(Share\DTO\ChannelProduct $product): string
+    public static function createPayloadProduct(Share\DTO\ChannelProduct $product): \stdClass
     {
-        return sprintf('%s/%s.json', self::DATA_DIR, $product->id);
+        // product
+        $channelProduct = new \stdClass();
+        $channelProduct->name = $product->title;
+        $channelProduct->id = $product->channel_product_code ?? null;
+        $channelProduct->variants = [];
+        $channelProduct->images = [];
+
+        // set variants
+        foreach ($product->variants as $v) {
+            $variant = new \stdClass();
+            $variant->sku = $v->sku;
+            $variant->id = $v->channel_variant_code ?? null;
+            $channelProduct->variants[] = $variant;
+        }
+
+        // set images
+        foreach ($product->images as $i) {
+            $image = new \stdClass();
+            $image->source = $i->src;
+            $image->id = $i->channel_image_code ?? null;
+            $channelProduct->images[] = $image;
+        }
+
+        return $channelProduct;
     }
 
     /**
-     * Retrieves all .json files from data dir and parses them.
+     * This function will set the appropriate fields on the Share\DTO\ChannelProducts based off of the
+     * channels response
      */
-    public static function getJSONFiles(): array
+    public static function setChannelProductFields(Share\DTO\ChannelProducts &$products, array $data)
     {
-        $files     = [];
-        $fileNames = array_diff(scandir(self::DATA_DIR, SCANDIR_SORT_ASCENDING), array('..', '.'));
-        sort($fileNames);
-        foreach ($fileNames as $file) {
-            if (str_ends_with($file, '.json')) {
-                $contents     = file_get_contents(self::DATA_DIR . '/' . $file);
-                $files[$file] = json_decode($contents, true);
+        // we know that a Share\DTO\ChannelProducts Title field is the equivalent of the data's name field
+        foreach ($data as $p) {
+            /** @var $product Share\DTO\ChannelProducts  **/
+            foreach ($products->channel_products as $value=>$product) {
+                if ($product->title == $p->name) {
+                    $product->channel_product_code = $p->id;
+                    $product->success = true;
+
+                    // set variants channel_variant_code
+                    foreach ($p->variants as $v) {
+                        foreach ($product->variants as $value=>$variant) {
+                            if ($v->sku == $variant->sku) {
+                                $variant->channel_variant_code = $v->id;
+                                $variant->success = true;
+                            }
+                        }
+                    }
+
+                    // set images channel_image_code
+                    foreach ($p->images as $i) {
+                        foreach ($product->images as $value=>$image) {
+                            if ($i->source == $image->src) {
+                                $image->channel_image_code = $i->id;
+                                $image->success = true;
+                            }
+                        }
+                    }
+                }
             }
         }
-        return $files;
+    }
+
+    /**
+     * Convenience function for marking multiple products as deleted
+     */
+    public static function markAsDeleted(Share\DTO\ChannelProducts &$products, array $data)
+    {
+        foreach ($data as $cpc) {
+            foreach ($products->channel_products as $p) {
+                /** @var $product Share\DTO\ChannelProducts  **/
+                if ($p->channel_product_code == $cpc) {
+                    self::setDeleted($p);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * This function will set the fields, that are no longer valid,
+     * post deletion from the channel to null
+     */
+    public static function setDeleted(Share\DTO\ChannelProduct &$product)
+    {
+        $product->channel_product_code = null;
+        foreach ($product->variants as $v) {
+            $v->channel_variant_code = null;
+            $v->success = true;
+        }
+        foreach ($product->images as $i) {
+            $i->channel_image_code = null;
+            $i->success = true;
+        }
+        $product->success = true;
+    }
+
+    /**
+     * This function will remove all products from the channel
+     */
+    public static function clearChannelProducts()
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'http://localhost:1234/clean');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_exec($ch);
     }
 }

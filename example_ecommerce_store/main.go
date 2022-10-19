@@ -22,6 +22,7 @@ func main() {
 	router.HandleFunc("/products", GetProducts).Methods(http.MethodGet)
 	router.HandleFunc("/products/page", GetProductsPage).Methods(http.MethodGet)
 	router.HandleFunc("/products", DeleteProducts).Methods(http.MethodDelete)
+	router.HandleFunc("/clean", CleanupDataDir).Methods(http.MethodDelete)
 
 	// os.Args[0] is the program
 	port := os.Args[1]
@@ -49,9 +50,20 @@ func Response(w http.ResponseWriter, statusCode int, data interface{}) {
 }
 
 type Product struct {
-	Title string   `json:"title"`
-	ID    string   `json:"id"`
-	Skus  []string `json:"skus"`
+	Name     string    `json:"name"`
+	ID       string    `json:"id"`
+	Variants []Variant `json:"variants"`
+	Images   []Image   `json:"images"`
+}
+
+type Variant struct {
+	Sku string `json:"sku"`
+	ID  string `json:"id"`
+}
+
+type Image struct {
+	Source string `json:"source"`
+	ID     string `json:"id"`
 }
 
 type Products []Product
@@ -59,12 +71,12 @@ type Products []Product
 type ProductIDs []string
 
 func (p *Product) Validate() error {
-	if p.Title == "" {
-		err := errors.New("product Title is required")
+	if p.Name == "" {
+		err := errors.New("product Name is required")
 		return err
 	}
-	if len(p.Skus) == 0 {
-		err := errors.New("product Skus are required")
+	if len(p.Variants) == 0 {
+		err := errors.New("product must have at least one variant")
 		return err
 	}
 	return nil
@@ -100,8 +112,21 @@ func PutProducts(w http.ResponseWriter, r *http.Request) {
 
 	// write products to file, generate id if it is not set
 	for i := 0; i < len(products); i++ {
+		// ID
 		if products[i].ID == "" {
 			products[i].ID = strconv.Itoa(int(time.Now().UnixNano()))
+		}
+		// Variants
+		for j := 0; j < len(products[i].Variants); j++ {
+			if products[i].Variants[j].ID == "" {
+				products[i].Variants[j].ID = strconv.Itoa(int(time.Now().UnixNano()))
+			}
+		}
+		// Images
+		for j := 0; j < len(products[i].Images); j++ {
+			if products[i].Images[j].ID == "" {
+				products[i].Images[j].ID = strconv.Itoa(int(time.Now().UnixNano()))
+			}
 		}
 
 		data, err := json.MarshalIndent(products[i], "", "    ")
@@ -149,7 +174,7 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 		}
 		buf.Write(b)
 
-		if i < len(getProducts) - 1 {
+		if i < len(getProducts)-1 {
 			buf.Write([]byte(","))
 		}
 	}
@@ -170,21 +195,16 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 func GetProductsPage(w http.ResponseWriter, r *http.Request) {
 	dataPath := fmt.Sprintf("%s", os.Args[2])
 
-	// get offset, default to 0 if not included in url params
-	o := r.URL.Query().Get("offset")
-	if o == "" {
-		o = "0"
-	}
-	offset, err := strconv.Atoi(o)
-	if err != nil {
-		Response(w, http.StatusBadRequest, "invalid offset")
-		return
+	// get channel_product_code, in this case it is an offset, default to 0 if not included in url params
+	cpc := r.URL.Query().Get("channel_product_code")
+	if cpc == "" {
+		cpc = "0"
 	}
 
 	// get offset, default to 10 if not included in url params
 	l := r.URL.Query().Get("limit")
 	if l == "" {
-		o = "10"
+		l = "10"
 	}
 	limit, err := strconv.Atoi(l)
 	if err != nil {
@@ -215,28 +235,34 @@ func GetProductsPage(w http.ResponseWriter, r *http.Request) {
 		Response(w, http.StatusAccepted, Products{})
 		return
 	}
-	if offset >= len(files) {
-		Response(w, http.StatusAccepted, Products{})
-		return
-	}
 
 	// read file data and append to buffer
 	buf := new(bytes.Buffer)
 	buf.Write([]byte("["))
 
+	offset := 0
+	if cpc != "0" {
+		for i := 0; i < len(files); i++ {
+			if strings.Contains(files[i], cpc) {
+				offset = i + 1
+				break
+			}
+		}
+	}
+
 	for i := 0; i < limit; i++ {
-		if offset + i >= len(files) {
+		if offset+i >= len(files) {
 			break
 		}
 
-		b, err := os.ReadFile(files[offset + i])
+		b, err := os.ReadFile(files[offset+i])
 		if err != nil {
-			Response(w, http.StatusBadRequest, fmt.Sprintf("unable to read file: %v", files[offset + i]))
+			Response(w, http.StatusBadRequest, fmt.Sprintf("unable to read file: %v", files[offset+i]))
 			return
 		}
 		buf.Write(b)
 
-		if (i + 1 < limit) && (offset + i + 1 < len(files)) {
+		if (i+1 < limit) && (offset+i+1 < len(files)) {
 			buf.Write([]byte(","))
 		}
 	}
@@ -299,6 +325,40 @@ func DeleteProducts(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
+		}
+	}
+
+	Response(w, http.StatusAccepted, nil)
+}
+
+func CleanupDataDir(w http.ResponseWriter, r *http.Request) {
+	dataPath := fmt.Sprintf("%s", os.Args[2])
+
+	// get all files
+	var files []string
+	err := filepath.Walk(dataPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		if !info.IsDir() && strings.HasSuffix(path, ".json") {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		Response(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// remove files
+	for _, file := range files {
+		err := os.Remove(file)
+		if err != nil {
+			log.Printf("err: %v", err)
+			Response(w, http.StatusBadRequest, err.Error())
+			return
 		}
 	}
 

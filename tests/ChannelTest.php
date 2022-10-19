@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Stock2Shop\Tests\Connector;
 
 use Stock2Shop\Connector\ChannelCreator;
+use Stock2Shop\Connector\Helper;
 use Stock2Shop\Share;
 
 final class ChannelTest extends Base
 {
     public function testSync()
     {
+        Helper::clearChannelProducts();
+
         $creator         = new ChannelCreator();
         $con             = $creator->createChannelProducts();
         $channel         = new Share\DTO\Channel($this->getTestDataChannel());
@@ -36,9 +39,9 @@ final class ChannelTest extends Base
         $this->assertNotEmpty($cps->channel_products[1]->images[1]->channel_image_code);
 
         // sync one, delete the other
-        $data                                             = $this->getTestDataChannelProducts();
+        $data                                  = $this->getTestDataChannelProducts();
         $data['channel_products'][1]['delete'] = true;
-        $cps2                                             = $con->sync(new Share\DTO\ChannelProducts($data), $channel);
+        $cps2                                  = $con->sync(new Share\DTO\ChannelProducts($data), $channel);
         $this->assertTrue($cps->channel_products[0]->success);
         $this->assertNotEmpty($cps2->channel_products[0]->channel_product_code);
         $this->assertTrue($cps2->channel_products[0]->variants[0]->success);
@@ -59,16 +62,22 @@ final class ChannelTest extends Base
 
     public function testGetByCode()
     {
+        Helper::clearChannelProducts();
+
         $creator = new ChannelCreator();
         $con     = $creator->createChannelProducts();
         $channel = new Share\DTO\Channel($this->getTestDataChannel());
-        $con->sync(
+        $cps     = $con->sync(
             new Share\DTO\ChannelProducts($this->getTestDataChannelProducts()),
             $channel
         );
 
-        // get channel codes and reset flags
-        $cps = $con->get('', 2, $channel);
+        // channel_product_codes should be set
+        foreach ($cps->channel_products as $cp) {
+            $this->assertNotEmpty($cp->channel_product_code);
+        }
+
+        // reset flags
         foreach ($cps->channel_products as $cp) {
             $cp->success = null;
             foreach ($cp->variants as $v) {
@@ -78,7 +87,13 @@ final class ChannelTest extends Base
                 $i->success = null;
             }
         }
+
         $existing = $con->getByCode($cps, $channel);
+        $this->assertSameSize(
+            $existing->channel_products,
+            $cps->channel_products);
+
+
         foreach ($cps->channel_products as $k => $cp) {
             $this->assertTrue($existing->channel_products[$k]->success);
             $this->assertEquals(
@@ -104,6 +119,8 @@ final class ChannelTest extends Base
 
     public function testGet()
     {
+        Helper::clearChannelProducts();
+
         $creator         = new ChannelCreator();
         $con             = $creator->createChannelProducts();
         $channel         = new Share\DTO\Channel($this->getTestDataChannel());
