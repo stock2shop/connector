@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Stock2Shop\Connector;
 
-use JetBrains\PhpStorm\Pure;
 use Stock2Shop\Connector\DemoAPI\Image;
 use Stock2Shop\Connector\DemoAPI\Option;
 use Stock2Shop\Connector\DemoAPI\Product;
@@ -12,7 +11,7 @@ use Stock2Shop\Share\DTO;
 
 class Transform
 {
-    #[Pure] public static function DtoToDemoProduct(DTO\ChannelProduct $product): Product
+    public static function DtoToDemoProduct(DTO\ChannelProduct $product): Product
     {
         $options = [];
         $images  = [];

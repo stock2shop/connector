@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Stock2Shop\Connector\DemoAPI;
 
-use JetBrains\PhpStorm\Pure;
 use Stock2Shop\Share;
 
 class Option
@@ -12,7 +11,7 @@ class Option
     public ?string $id;
     public string $sku;
 
-    #[Pure] public function __construct(array $data)
+    public function __construct(array $data)
     {
         $this->sku = self::stringFrom($data, 'sku');
         $this->id  = self::stringFrom($data, 'id');

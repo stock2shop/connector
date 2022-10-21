@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Stock2Shop\Connector\DemoAPI;
 
-use JetBrains\PhpStorm\Pure;
 use Stock2Shop\Share;
 
 class Product
@@ -16,7 +15,7 @@ class Product
     /** @var Image[] */
     public array $images;
 
-    #[Pure] public function __construct(array $data)
+    public function __construct(array $data)
     {
         $this->id      = self::stringFrom($data, 'id');
         $this->name    = self::stringFrom($data, 'name');
@@ -27,7 +26,7 @@ class Product
     /**
      * @return Product[]
      */
-    #[Pure] public static function createArray(array $data): array
+    public static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {
