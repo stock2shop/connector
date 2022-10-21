@@ -6,7 +6,7 @@
   "meta": [
     {
       "key": "api_url",
-      "value": "https://www.your-store.com/wc-api/v3"
+      "value": "http://localhost:<port>"
     },
     {
       "key": "foo",
