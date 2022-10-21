@@ -50,20 +50,20 @@ func Response(w http.ResponseWriter, statusCode int, data interface{}) {
 }
 
 type Product struct {
-	Name     string    `json:"name"`
-	ID       string    `json:"id"`
-	Variants []Variant `json:"variants"`
-	Images   []Image   `json:"images"`
+	Name    string    `json:"name"`
+	ID      string    `json:"id"`
+	Options []Options `json:"options"`
+	Images  []Image   `json:"images"`
 }
 
-type Variant struct {
+type Options struct {
 	Sku string `json:"sku"`
 	ID  string `json:"id"`
 }
 
 type Image struct {
-	Source string `json:"source"`
-	ID     string `json:"id"`
+	Url string `json:"url"`
+	ID  string `json:"id"`
 }
 
 type Products []Product
@@ -75,8 +75,8 @@ func (p *Product) Validate() error {
 		err := errors.New("product Name is required")
 		return err
 	}
-	if len(p.Variants) == 0 {
-		err := errors.New("product must have at least one variant")
+	if len(p.Options) == 0 {
+		err := errors.New("product must have at least one option")
 		return err
 	}
 	return nil
@@ -117,9 +117,9 @@ func PutProducts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 			products[i].ID = strconv.Itoa(int(time.Now().UnixNano()))
 		}
 		// Variants
-		for j := 0; j < len(products[i].Variants); j++ {
-			if products[i].Variants[j].ID == "" {
-				products[i].Variants[j].ID = strconv.Itoa(int(time.Now().UnixNano()))
+		for j := 0; j < len(products[i].Options); j++ {
+			if products[i].Options[j].ID == "" {
+				products[i].Options[j].ID = strconv.Itoa(int(time.Now().UnixNano()))
 			}
 		}
 		// Images
