@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Stock2Shop\Tests\Connector;
 
+use GuzzleHttp\Client;
+use Stock2Shop\Connector\DemoAPI\API;
 use Stock2Shop\Connector\ChannelCreator;
+use Stock2Shop\Connector\DemoAPI\Option;
+use Stock2Shop\Connector\DemoAPI\Product;
 use Stock2Shop\Connector\Helper;
 use Stock2Shop\Share;
 
@@ -12,7 +16,7 @@ final class ChannelTest extends Base
 {
     public function testSync()
     {
-        Helper::clearChannelProducts();
+        self::cleanupDataDir();
 
         $creator         = new ChannelCreator();
         $con             = $creator->createChannelProducts();
@@ -38,10 +42,9 @@ final class ChannelTest extends Base
         $this->assertNotEmpty($cps->channel_products[1]->images[0]->channel_image_code);
         $this->assertNotEmpty($cps->channel_products[1]->images[1]->channel_image_code);
 
-        // sync one, delete the other
-        $data                                  = $this->getTestDataChannelProducts();
-        $data['channel_products'][1]['delete'] = true;
-        $cps2                                  = $con->sync(new Share\DTO\ChannelProducts($data), $channel);
+        // set one product to delete and sync again
+        $cps->channel_products[1]->delete = true;
+        $cps2                             = $con->sync($cps, $channel);
         $this->assertTrue($cps->channel_products[0]->success);
         $this->assertNotEmpty($cps2->channel_products[0]->channel_product_code);
         $this->assertTrue($cps2->channel_products[0]->variants[0]->success);
@@ -62,7 +65,7 @@ final class ChannelTest extends Base
 
     public function testGetByCode()
     {
-        Helper::clearChannelProducts();
+        self::cleanupDataDir();
 
         $creator = new ChannelCreator();
         $con     = $creator->createChannelProducts();
@@ -96,20 +99,17 @@ final class ChannelTest extends Base
 
 
         foreach ($cps->channel_products as $k => $cp) {
-            $this->assertTrue($existing->channel_products[$k]->success);
             $this->assertEquals(
                 $cp->channel_product_code,
                 $existing->channel_products[$k]->channel_product_code
             );
             foreach ($cp->variants as $kv => $v) {
-                $this->assertTrue($existing->channel_products[$k]->variants[$kv]->success);
                 $this->assertEquals(
                     $v->channel_variant_code,
                     $existing->channel_products[$k]->variants[$kv]->channel_variant_code
                 );
             }
             foreach ($cp->images as $ki => $i) {
-                $this->assertTrue($existing->channel_products[$k]->images[$ki]->success);
                 $this->assertEquals(
                     $i->channel_image_code,
                     $existing->channel_products[$k]->images[$ki]->channel_image_code
@@ -120,7 +120,7 @@ final class ChannelTest extends Base
 
     public function testGet()
     {
-        Helper::clearChannelProducts();
+        self::cleanupDataDir();
 
         $creator         = new ChannelCreator();
         $con             = $creator->createChannelProducts();
@@ -134,12 +134,25 @@ final class ChannelTest extends Base
         $this->assertCount(1, $result1->channel_products);
         $this->assertCount(1, $result2->channel_products);
         $this->assertCount(0, $result3->channel_products);
-        $this->assertTrue($result1->channel_products[0]->success);
-        $this->assertTrue($result2->channel_products[0]->success);
         $this->assertGreaterThan('', $result1->channel_products[0]->channel_product_code);
         $this->assertGreaterThan(
             $result1->channel_products[0]->channel_product_code,
             $result2->channel_products[0]->channel_product_code
         );
+    }
+
+    private function cleanupDataDir()
+    {
+        // get channel so we can get the base url
+        $channel = new Share\DTO\Channel($this->getTestDataChannel());
+        foreach ($channel->meta as $m) {
+            if ($m->key === 'api_url') {
+                $client = new Client([
+                    'base_uri' => $m->value
+                ]);
+                $client->request('DELETE', '/clean');
+                return;
+            }
+        }
     }
 }
