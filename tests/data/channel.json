@@ -6,7 +6,7 @@
   "meta": [
     {
       "key": "api_url",
-      "value": "http://localhost:<port>"
+      "value": "http://localhost:8080"
     },
     {
       "key": "foo",
