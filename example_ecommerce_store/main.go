@@ -25,18 +25,13 @@ func main() {
 	router.DELETE("/clean", CleanupDataDir)
 
 	// os.Args[0] is the program
-	port := os.Args[1]
-	if port == "" {
-		log.Fatal("server port must be specified as the first argument")
-	}
-
-	path := os.Args[2]
+	path := os.Args[1]
 	if path == "" {
 		log.Fatal("data storage path must be specified as the second argument")
 	}
 
-	log.Printf("server stating on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), router))
+	log.Printf("server stating on port 8080")
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":8080"), router))
 }
 
 func Response(w http.ResponseWriter, statusCode int, data interface{}) {
@@ -93,7 +88,7 @@ func (p *Products) Validate() error {
 }
 
 func PutProducts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	dataPath := fmt.Sprintf("%s", os.Args[2])
+	dataPath := fmt.Sprintf("%s", os.Args[1])
 	products := Products{}
 
 	// populate products with data from request
@@ -146,7 +141,7 @@ func PutProducts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	dataPath := fmt.Sprintf("%s", os.Args[2])
+	dataPath := fmt.Sprintf("%s", os.Args[1])
 	getProducts := ProductIDs{}
 
 	// populate products with data from request
@@ -193,7 +188,7 @@ func GetProducts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func GetProductsPage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	dataPath := fmt.Sprintf("%s", os.Args[2])
+	dataPath := fmt.Sprintf("%s", os.Args[1])
 
 	// get channel_product_code, in this case it is an offset, default to 0 if not included in url params
 	cpc := r.URL.Query().Get("channel_product_code")
@@ -279,7 +274,7 @@ func GetProductsPage(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 }
 
 func DeleteProducts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	dataPath := fmt.Sprintf("%s", os.Args[2])
+	dataPath := fmt.Sprintf("%s", os.Args[1])
 
 	ids := ProductIDs{}
 
@@ -331,7 +326,7 @@ func DeleteProducts(w http.ResponseWriter, r *http.Request, _ httprouter.Params)
 }
 
 func CleanupDataDir(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	dataPath := fmt.Sprintf("%s", os.Args[2])
+	dataPath := fmt.Sprintf("%s", os.Args[1])
 
 	// get all files
 	var files []string
