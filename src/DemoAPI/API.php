@@ -82,7 +82,22 @@ class API
         return Product::createArray((array)$body);
     }
 
-    public function deleteProducts($body)
+    /**
+     * @param string[] $codes
+     * @throws GuzzleException
+     */
+    public function deleteProducts(array $codes): int
     {
+        // create guzzle client
+        $client = new Client([
+            'base_uri' => $this->url,
+        ]);
+
+        // execute request
+        $response = $client->request('DELETE', '/products', ['body' => json_encode($codes)]);
+
+
+        // get response body as json
+        return $response->getStatusCode();
     }
 }

@@ -4,29 +4,30 @@ declare(strict_types=1);
 
 namespace Stock2Shop\Connector\DemoAPI;
 
+use JetBrains\PhpStorm\Pure;
 use Stock2Shop\Share;
 
 class Product
 {
-    public ?int $id;
+    public ?string $id;
     public string $name;
-    /** @var Option[]  */
+    /** @var Option[] */
     public array $options;
-    /** @var Image[]  */
+    /** @var Image[] */
     public array $images;
 
-    public function __construct(array $data)
+    #[Pure] public function __construct(array $data)
     {
-        $this->id = self::intFrom($data, 'id');
-        $this->name = self::stringFrom($data, 'name');
+        $this->id      = self::stringFrom($data, 'id');
+        $this->name    = self::stringFrom($data, 'name');
         $this->options = $data['options'];
-        $this->images = $data['images'];
+        $this->images  = $data['images'];
     }
 
     /**
      * @return Product[]
      */
-    public static function createArray(array $data): array
+    #[Pure] public static function createArray(array $data): array
     {
         $a = [];
         foreach ($data as $item) {
@@ -35,18 +36,10 @@ class Product
         return $a;
     }
 
-    public static function intFrom(array $data, string $key): ?int
-    {
-        if (array_key_exists($key, $data)) {
-            return (int) $data[$key];
-        }
-        return null;
-    }
-
     public static function stringFrom(array $data, string $key): ?string
     {
         if (array_key_exists($key, $data)) {
-            return (string) $data[$key];
+            return (string)$data[$key];
         }
         return null;
     }
