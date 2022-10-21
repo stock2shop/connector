@@ -39,11 +39,13 @@ composer install
 
 ## running tests
 
-First start the example server provided, binaries for `macOS`, `windows` and `linux` systems can be found at `connector/example_ecommerce_store/bin/`.
+1. Run the example channel
 ```bash
-./example_ecommerce_store/bin/<os>
+# for mac os, binaries for linux and windows have been included
+# data_dir is the path to the folder which the server should write to
+./example_ecommerce_store/bin/mac <data_dir>
 ```
-Once the server has been started you can run the tests
+2. Once the server has been started you can run the tests
 ```
 ./vendor/bin/phpunit
 ```
@@ -80,9 +82,8 @@ In the `example_ecommerce_store` first build the program
     go build -o build/<EXECUTIBLE_NAME>
 ```
 
-Once built run the executable by passing two arguments
-1. port at which you would like the server to run
+Once built run the executable by passing one argument
 2. path at which you would like the program to save product data
 ```bash
-    ./build/<EXECUTIBLE_NAME> <SERVER_PORT> <DATA_PATH>
+    ./build/<EXECUTIBLE_NAME> <DATA_PATH>
 ```
