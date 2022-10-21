@@ -5,11 +5,7 @@ declare(strict_types=1);
 namespace Stock2Shop\Tests\Connector;
 
 use GuzzleHttp\Client;
-use Stock2Shop\Connector\DemoAPI\API;
 use Stock2Shop\Connector\ChannelCreator;
-use Stock2Shop\Connector\DemoAPI\Option;
-use Stock2Shop\Connector\DemoAPI\Product;
-use Stock2Shop\Connector\Helper;
 use Stock2Shop\Share;
 
 final class ChannelTest extends Base
