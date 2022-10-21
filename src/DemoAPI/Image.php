@@ -25,5 +25,4 @@ class Image
         }
         return null;
     }
-
 }

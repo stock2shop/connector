@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Stock2Shop\Connector\Log;
 
-use \Monolog\Formatter;
+use Monolog\Formatter;
 use Stock2Shop\Share\DTO\Log;
 
 class JsonFormatter extends Formatter\JsonFormatter
@@ -18,12 +18,11 @@ class JsonFormatter extends Formatter\JsonFormatter
         // Flatten structure
         foreach ($log as $k => $v) {
             // ignore nulls / empty and context
-            if(!empty($v) && $k !== 'context') {
+            if (!empty($v) && $k !== 'context') {
                 $record[$k] = $v;
             }
         }
         $record['context'] = $log->context;
         return $this->toJson($record, true) . ($this->appendNewline ? "\n" : '');
     }
-
 }

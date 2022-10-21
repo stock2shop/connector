@@ -12,7 +12,6 @@ use Monolog;
 
 class WriterTest extends TestCase
 {
-
     public function testWrite()
     {
         // test writing logs to file
@@ -23,7 +22,7 @@ class WriterTest extends TestCase
         ]);
         // clean test file
         $file = $env->getLogFSDIR() . $env->getLogFSFileName();
-        if(file_exists($file)) {
+        if (file_exists($file)) {
             unlink($file);
         }
 
@@ -57,5 +56,4 @@ class WriterTest extends TestCase
         $this->assertEquals('bar', $obj['context']['foo']);
         $this->assertArrayHasKey('datetime', $obj);
     }
-
 }
