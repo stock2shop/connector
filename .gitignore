@@ -1,9 +1,8 @@
-example_ecommerce_store/vendor/
+demo_store/vendor/
 /.php-cs-fixer.cache
 .env
 .phpunit.result.cache
 .idea
 .run
-src/data/
 /vendor/
 /tests/output
