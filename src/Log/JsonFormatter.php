@@ -12,7 +12,7 @@ class JsonFormatter extends Formatter\JsonFormatter
     public function format(array $record): string
     {
         $record = $this->normalize($record);
-        $log = new Log($record["context"]);
+        $log    = new Log($record["context"]);
         // Transform record to be consistent with Stock2Shop.
         // Property names must be the same.
         // Flatten structure

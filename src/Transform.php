@@ -11,28 +11,54 @@ use Stock2Shop\Share\DTO;
 
 class Transform
 {
-    public static function DtoToDemoProduct(DTO\ChannelProduct $product): Product
+    /**
+     * @param DTO\ChannelProduct[] $channelProducts
+     * @return Product[]
+     */
+    public static function getDemoProducts(array $channelProducts): array
     {
-        $options = [];
-        $images  = [];
-        foreach ($product->variants as $v) {
-            $options[] = new Option([
-                'id'  => $v->channel_variant_code,
-                'sku' => $v->sku
+        $products = [];
+        foreach ($channelProducts as $cp) {
+            $options = [];
+            $images  = [];
+            foreach ($cp->variants as $v) {
+                $options[] = new Option([
+                    'id'  => $v->channel_variant_code,
+                    'sku' => $v->sku
+                ]);
+            }
+            foreach ($cp->images as $i) {
+                $images[] = new Image([
+                    'url' => $i->src,
+                    'id'  => $i->channel_image_code
+                ]);
+            }
+            $products[] = new DemoAPI\Product([
+                'id'      => $cp->channel_product_code,
+                'name'    => $cp->title,
+                'options' => $options,
+                'images'  => $images
             ]);
         }
-        foreach ($product->images as $i) {
-            $images[] = new Image([
-                'url' => $i->src,
-                'id'  => $i->channel_image_code
-            ]);
+        return $products;
+    }
+
+    /**
+     * @param DTO\ChannelProduct[] $channelProducts
+     * @return string[]
+     */
+    public static function getDemoProductIDS(array $channelProducts): array
+    {
+        $ids = [];
+        foreach ($channelProducts as $cp) {
+            if (
+                !is_null($cp->channel_product_code) &&
+                $cp->channel_product_code !== ''
+            ) {
+                $ids[] = $cp->channel_product_code;
+            }
         }
-        return new DemoAPI\Product([
-            'id'      => $product->channel_product_code,
-            'name'    => $product->title,
-            'options' => $options,
-            'images'  => $images
-        ]);
+        return $ids;
     }
 
     /**
@@ -64,68 +90,5 @@ class Transform
         }
 
         return $cps;
-    }
-
-    /**
-     * SetChannelCodesFromDemoProduct will set the following properties
-     * ChannelProduct->channel_product_code
-     * ChannelProduct->success
-     * ChannelProduct->Variants[]->channel_variant_code
-     * ChannelProduct->Variants[]->success
-     * ChannelProduct->Images[]->channel_image_code
-     * ChannelProduct->Images[]->success
-     * ChannelProduct->Images[]->src
-     * @param DTO\ChannelProducts $cps
-     * @param Product[] $dps
-     */
-    public static function SetChannelCodesFromDemoProducts(DTO\ChannelProducts &$cps, array $dps)
-    {
-        foreach ($dps as $dp) {
-            foreach ($cps->channel_products as $x => $cp) {
-                if ($dp->name == $cp->title) {
-                    $cp->channel_product_code = $dp->id;
-                    $cp->success              = true;
-                    foreach ($dp->options as $option) {
-                        foreach ($cp->variants as $y => $variant) {
-                            if ($option->sku == $variant->sku) {
-                                $variant->channel_variant_code = $option->id;
-                                $variant->success              = true;
-                            }
-                        }
-                    }
-                    foreach ($dp->images as $image) {
-                        foreach ($cp->images as $z => $i) {
-                            if ($image->url == $i->src) {
-                                $i->channel_image_code = $image->id;
-                                $i->success            = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @param string[] $codes the channel_product_codes to be unset
-     */
-    public static function UnsetChannelProperties(DTO\ChannelProducts $cps, array $codes)
-    {
-        foreach ($codes as $code) {
-            foreach ($cps->channel_products as $x => $cp) {
-                if ($code == $cp->channel_product_code) {
-                    $cp->channel_product_code = null;
-                    $cp->success              = true;
-                    foreach ($cp->variants as $y => $v) {
-                        $v->channel_variant_code = null;
-                        $v->success              = true;
-                    }
-                    foreach ($cp->images as $z => $i) {
-                        $i->channel_image_code = null;
-                        $i->success            = true;
-                    }
-                }
-            }
-        }
     }
 }

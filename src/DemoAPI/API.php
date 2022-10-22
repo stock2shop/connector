@@ -11,10 +11,14 @@ use Stock2Shop\Share;
 class API
 {
     private readonly string $url;
+    private Client $client;
 
     public function __construct(string $url)
     {
-        $this->url = $url;
+        $this->url    = $url;
+        $this->client = new Client([
+            'base_uri' => $this->url,
+        ]);
     }
 
     /**
@@ -23,22 +27,15 @@ class API
      */
     public function getProducts(string $fromID, int $limit): array
     {
-        // create guzzle client
-        $client = new Client([
-            'base_uri' => $this->url,
-        ]);
-
-        // execute request
-        $response = $client->request('GET', '/products/page', [
+        $response = $this->client->request('GET', '/products/page', [
             'query' => [
                 'channel_product_code' => $fromID,
-                'limit' => $limit
+                'limit'                => $limit
             ]
         ]);
-
-        // get response body as json
-        $body = json_decode($response->getBody()->getContents());
-        return Product::createArray((array)$body);
+        return Product::createArray(
+            json_decode($response->getBody()->getContents(), true)
+        );
     }
 
     /**
@@ -48,18 +45,10 @@ class API
      */
     public function getProductsByCodes(array $codes): array
     {
-        // create guzzle client
-        $client = new Client([
-            'base_uri' => $this->url,
-        ]);
-
-        // execute request
-        $response = $client->request('GET', '/products', ['body' => json_encode($codes)]);
-
-
-        // get response body as json
-        $body = json_decode($response->getBody()->getContents());
-        return Product::createArray((array)$body);
+        $response = $this->client->request('GET', '/products', ['body' => json_encode($codes)]);
+        return Product::createArray(
+            json_decode($response->getBody()->getContents())
+        );
     }
 
     /**
@@ -69,17 +58,10 @@ class API
      */
     public function postProducts(array $products): array
     {
-        // create guzzle client
-        $client = new Client([
-            'base_uri' => $this->url,
-        ]);
-
-        // execute request
-        $response = $client->request('POST', '/products', ['body' => json_encode($products)]);
-
-        // get response body as json
-        $body = json_decode($response->getBody()->getContents());
-        return Product::createArray((array)$body);
+        $response = $this->client->request('POST', '/products', ['body' => json_encode($products)]);
+        return Product::createArray(
+            json_decode($response->getBody()->getContents(), true)
+        );
     }
 
     /**
@@ -88,16 +70,7 @@ class API
      */
     public function deleteProducts(array $codes): int
     {
-        // create guzzle client
-        $client = new Client([
-            'base_uri' => $this->url,
-        ]);
-
-        // execute request
-        $response = $client->request('DELETE', '/products', ['body' => json_encode($codes)]);
-
-
-        // get response body as json
+        $response = $this->client->request('DELETE', '/products', ['body' => json_encode($codes)]);
         return $response->getStatusCode();
     }
 }

@@ -6,7 +6,7 @@ namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
-class Product
+class Product extends Base
 {
     public ?string $id;
     public string $name;
@@ -17,10 +17,13 @@ class Product
 
     public function __construct(array $data)
     {
+        $options = self::arrayFrom($data, 'options');
+        $images  = self::arrayFrom($data, 'images');
+
         $this->id      = self::stringFrom($data, 'id');
         $this->name    = self::stringFrom($data, 'name');
-        $this->options = $data['options'];
-        $this->images  = $data['images'];
+        $this->options = Option::createArray($options);
+        $this->images  = Image::createArray($images);
     }
 
     /**
@@ -33,13 +36,5 @@ class Product
             $a[] = new Product((array)$item);
         }
         return $a;
-    }
-
-    public static function stringFrom(array $data, string $key): ?string
-    {
-        if (array_key_exists($key, $data)) {
-            return (string)$data[$key];
-        }
-        return null;
     }
 }

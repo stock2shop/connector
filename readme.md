@@ -1,64 +1,84 @@
 # Stock2Shop - PHP Connectors
 
-Example Channel Connector
+Demo Connector
 
 ## Overview
 
-A "channel" is an online shop, a marketplace or a website that has shopping cart functionality, where a business trades
-products and customers place orders. A "connector" is code which makes it possible for synchronization of data between a
+A "channel" is an online shop, a marketplace or a website that has shopping cart functionality.
+e.g. Shopify, Magento or WooCommerce.
+
+A "connector" is code which makes it possible for synchronization of data between a
 channel and Stock2Shop.
 
-For more information please visit the "Integrations" section on our
-website at [https://www.stock2shop.com](https://www.stock2shop.com) or our
-[developer documentation](https://docs.stock2shop.com).
+This repository has a Demo channel API which can be run locally.
+It mimics how a "real" channel might behave.
 
-This channel connector writes data to the OS disk and is used as an example.
+## Demo setup
 
-## Data Flow
-
-Data is passed between applications using [DTOs](https://github.com/stock2shop/share).
-
-The interface to send [ChannelProducts](https://github.com/stock2shop/share/blob/master/src/DTO/ChannelProducts.php) to 
-a [Channel](https://github.com/stock2shop/share/blob/master/src/DTO/Channel.php) can be found 
-[here](https://github.com/stock2shop/share/blob/master/src/Channel/ChannelProductsInterface.php).
-
-For our system to verify that the products exist on the channel, there are two methods available,
-[get](https://github.com/stock2shop/share/blob/2ec36d6d4d60cff9ddea9df73786cfedef323fab/src/Channel/ChannelProductsInterface.php#L104) 
-and [getByCode](https://github.com/stock2shop/share/blob/2ec36d6d4d60cff9ddea9df73786cfedef323fab/src/Channel/ChannelProductsInterface.php#L75) 
-
-[Channel Products](https://github.com/stock2shop/share/blob/master/src/DTO/ChannelProducts.php) are sent in batches 
-to the channel and the connector updates the channel as efficiently as possible.
-
-## setup
+To set up the DEMO webserver and run the below in sequence.  
 
 ```
-git clone https://github.com/stock2shop/share.git
-cd share
+git clone https://github.com/stock2shop/connector.git
+cd connector
 composer install
 ```
 
-## running tests
+Setup your environment.
 
-1. Run the example channel
-```bash
-# for mac os, binaries for linux and windows have been included
-# data_dir is the path to the folder which the server should write to
-./example_ecommerce_store/bin/mac <data_dir>
 ```
-2. Once the server has been started you can run the tests
+cp env.sample .env
 ```
-./vendor/bin/phpunit
+
+Edit the `.env` according to your environment. 
+
+Start the Demo API web server locally.
+The API uses the file system to store information, it has no database.
+Set the data dir when starting the API.
+
+> Binaries for Mac, linux and windows have been included in demo_store directory
+> The demo API is built in Go, instructions to build are below but are not required 
+> to run the project.
+
 ```
+./demo_store/bin/mac /path/to/your/data/dir
+```
+
+Run your tests
+
+```
+vendor/bin/phpunit
+```
+
+Your tests should pass.
+You can view the products saved on the Demo API by looking in the data dir.
+You can also view the logs depending on where you configured this.
+
+## Data Flow
+
+Data is passed between applications using Data Transfer Objects [DTOs](https://github.com/stock2shop/share).
+
+The interface to send [ChannelProducts](https://github.com/stock2shop/share/blob/master/src/DTO/ChannelProducts.php) to
+a [Channel](https://github.com/stock2shop/share/blob/master/src/DTO/Channel.php) can be found
+[here](https://github.com/stock2shop/share/blob/master/src/Channel/ChannelProductsInterface.php).
+
+For our system to verify that the products exist on the channel, there are two methods available,
+[get](https://github.com/stock2shop/share/blob/2ec36d6d4d60cff9ddea9df73786cfedef323fab/src/Channel/ChannelProductsInterface.php#L104)
+and [getByCode](https://github.com/stock2shop/share/blob/2ec36d6d4d60cff9ddea9df73786cfedef323fab/src/Channel/ChannelProductsInterface.php#L75)
+
+[Channel Products](https://github.com/stock2shop/share/blob/master/src/DTO/ChannelProducts.php) are sent in batches
+to the channel and the connector updates the channel as efficiently as possible.
 
 ## General
 
 - PHP version 8.1
 - Use strict types `declare(strict_types=1);`
+- Use PSR12 standards
+- Setup php-cs-fixer in your IDE to enforce coding standards
 
 ***
-## Example Ecommerce store
+## Demo API Build
 
-Using go modules for dependencies, the following commands should be run in the `connector/example_ecommerce_store` directory.
+Using go modules for dependencies, the following commands should be run in the `connector/demo_store` directory.
 
 List all modules
 ```bash
@@ -77,13 +97,7 @@ go mod vendor
 
 ## Run
 
-In the `example_ecommerce_store` first build the program 
+In the `demo_store` first build the program 
 ```bash
     go build -o build/<EXECUTIBLE_NAME>
-```
-
-Once built run the executable by passing one argument
-2. path at which you would like the program to save product data
-```bash
-    ./build/<EXECUTIBLE_NAME> <DATA_PATH>
 ```

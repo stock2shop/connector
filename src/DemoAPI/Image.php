@@ -6,7 +6,7 @@ namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
-class Image
+class Image extends Base
 {
     public string $url;
     public ?string $id;
@@ -17,11 +17,15 @@ class Image
         $this->url = self::stringFrom($data, 'url');
     }
 
-    public static function stringFrom(array $data, string $key): ?string
+    /**
+     * @return Image[]
+     */
+    public static function createArray(array $data): array
     {
-        if (array_key_exists($key, $data)) {
-            return (string)$data[$key];
+        $a = [];
+        foreach ($data as $item) {
+            $a[] = new Image((array)$item);
         }
-        return null;
+        return $a;
     }
 }

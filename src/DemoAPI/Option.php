@@ -6,7 +6,7 @@ namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
-class Option
+class Option extends Base
 {
     public ?string $id;
     public string $sku;
@@ -17,11 +17,15 @@ class Option
         $this->id  = self::stringFrom($data, 'id');
     }
 
-    public static function stringFrom(array $data, string $key): ?string
+    /**
+     * @return Option[]
+     */
+    public static function createArray(array $data): array
     {
-        if (array_key_exists($key, $data)) {
-            return (string)$data[$key];
+        $a = [];
+        foreach ($data as $item) {
+            $a[] = new Option((array)$item);
         }
-        return null;
+        return $a;
     }
 }

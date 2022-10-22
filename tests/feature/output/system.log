@@ -1,0 +1,1 @@
+{"message":"Invalid URL","context":[],"level":"error","level_name":"ERROR","channel":"Share","datetime":"2022-10-22T15:23:24.251277+00:00","extra":[],"channel_id":1,"client_id":21,"log_to_es":true,"metric":2.0,"origin":"Demo","tags":["sync_channel_products"]}
