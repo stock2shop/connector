@@ -1,3 +1,0 @@
-{"message":"Hello World","context":{"foo":"bar","baz":"bat"},"level":"info","level_name":"INFO","channel":"Share","datetime":"2022-10-22T15:29:20.611934+00:00","extra":[],"client_id":21,"log_to_es":true,"origin":"Connector X"}
-{"message":"Hello World","context":{"foo":"bar","baz":"bat"},"level":"warning","level_name":"WARNING","channel":"Share","datetime":"2022-10-22T15:29:20.612243+00:00","extra":[],"client_id":21,"log_to_es":true,"origin":"Connector X"}
-{"message":"Hello World","context":{"foo":"bar","baz":"bat"},"level":"error","level_name":"ERROR","channel":"Share","datetime":"2022-10-22T15:29:20.612373+00:00","extra":[],"client_id":21,"log_to_es":true,"origin":"Connector X"}

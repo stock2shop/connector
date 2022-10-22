@@ -18,7 +18,7 @@ class WriterTest extends TestCase
         Environment::set(
             new LoaderArray([
                 'LOG_CHANNEL'      => 'Share',
-                'LOG_FS_DIR'       => sprintf('%s/../output/', __DIR__),
+                'LOG_FS_DIR'       => sprintf('%s/../../output/', __DIR__),
                 'LOG_FS_FILE_NAME' => 'system.log'
             ])
         );
