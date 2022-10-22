@@ -64,7 +64,7 @@ class Transform
     /**
      * @param Product[] $demoProducts
      */
-    public static function DemoProductToDto(array $demoProducts): DTO\ChannelProducts
+    public static function getChannelProducts(array $demoProducts): DTO\ChannelProducts
     {
         $cps = new DTO\ChannelProducts([]);
         foreach ($demoProducts as $p) {
@@ -88,7 +88,6 @@ class Transform
             }
             $cps->channel_products[] = $cp;
         }
-
         return $cps;
     }
 }

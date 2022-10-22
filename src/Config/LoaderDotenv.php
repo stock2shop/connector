@@ -19,5 +19,4 @@ class LoaderDotenv implements LoaderInterface
         $dotenv = Dotenv::createImmutable($this->env_path, $this->names);
         $dotenv->load();
     }
-
 }

@@ -14,7 +14,7 @@ class Sync
     /**
      * @param DTO\ChannelProduct[] $channelProducts
      */
-    public static function touchProducts(DemoAPI\API $api, array $channelProducts): void
+    public static function touchProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): void
     {
         if (empty($channelProducts)) {
             return;
@@ -25,11 +25,7 @@ class Sync
             $body = Transform::getDemoProducts($channelProducts);
         } catch (Exception) {
             SyncResults::setFailed($channelProducts);
-            Logger::LogProductSync(
-                DTO\Log::LOG_LEVEL_ERROR,
-                'Invalid Transform',
-                $channelProducts
-            );
+            Logger::LogProductSyncFailed($channelProducts, 'Invalid Transform', $channel);
             return;
         }
 
@@ -38,17 +34,16 @@ class Sync
             $dps = $api->postProducts($body);
         } catch (GuzzleException $e) {
             SyncResults::setFailed($channelProducts);
-            Logger::LogProductSync(DTO\Log::LOG_LEVEL_ERROR, $e->getMessage(), $channelProducts);
+            Logger::LogProductSyncFailed($channelProducts, $e->getMessage(), $channel);
             return;
         }
         SyncResults::setSuccess($channelProducts, $dps);
-        Logger::LogProductSync(DTO\Log::LOG_LEVEL_INFO, 'Products Updated to Demo', $channelProducts);
     }
 
     /**
      * @param DTO\ChannelProduct[] $channelProducts
      */
-    public static function deleteProducts(DemoAPI\API $api, array $channelProducts): void
+    public static function deleteProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): void
     {
         if (empty($channelProducts)) {
             return;
@@ -59,11 +54,7 @@ class Sync
             $body = Transform::getDemoProductIDS($channelProducts);
         } catch (Exception) {
             SyncResults::setFailed($channelProducts);
-            Logger::LogProductSync(
-                DTO\Log::LOG_LEVEL_ERROR,
-                'Invalid Transform',
-                $channelProducts
-            );
+            Logger::LogProductSyncFailed($channelProducts, 'Invalid Transform', $channel);
             return;
         }
 
@@ -72,14 +63,9 @@ class Sync
             $api->deleteProducts($body);
         } catch (GuzzleException $e) {
             SyncResults::setFailed($channelProducts);
-            Logger::LogProductSync(DTO\Log::LOG_LEVEL_ERROR, $e->getMessage(), $channelProducts);
+            Logger::LogProductSyncFailed($channelProducts, $e->getMessage(), $channel);
             return;
         }
         SyncResults::setDeleteSuccess($channelProducts);
     }
-
-    public static function getProducts(DemoAPI\API $api, array $channelProducts): void
-    {
-    }
-
 }

@@ -8,7 +8,6 @@ use InvalidArgumentException;
 
 class LoaderArray implements LoaderInterface
 {
-
     public function __construct(private readonly array $array)
     {
     }
@@ -22,5 +21,4 @@ class LoaderArray implements LoaderInterface
             $_SERVER[$k] = $v;
         }
     }
-
 }

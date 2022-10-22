@@ -10,19 +10,22 @@ use Stock2Shop\Share;
 
 class Logger
 {
-
-    public static function LogProductSync(string $level, string $message, array $channelProducts): void
+    /**
+     * @param DTO\ChannelProduct[] $channelProducts
+     */
+    public static function LogProductSync(array $channelProducts, DTO\Channel $channel): void
     {
-        $log = new DTO\Log([
-            'channel_id' => $channelProducts[0]->channel_id,
-            'client_id'  => $channelProducts[0]->client_id,
-            'log_to_es'  => true,
-            'level'      => $level,
-            'message'    => $message,
-            'metric'     => count($channelProducts),
-            'origin'     => 'Demo',
-            'tags'       => ['sync_channel_products']
-        ]);
+        $log          = self::getChannelProductsBaseLog($channelProducts, $channel);
+        $log->message = 'Products Updated';
+        $log->tags[]  = 'update';
+        self::Write($log);
+    }
+
+    public static function LogProductSyncFailed(array $channelProducts, $message, DTO\Channel $channel): void
+    {
+        $log          = self::getChannelProductsBaseLog($channelProducts, $channel);
+        $log->level   = DTO\Log::LOG_LEVEL_ERROR;
+        $log->message = $message;
         self::Write($log);
     }
 
@@ -40,6 +43,23 @@ class Logger
         self::Write($log);
     }
 
+    /**
+     * @param DTO\ChannelProduct[] $channelProducts
+     */
+    private static function getChannelProductsBaseLog(array $channelProducts, DTO\Channel $channel): DTO\Log
+    {
+        return new DTO\Log([
+            'channel_id' => $channel->id,
+            'client_id'  => $channel->client_id,
+            'log_to_es'  => true,
+            'message'    => '',
+            'level'      => DTO\Log::LOG_LEVEL_INFO,
+            'metric'     => count($channelProducts),
+            'origin'     => 'Demo',
+            'tags'       => ['sync_channel_products']
+        ]);
+    }
+
     private static function Write(DTO\Log $log): void
     {
         $writer = new Writer();
@@ -49,5 +69,4 @@ class Logger
         } catch (\Exception) {
         }
     }
-
 }

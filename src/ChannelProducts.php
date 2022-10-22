@@ -10,7 +10,6 @@ use Stock2Shop\Share;
 
 class ChannelProducts implements Share\Channel\ChannelProductsInterface
 {
-
     public function sync(
         Share\DTO\ChannelProducts $channelProducts,
         Share\DTO\Channel $channel
@@ -19,13 +18,11 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         $url  = $meta->get(Meta::CHANNEL_META_URL_KEY);
         if (!$url) {
             SyncResults::setFailed($channelProducts->channel_products);
-            Logger::LogProductSync(
-                DTO\Log::LOG_LEVEL_ERROR,
-                'Invalid URL',
-                $channelProducts->channel_products
-            );
+            Logger::LogProductSyncFailed($channelProducts->channel_products, 'Invalid URL', $channel);
             return $channelProducts;
         }
+
+        // batch updates and deletes
         $toDelete = [];
         $toTouch  = [];
         foreach ($channelProducts->channel_products as $product) {
@@ -36,8 +33,9 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
             }
         }
         $api = new DemoAPI\API($url);
-        Sync::touchProducts($api, $toTouch);
-        Sync::deleteProducts($api, $toDelete);
+        Sync::touchProducts($api, $toTouch, $channel);
+        Sync::deleteProducts($api, $toDelete, $channel);
+        Logger::LogProductSync(array_merge($toDelete, $toTouch), $channel);
         return $channelProducts;
     }
 
@@ -57,16 +55,16 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
             return new DTO\ChannelProducts([]);
         }
 
+        // Get product data from the channel specified
         $api = new DemoAPI\API($url);
         try {
-            // get product data from the channel specified
             $products = $api->getProducts($channel_product_code, $limit);
-
-            // transform DemoProduct data into ChannelProducts
-            return Transform::DemoProductToDto($products);
-        } catch (GuzzleException $e) {
+        } catch (GuzzleException) {
             return new DTO\ChannelProducts([]);
         }
+
+        // Transform DemoProduct data into ChannelProducts
+        return Transform::getChannelProducts($products);
     }
 
     public function getByCode(
@@ -84,26 +82,16 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
             return new DTO\ChannelProducts([]);
         }
 
-        // channel only allows us to read products by channel_product_code or in pages
-        // get channel_product_codes
-        $codes = [];
-        foreach ($channelProducts->channel_products as $product) {
-            if (isset($product->channel_product_code)) {
-                $codes[] = $product->channel_product_code;
-            }
-        }
-
+        // Demo API fetches products by ID
+        $ids = Transform::getDemoProductIDS($channelProducts->channel_products);
         $api = new DemoAPI\API($url);
         try {
-            // get product data from the channel specified
-            $products = $api->getProductsByCodes($codes);
-
-            // transform DemoProduct data into ChannelProducts
-            return Transform::DemoProductToDto($products);
+            $products = $api->getProductsByIDS($ids);
         } catch (GuzzleException $e) {
             return new DTO\ChannelProducts([]);
         }
+
+        // Transform DemoProduct data into ChannelProducts
+        return Transform::getChannelProducts($products);
     }
-
-
 }

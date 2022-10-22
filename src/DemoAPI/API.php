@@ -43,7 +43,7 @@ class API
      * @return Product[]
      * @throws GuzzleException
      */
-    public function getProductsByCodes(array $codes): array
+    public function getProductsByIDS(array $codes): array
     {
         $response = $this->client->request('GET', '/products', ['body' => json_encode($codes)]);
         return Product::createArray(

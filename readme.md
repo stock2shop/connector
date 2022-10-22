@@ -1,21 +1,18 @@
-# Stock2Shop - PHP Connectors
-
-Demo Connector
+# Stock2Shop - Demo Channel Connector
 
 ## Overview
 
-A "channel" is an online shop, a marketplace or a website that has shopping cart functionality.
+A "Channel" is an online shop, a marketplace or a website that has shopping cart functionality.
 e.g. Shopify, Magento or WooCommerce.
 
-A "connector" is code which makes it possible for synchronization of data between a
-channel and Stock2Shop.
+A "Connector" makes it possible to sync data between a Channel and Stock2Shop.
 
-This repository has a Demo channel API which can be run locally.
-It mimics how a "real" channel might behave.
+This repository has a Demo API which can be run locally.
+It mimics how a "real" Channel might behave.
 
-## Demo setup
+## Setup
 
-To set up the DEMO webserver and run the below in sequence.  
+To set up the Demo API and tests, run the below in sequence.  
 
 ```
 git clone https://github.com/stock2shop/connector.git
@@ -23,17 +20,16 @@ cd connector
 composer install
 ```
 
-Setup your environment.
+Set your environment.
 
 ```
 cp env.sample .env
 ```
 
-Edit the `.env` according to your environment. 
+Edit the `.env` accordingly. 
 
-Start the Demo API web server locally.
+Start the Demo API locally.
 The API uses the file system to store information, it has no database.
-Set the data dir when starting the API.
 
 > Binaries for Mac, linux and windows have been included in demo_store directory
 > The demo API is built in Go, instructions to build are below but are not required 

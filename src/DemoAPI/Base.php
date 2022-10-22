@@ -8,7 +8,6 @@ use Stock2Shop\Share;
 
 abstract class Base
 {
-
     public static function stringFrom(array $data, string $key): ?string
     {
         if (array_key_exists($key, $data)) {
@@ -24,5 +23,4 @@ abstract class Base
         }
         return [];
     }
-
 }

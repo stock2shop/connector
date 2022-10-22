@@ -11,5 +11,4 @@ namespace Stock2Shop\Connector\Config;
 interface LoaderInterface
 {
     public function set(): void;
-
 }

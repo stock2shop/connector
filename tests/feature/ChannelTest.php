@@ -111,7 +111,8 @@ final class ChannelTest extends Base
         // create channel without correct meta
         $creator         = new ChannelCreator();
         $con             = $creator->createChannelProducts();
-        $channel         = new DTO\Channel([]);
+        $channel         = new DTO\Channel($this->getTestDataChannel());
+        $channel->meta   = [];
         $channelProducts = new DTO\ChannelProducts($this->getTestDataChannelProducts());
         $cps             = $con->sync($channelProducts, $channel);
         $this->assertFalse($cps->channel_products[0]->success);
