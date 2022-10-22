@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1658bbe3cc750d24c38e1b41250eefbf",
+    "content-hash": "65c41f72bc36cc69ff7680a177e51983",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -58,16 +58,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.239.0",
+            "version": "3.240.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "33ae76381b77a1a2580817996dcc7b9e931ae5f4"
+                "reference": "95186e6a40670196cc2f9f752a38b863aa45a890"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/33ae76381b77a1a2580817996dcc7b9e931ae5f4",
-                "reference": "33ae76381b77a1a2580817996dcc7b9e931ae5f4",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/95186e6a40670196cc2f9f752a38b863aa45a890",
+                "reference": "95186e6a40670196cc2f9f752a38b863aa45a890",
                 "shasum": ""
             },
             "require": {
@@ -146,9 +146,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.239.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.240.0"
             },
-            "time": "2022-10-18T18:17:00+00:00"
+            "time": "2022-10-21T20:17:33+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -1097,12 +1097,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/stock2shop/share.git",
-                "reference": "8ebb4727eea0a5c1fb5306b110a4df9f55556b11"
+                "reference": "737ccc5c200fa9922104d19c5e96e6a8a55964c2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stock2shop/share/zipball/8ebb4727eea0a5c1fb5306b110a4df9f55556b11",
-                "reference": "8ebb4727eea0a5c1fb5306b110a4df9f55556b11",
+                "url": "https://api.github.com/repos/stock2shop/share/zipball/737ccc5c200fa9922104d19c5e96e6a8a55964c2",
+                "reference": "737ccc5c200fa9922104d19c5e96e6a8a55964c2",
                 "shasum": ""
             },
             "require": {
@@ -1136,7 +1136,7 @@
                 "source": "https://github.com/stock2shop/share/tree/master",
                 "issues": "https://github.com/stock2shop/share/issues"
             },
-            "time": "2022-10-19T11:33:55+00:00"
+            "time": "2022-10-20T12:27:56+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",

@@ -1,20 +1,17 @@
 {
   "id": 1,
-  "active": 1,
+  "client_id": 21,
+  "active": true,
   "created": "2022-02-11 06:30:51",
-  "description": "Default Channel",
+  "description": "Demo Channel",
   "meta": [
     {
       "key": "api_url",
-      "value": "https://www.your-store.com/wc-api/v3"
-    },
-    {
-      "key": "foo",
-      "value": "bar"
+      "value": "http://localhost:8080"
     }
   ],
   "modified": "2022-02-11 06:56:05",
   "price_tier": null,
   "qty_availability": null,
-  "type": "os"
+  "type": "demo"
 }

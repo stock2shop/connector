@@ -10,29 +10,35 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Maxbanton\Cwh\Handler\CloudWatch;
 use Stock2Shop\Connector\Config\Environment;
-use Stock2Shop\Connector\ENV;
-use Stock2Shop\Share\Config;
-use Stock2Shop\Share\DTO\Log;
+use Stock2Shop\Share\DTO;
 use Stock2Shop\Share\Utils\Date;
 
 class Writer
 {
+    public const LOG_LEVEL_MAP = [
+        DTO\Log::LOG_LEVEL_ERROR    => Logger::ERROR,
+        DTO\Log::LOG_LEVEL_DEBUG    => Logger::DEBUG,
+        DTO\Log::LOG_LEVEL_INFO     => Logger::INFO,
+        DTO\Log::LOG_LEVEL_CRITICAL => Logger::CRITICAL,
+        DTO\Log::LOG_LEVEL_WARNING  => Logger::WARNING,
+    ];
+
     public Logger $logger;
 
-    public function __construct(Environment $env)
+    public function __construct()
     {
-        $this->logger = new Logger($env->getLogChannel());
+        $this->logger = new Logger(Environment::getLogChannel());
         if (
-            $env->getCWKey() &&
-            $env->getCWSecret()
+            Environment::getCWKey() &&
+            Environment::getCWSecret()
         ) {
-            $handler = $this->handlerCloudWatch($env);
+            $handler = $this->handlerCloudWatch();
         } else {
             if (
-                $env->getLogFSDIR() &&
-                $env->getLogFSFileName()
+                Environment::getLogFSDIR() &&
+                Environment::getLogFSFileName()
             ) {
-                $handler = $this->handlerFile($env);
+                $handler = $this->handlerFile();
             }
         }
         if (!isset($handler)) {
@@ -43,34 +49,39 @@ class Writer
         $this->logger->pushHandler($handler);
     }
 
-    public function write(int $level, Log $log): void
+    public function write(DTO\Log $log): void
     {
-        $this->logger->addRecord($level, $log->message, (array)$log);
+        $level = self::LOG_LEVEL_MAP[$log->level];
+        $this->logger->addRecord(
+            $level,
+            $log->message,
+            (array)$log
+        );
     }
 
-    private function handlerCloudWatch(Environment $env): CloudWatch
+    private function handlerCloudWatch(): CloudWatch
     {
         $client = new CloudWatchLogsClient([
-            'version'     => $env->getCWVersion(),
-            'region'      => $env->getCWRegion(),
+            'version'     => Environment::getCWVersion(),
+            'region'      => Environment::getCWRegion(),
             'credentials' => [
-                'key'    => $env->getCWKey(),
-                'secret' => $env->getCWSecret()
+                'key'    => Environment::getCWKey(),
+                'secret' => Environment::getCWSecret()
             ]
         ]);
         return new CloudWatch(
             $client,
-            $env->getCWGroupName(),
+            Environment::getCWGroupName(),
             substr(Date::getDateString(Date::FORMAT), 0, 10),
-            $env->getCWRetentionDays(),
-            $env->getCWBatchSize()
+            Environment::getCWRetentionDays(),
+            Environment::getCWBatchSize()
         );
     }
 
-    private function handlerFile(Environment $env): StreamHandler
+    private function handlerFile(): StreamHandler
     {
-        $dir  = $env->getLogFSDIR();
-        $file = $env->getLogFSFileName();
+        $dir  = Environment::getLogFSDIR();
+        $file = Environment::getLogFSFileName();
         if (!is_dir($dir)) {
             mkdir($dir);
         }
