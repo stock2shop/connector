@@ -12,7 +12,7 @@ It mimics how a "real" Channel might behave.
 
 ## Setup
 
-To set up the Demo API and tests, run the below in sequence.  
+To set up the Demo API and tests, run the following commands in sequence.  
 
 ```
 git clone https://github.com/stock2shop/connector.git
@@ -26,12 +26,12 @@ Set your environment.
 cp env.sample .env
 ```
 
-Edit the `.env` accordingly. 
+Edit the `.env` file accordingly. 
 
 Start the Demo API locally.
 The API uses the file system to store information, it has no database.
 
-> Binaries for Mac, linux and windows have been included in demo_store directory
+> Binaries for Mac, linux and windows have been included in the `demo_store` directory
 > The demo API is built in Go, instructions to build are below but are not required 
 > to run the project.
 
@@ -68,8 +68,8 @@ to the channel and the connector updates the channel as efficiently as possible.
 
 - PHP version 8.1
 - Use strict types `declare(strict_types=1);`
-- Use PSR12 standards
-- Setup php-cs-fixer in your IDE to enforce coding standards
+- Use PSR-12 standards
+- Setup `php-cs-fixer` in your IDE to enforce coding standards
 
 ***
 ## Demo API Build
@@ -95,5 +95,5 @@ go mod vendor
 
 In the `demo_store` first build the program 
 ```bash
-    go build -o build/<EXECUTIBLE_NAME>
+    go build -o build/<EXECUTABLE_NAME>
 ```
