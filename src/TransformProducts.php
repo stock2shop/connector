@@ -9,7 +9,7 @@ use Stock2Shop\Connector\DemoAPI\Option;
 use Stock2Shop\Connector\DemoAPI\Product;
 use Stock2Shop\Share\DTO;
 
-class Transform
+class TransformProducts
 {
     /**
      * @param DTO\ChannelProduct[] $channelProducts

@@ -22,7 +22,7 @@ class Sync
 
         // transform
         try {
-            $body = Transform::getDemoProducts($channelProducts);
+            $body = TransformProducts::getDemoProducts($channelProducts);
         } catch (Exception) {
             SyncResults::setFailed($channelProducts);
             Logger::LogProductSyncFailed($channelProducts, 'Invalid Transform', $channel);
@@ -51,7 +51,7 @@ class Sync
 
         // transform
         try {
-            $body = Transform::getDemoProductIDS($channelProducts);
+            $body = TransformProducts::getDemoProductIDS($channelProducts);
         } catch (Exception) {
             SyncResults::setFailed($channelProducts);
             Logger::LogProductSyncFailed($channelProducts, 'Invalid Transform', $channel);

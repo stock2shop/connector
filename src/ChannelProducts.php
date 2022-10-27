@@ -64,7 +64,7 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         }
 
         // Transform DemoProduct data into ChannelProducts
-        return Transform::getChannelProducts($products);
+        return TransformProducts::getChannelProducts($products);
     }
 
     public function getByCode(
@@ -83,7 +83,7 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         }
 
         // Demo API fetches products by ID
-        $ids = Transform::getDemoProductIDS($channelProducts->channel_products);
+        $ids = TransformProducts::getDemoProductIDS($channelProducts->channel_products);
         $api = new DemoAPI\API($url);
         try {
             $products = $api->getProductsByIDS($ids);
@@ -92,6 +92,6 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         }
 
         // Transform DemoProduct data into ChannelProducts
-        return Transform::getChannelProducts($products);
+        return TransformProducts::getChannelProducts($products);
     }
 }
