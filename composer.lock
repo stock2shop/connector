@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "65c41f72bc36cc69ff7680a177e51983",
+    "content-hash": "b3b0ee4a3a85a093a698ea778b67f688",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -58,16 +58,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.240.0",
+            "version": "3.240.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "95186e6a40670196cc2f9f752a38b863aa45a890"
+                "reference": "69c7fa97862694d8c0c03f2e905c7fe05683bee9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/95186e6a40670196cc2f9f752a38b863aa45a890",
-                "reference": "95186e6a40670196cc2f9f752a38b863aa45a890",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/69c7fa97862694d8c0c03f2e905c7fe05683bee9",
+                "reference": "69c7fa97862694d8c0c03f2e905c7fe05683bee9",
                 "shasum": ""
             },
             "require": {
@@ -146,9 +146,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.240.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.240.4"
             },
-            "time": "2022-10-21T20:17:33+00:00"
+            "time": "2022-10-27T19:19:40+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -426,16 +426,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "2.4.1",
+            "version": "2.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "69568e4293f4fa993f3b0e51c9723e1e17c41379"
+                "reference": "67c26b443f348a51926030c83481b85718457d3d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/69568e4293f4fa993f3b0e51c9723e1e17c41379",
-                "reference": "69568e4293f4fa993f3b0e51c9723e1e17c41379",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/67c26b443f348a51926030c83481b85718457d3d",
+                "reference": "67c26b443f348a51926030c83481b85718457d3d",
                 "shasum": ""
             },
             "require": {
@@ -525,7 +525,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/psr7/issues",
-                "source": "https://github.com/guzzle/psr7/tree/2.4.1"
+                "source": "https://github.com/guzzle/psr7/tree/2.4.3"
             },
             "funding": [
                 {
@@ -541,7 +541,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-08-28T14:45:39+00:00"
+            "time": "2022-10-26T14:07:24+00:00"
         },
         {
             "name": "maxbanton/cwh",
@@ -761,6 +761,56 @@
                 "source": "https://github.com/jmespath/jmespath.php/tree/2.6.1"
             },
             "time": "2021-06-14T00:11:39+00:00"
+        },
+        {
+            "name": "mustache/mustache",
+            "version": "v2.14.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bobthecow/mustache.php.git",
+                "reference": "e62b7c3849d22ec55f3ec425507bf7968193a6cb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bobthecow/mustache.php/zipball/e62b7c3849d22ec55f3ec425507bf7968193a6cb",
+                "reference": "e62b7c3849d22ec55f3ec425507bf7968193a6cb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "~1.11",
+                "phpunit/phpunit": "~3.7|~4.0|~5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Mustache": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Justin Hileman",
+                    "email": "justin@justinhileman.info",
+                    "homepage": "http://justinhileman.com"
+                }
+            ],
+            "description": "A Mustache implementation in PHP.",
+            "homepage": "https://github.com/bobthecow/mustache.php",
+            "keywords": [
+                "mustache",
+                "templating"
+            ],
+            "support": {
+                "issues": "https://github.com/bobthecow/mustache.php/issues",
+                "source": "https://github.com/bobthecow/mustache.php/tree/v2.14.2"
+            },
+            "time": "2022-08-23T13:07:01+00:00"
         },
         {
             "name": "phpoption/phpoption",
@@ -1094,16 +1144,10 @@
         {
             "name": "stock2shop/share",
             "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/stock2shop/share.git",
-                "reference": "737ccc5c200fa9922104d19c5e96e6a8a55964c2"
-            },
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/stock2shop/share/zipball/737ccc5c200fa9922104d19c5e96e6a8a55964c2",
-                "reference": "737ccc5c200fa9922104d19c5e96e6a8a55964c2",
-                "shasum": ""
+                "type": "path",
+                "url": "/Users/arata/workspace/github.com/stock2shop/share",
+                "reference": "916ea9597647cc704fbf17d37ba594b4303b7e52"
             },
             "require": {
                 "ext-json": "*",
@@ -1113,7 +1157,6 @@
                 "friendsofphp/php-cs-fixer": "^3.12",
                 "phpunit/phpunit": "^9"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -1132,11 +1175,9 @@
                 }
             ],
             "description": "Stock2Shop DTO's, factories and interfaces",
-            "support": {
-                "source": "https://github.com/stock2shop/share/tree/master",
-                "issues": "https://github.com/stock2shop/share/issues"
-            },
-            "time": "2022-10-20T12:27:56+00:00"
+            "transport-options": {
+                "relative": false
+            }
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -2293,16 +2334,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "9.2.17",
+            "version": "9.2.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "aa94dc41e8661fe90c7316849907cba3007b10d8"
+                "reference": "12fddc491826940cf9b7e88ad9664cf51f0f6d0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/aa94dc41e8661fe90c7316849907cba3007b10d8",
-                "reference": "aa94dc41e8661fe90c7316849907cba3007b10d8",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/12fddc491826940cf9b7e88ad9664cf51f0f6d0a",
+                "reference": "12fddc491826940cf9b7e88ad9664cf51f0f6d0a",
                 "shasum": ""
             },
             "require": {
@@ -2358,7 +2399,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.17"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.18"
             },
             "funding": [
                 {
@@ -2366,7 +2407,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-08-30T12:24:04+00:00"
+            "time": "2022-10-27T13:35:33+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -2611,16 +2652,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.5.25",
+            "version": "9.5.26",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "3e6f90ca7e3d02025b1d147bd8d4a89fd4ca8a1d"
+                "reference": "851867efcbb6a1b992ec515c71cdcf20d895e9d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/3e6f90ca7e3d02025b1d147bd8d4a89fd4ca8a1d",
-                "reference": "3e6f90ca7e3d02025b1d147bd8d4a89fd4ca8a1d",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/851867efcbb6a1b992ec515c71cdcf20d895e9d2",
+                "reference": "851867efcbb6a1b992ec515c71cdcf20d895e9d2",
                 "shasum": ""
             },
             "require": {
@@ -2693,7 +2734,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.5.25"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.5.26"
             },
             "funding": [
                 {
@@ -2709,7 +2750,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-09-25T03:44:45+00:00"
+            "time": "2022-10-28T06:00:21+00:00"
         },
         {
             "name": "psr/cache",
@@ -4878,5 +4919,5 @@
         "php": ">=8.1"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.1.0"
 }

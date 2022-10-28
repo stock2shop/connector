@@ -20,8 +20,8 @@
   ],
   "repositories": [
     {
-      "type": "vcs",
-      "url": "https://github.com/stock2shop/share"
+      "type": "path",
+      "url": "/Users/arata/workspace/github.com/stock2shop/share"
     }
   ],
   "require": {
@@ -31,7 +31,8 @@
     "monolog/monolog": "^2.8.0",
     "maxbanton/cwh": "^2.0.2",
     "aws/aws-sdk-php": "^3.238",
-    "guzzlehttp/guzzle": "^7.0"
+    "guzzlehttp/guzzle": "^7.0",
+    "mustache/mustache": "~2.5"
   },
   "require-dev": {
     "phpunit/phpunit": "^9",
