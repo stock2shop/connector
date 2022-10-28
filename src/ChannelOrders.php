@@ -18,7 +18,10 @@ class ChannelOrders implements Share\Channel\ChannelOrdersInterface
      */
     public function transform(array $channelOrderWebhooks, DTO\Channel $channel): array
     {
-        $demoOrders   = TransformOrders::getDemoOrders($channelOrderWebhooks);
+        $demoOrders = TransformOrders::getDemoOrders($channelOrderWebhooks);
+        if ($demoOrders == []) {
+            Logger::LogOrderTransformFailed(null, "unable to read order data", $channel);
+        }
         $channelOrders = TransformOrders::getChannelOrders($demoOrders);
 
         foreach ($channel->meta as $cm) {
@@ -26,16 +29,17 @@ class ChannelOrders implements Share\Channel\ChannelOrdersInterface
                 // we need to do a custom transform
                 foreach ($channelOrders as $index => $co) {
                     // get field that needs a custom value to be set
-                    $field         = substr($cm->key, strlen(self::CUSTOM_TRANSFORM_PREFIX));
-                    $data          = (array)$co;
-                    $data[$field]  = $cm->value;
-                    $orderAsArray  = json_decode(json_encode($demoOrders[$index]), true);
-                    $transform     = TransformOrders::getChannelOrdersTemplate(json_encode($data), $orderAsArray);
+                    $field                 = substr($cm->key, strlen(self::CUSTOM_TRANSFORM_PREFIX));
+                    $data                  = (array)$co;
+                    $data[$field]          = $cm->value;
+                    $orderAsArray          = json_decode(json_encode($demoOrders[$index]), true);
+                    $transform             = TransformOrders::getChannelOrdersTemplate(json_encode($data), $orderAsArray);
                     $channelOrders[$index] = new DTO\ChannelOrder(json_decode($transform, true));
                 }
             }
         }
 
+        Logger::LogOrderTransform($channelOrders, $channel);
         return $channelOrders;
     }
 }

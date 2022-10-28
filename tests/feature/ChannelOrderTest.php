@@ -27,14 +27,24 @@ final class ChannelOrderTest extends Base
      */
     public function testDefaultTransform()
     {
+        Environment::set(
+            new LoaderArray([
+                'LOG_CHANNEL'      => 'Share',
+                'LOG_FS_DIR'       => sprintf('%s/../output/', __DIR__),
+                'LOG_FS_FILE_NAME' => 'system.log'
+            ])
+        );
+
         $wh1 = new DTO\ChannelOrderWebhook([
             'storage_code' => __DIR__ . '/../data/order1.json'
         ]);
         $wh2 = new DTO\ChannelOrderWebhook([
             'storage_code' => __DIR__ . '/../data/order2.json'
         ]);
-        $co = new ChannelOrders();
-        $orders = $co->transform([$wh1, $wh2], new DTO\Channel([]));
+
+        $co      = new ChannelOrders();
+        $channel = new DTO\Channel($this->getTestDataChannel());
+        $orders  = $co->transform([$wh1, $wh2], $channel);
 
         $this->assertCount(2, $orders);
         foreach ($orders as $order) {
@@ -44,26 +54,23 @@ final class ChannelOrderTest extends Base
         }
 
 
-
     }
 
     public function testCustomTransform()
     {
-        $wh1 = new DTO\ChannelOrderWebhook([
+        $wh1             = new DTO\ChannelOrderWebhook([
             'storage_code' => __DIR__ . '/../data/order1.json'
         ]);
-        $wh2 = new DTO\ChannelOrderWebhook([
+        $wh2             = new DTO\ChannelOrderWebhook([
             'storage_code' => __DIR__ . '/../data/order2.json'
         ]);
-        $co = new ChannelOrders();
-        $orders = $co->transform([$wh1, $wh2], new DTO\Channel([
-            'meta' => [
-                [
-                    'key' => 'order_transform_channel_order_code',
-                    'value' => '{{ protect_code }}'
-                ]
-            ]
-        ]));
+        $co              = new ChannelOrders();
+        $channel         = new DTO\Channel($this->getTestDataChannel());
+        $channel->meta[] = new DTO\Meta([
+            'key'   => 'order_transform_channel_order_code',
+            'value' => '{{ protect_code }}'
+        ]);
+        $orders          = $co->transform([$wh1, $wh2], $channel);
 
         $this->assertCount(2, $orders);
         foreach ($orders as $order) {

@@ -44,6 +44,28 @@ class Logger
     }
 
     /**
+     * @param DTO\ChannelOrder[] $channelOrders
+     */
+    public static function LogOrderTransformFailed(array $channelOrders, string $message, DTO\Channel $channel)
+    {
+        $log          = self::getChannelOrderBaseLog($channelOrders, $channel);
+        $log->level   = DTO\Log::LOG_LEVEL_ERROR;
+        $log->message = $message;
+        self::Write($log);
+    }
+
+    /**
+     * @param DTO\ChannelOrder[] $channelOrders
+     */
+    public static function LogOrderTransform(array $channelOrders, DTO\Channel $channel)
+    {
+        $log          = self::getChannelOrderBaseLog($channelOrders, $channel);
+        $log->message = 'Orders transformed';
+        $log->tags[]  = 'add_order';
+        self::Write($log);
+    }
+
+    /**
      * @param DTO\ChannelProduct[] $channelProducts
      */
     private static function getChannelProductsBaseLog(array $channelProducts, DTO\Channel $channel): DTO\Log
@@ -57,6 +79,23 @@ class Logger
             'metric'     => count($channelProducts),
             'origin'     => 'Demo',
             'tags'       => ['sync_channel_products']
+        ]);
+    }
+
+    /**
+     * @param DTO\ChannelOrder[] $channelOrders
+     */
+    private static function getChannelOrderBaseLog(array $channelOrders, DTO\Channel $channel): DTO\Log
+    {
+        return new DTO\Log([
+            'channel_id' => $channel->id,
+            'client_id'  => $channel->client_id,
+            'log_to_es'  => true,
+            'message'    => '',
+            'level'      => DTO\Log::LOG_LEVEL_INFO,
+            'metric'     => count($channelOrders),
+            'origin'     => 'Demo',
+            'tags'       => ['add_order']
         ]);
     }
 
