@@ -10,7 +10,7 @@ use Stock2Shop\Share\DTO;
 
 class TransformOrders
 {
-    private const INSTRUCTION_SYNC_ORDER = "sync_order";
+    public const INSTRUCTION_SYNC_ORDER = "sync_order";
 
     /**
      * @param DTO\ChannelOrderWebhook[] $webHooks
@@ -61,7 +61,7 @@ class TransformOrders
                     'zip'           => $do->billing_address->postcode,
                 ],
                 'customer'           => [
-                    'accepts_marketing' => null,
+                    'accepts_marketing' => false,
                     'email'             => $do->customer[0]->email ?? null,
                     'first_name'        => $do->customer[0]->firstname ?? null,
                     'last_name'         => $do->customer[0]->lastname ?? null,

@@ -11,20 +11,14 @@ use Stock2Shop\Connector\ChannelOrders;
 use Stock2Shop\Connector\Config\Environment;
 use Stock2Shop\Connector\Config\LoaderArray;
 use Stock2Shop\Connector\Meta;
+use Stock2Shop\Connector\TransformOrders;
 use Stock2Shop\Share\Channel\ChannelProductsInterface;
 use Stock2Shop\Share\DTO;
+use Stock2Shop\Share\DTO\ChannelOrderAddress;
 use Stock2Shop\Tests\Connector\Base;
 
 final class ChannelOrderTest extends Base
 {
-    /**
-     * Feature test
-     * Syncs product data to channel.
-     * Uses get and getBy to ensure products exist on channel
-     * Then runs same again with update and delete
-     *
-     * @return void
-     */
     public function testDefaultTransform()
     {
         Environment::set(
@@ -51,9 +45,26 @@ final class ChannelOrderTest extends Base
             $this->assertIsArray($order->meta);
             $this->assertIsArray($order->line_items);
             $this->assertIsArray($order->shipping_lines);
+            $this->assertNotEmpty($order->channel_order_code);
+            $this->assertNotEmpty($order->billing_address->address1);
+            $this->assertFalse($order->customer->accepts_marketing);
+            $this->assertNotEmpty($order->shipping_address->address1);
+            $this->assertEquals(TransformOrders::INSTRUCTION_SYNC_ORDER, $order->instruction);
+            foreach ($order->shipping_lines as $sl) {
+                $this->assertNotEmpty($sl->title);
+                $this->assertIsArray($sl->tax_lines);
+                foreach ($sl->tax_lines as $tl) {
+                    $this->assertNotEmpty($tl->price);
+                }
+            }
+            foreach ($order->line_items as $li) {
+                $this->assertNotEmpty($li->channel_variant_code);
+                $this->assertIsArray($li->tax_lines);
+                foreach ($li->tax_lines as $tl) {
+                    $this->assertNotEmpty($tl->price);
+                }
+            }
         }
-
-
     }
 
     public function testCustomTransform()
@@ -72,11 +83,33 @@ final class ChannelOrderTest extends Base
         ]);
         $orders          = $co->transform([$wh1, $wh2], $channel);
 
+        $demoProducts = TransformOrders::getDemoOrders([$wh1, $wh2]);
+
         $this->assertCount(2, $orders);
-        foreach ($orders as $order) {
+        foreach ($orders as $index => $order) {
+            // check that the custom field assignment has worked
+            $this->assertEquals($demoProducts[$index]->protect_code, $order->channel_order_code);
             $this->assertIsArray($order->meta);
             $this->assertIsArray($order->line_items);
             $this->assertIsArray($order->shipping_lines);
+            $this->assertNotEmpty($order->billing_address->address1);
+            $this->assertFalse($order->customer->accepts_marketing);
+            $this->assertNotEmpty($order->shipping_address->address1);
+            $this->assertEquals(TransformOrders::INSTRUCTION_SYNC_ORDER, $order->instruction);
+            foreach ($order->shipping_lines as $sl) {
+                $this->assertNotEmpty($sl->title);
+                $this->assertIsArray($sl->tax_lines);
+                foreach ($sl->tax_lines as $tl) {
+                    $this->assertNotEmpty($tl->price);
+                }
+            }
+            foreach ($order->line_items as $li) {
+                $this->assertNotEmpty($li->channel_variant_code);
+                $this->assertIsArray($li->tax_lines);
+                foreach ($li->tax_lines as $tl) {
+                    $this->assertNotEmpty($tl->price);
+                }
+            }
         }
     }
 }
