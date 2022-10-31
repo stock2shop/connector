@@ -6,20 +6,20 @@
     "region_id": "661",
     "region": "Western Cape",
     "postcode": "7975",
-    "lastname": "Faasen",
-    "street": "59 Emerald Crescent Fish Hoek",
+    "lastname": "Doe",
+    "street": "15 some street, Cape Town",
     "city": "Cape Town",
-    "email": "JulianFaasen@pnp.co.za",
-    "telephone": "0720809690",
+    "email": "johndoe@test.co.za",
+    "telephone": "0761234567",
     "country_id": "ZA",
-    "firstname": "Julian",
+    "firstname": "John",
     "address_type": "billing"
   },
   "customer": [],
   "line_items": [
     {
       "id": "276",
-      "image": "https://pnpclothing.getmelive.co.za/pub/static/version1650949734/frontend/Smartwave/porto/en_US/Magento_Catalog/images/product/placeholder/image.jpg",
+      "image": "https://localhost:8080/image.jpg",
       "name": "180_737086",
       "price": 110.99,
       "price_with_discount": 110.99,
@@ -28,7 +28,7 @@
       "qty": 1,
       "sku": "737086091",
       "tax_rate": 0,
-      "url": "https://pnpclothing.getmelive.co.za/mens-3-pack-chewbacca-briefs-737086"
+      "url": "https://localhost:8080/mens-3-pack-chewbacca-briefs-737086"
     }
   ],
   "payment": {
@@ -45,7 +45,7 @@
     "method": "payumea_creditcard",
     "additional_information": {
       "method_title": "Credit Card (payu) ",
-      "payUReference": "23594620237252"
+      "payUReference": "12345678123412"
     }
   },
   "shipping_address": {
@@ -55,23 +55,20 @@
     "region_id": "661",
     "region": "Western Cape",
     "postcode": "7975",
-    "lastname": "Faasen",
-    "street": "59 Emerald Crescent Fish Hoek",
+    "lastname": "Doe",
+    "street": "15 some street, Cape Town",
     "city": "Cape Town",
-    "email": "JulianFaasen@pnp.co.za",
-    "telephone": "0720809690",
+    "email": "johndoe@test.co.za",
+    "telephone": "0721234567",
     "country_id": "ZA",
-    "firstname": "Julian",
+    "firstname": "John",
     "address_type": "shipping"
   },
   "visitor": {
     "http_user_agent": "Apache-HttpClient/4.5.3 (Java/1.8.0_144)",
-    "remote_addr": "197.84.244.25"
+    "remote_addr": "127.0.0.1"
   },
   "payment_additional_info": null,
-  "payu_additional_info": "{\"amountInCents\":\"17099\",\"cardExpiry\":\"102022\",\"cardNumber\":\"402837******3018\",\"gatewayReference\":\"000000076052\",\"information\":\"VISA\",\"nameOnCard\":\"Test Two\"}",
-  "payu_payment_status": "Successful",
-  "payu_payment_date": "2022-06-15 06:20:24",
   "entity_id": "1293",
   "state": "processing",
   "status": "processing",
@@ -124,9 +121,9 @@
   "weight": "1.0000",
   "increment_id": "000001317",
   "base_currency_code": "ZAR",
-  "customer_email": "JulianFaasen@pnp.co.za",
-  "customer_firstname": "Julian",
-  "customer_lastname": "Faasen",
+  "customer_email": "johndoe@test.co.za",
+  "customer_firstname": "John",
+  "customer_lastname": "Doe",
   "global_currency_code": "ZAR",
   "order_currency_code": "ZAR",
   "remote_ip": "102.182.141.213",

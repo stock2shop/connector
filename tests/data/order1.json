@@ -91,9 +91,6 @@
     "remote_addr": "127.0.0.1"
   },
   "payment_additional_info": null,
-  "payu_additional_info": "{\"amountInCents\":\"12345\",\"cardExpiry\":\"12345\",\"cardNumber\":\"123456******1234\",\"gatewayReference\":\"000000012345\",\"information\":\"VISA\",\"nameOnCard\":\"Test Two\"}",
-  "payu_payment_status": "Successful",
-  "payu_payment_date": "2022-06-15 06:20:24",
   "entity_id": "1293",
   "state": "processing",
   "status": "processing",
