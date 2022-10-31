@@ -9,7 +9,6 @@ use Stock2Shop\Share;
 
 class ChannelOrders implements Share\Channel\ChannelOrdersInterface
 {
-
     private const CUSTOM_TRANSFORM_PREFIX = 'order_transform_';
 
     /**

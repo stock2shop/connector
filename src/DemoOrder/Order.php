@@ -8,7 +8,6 @@ use Stock2Shop\Share;
 
 class Order extends Base
 {
-
     public Address $billing_address;
     /** @var Customer[] $customer */
     public array $customer;
@@ -205,5 +204,4 @@ class Order extends Base
         }
         return $a;
     }
-
 }
