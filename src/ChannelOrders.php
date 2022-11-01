@@ -24,26 +24,19 @@ class ChannelOrders implements Share\Channel\ChannelOrdersInterface
         // fetch meta
         $meta = new Meta($channel);
         $map  = $meta->get(Meta::CHANNEL_ORDER_TEMPLATE);
-
-        if ($map) {
-            // get base order
-            $channelOrders = TransformOrders::getChannelOrdersTemplate($map, $orders);
-
-            // get line items with separate map
-            $orderArr = json_decode(json_encode($orders), true);
-            foreach ($orderArr as $index => $order) {
-                foreach ($order['line_items'] as &$line_item) {
-                    $map                                 = $meta->get(Meta::CHANNEL_ORDER_LINE_ITEM_TEMPLATE);
-                    $channelOrders[$index]->line_items[] = TransformOrders::getChannelOrdersLineItems($map, $line_item);
-                }
-            }
-        } else {
-            $channelOrders = TransformOrders::getChannelOrders($orders);
+        if (!$map) {
+            $map = null;
         }
+        $channelOrders = TransformOrders::getChannelOrders($orders, $map);
 
         // set instruction, add_order if processing or null if anything else
+        $state  = $meta->get(Meta::ORDER_STATUS);
         foreach ($orders as $index => $order) {
-            if ($order->state == DTO\ChannelOrder::ORDER_STATE_PROCESSING) {
+            if (!$state) {
+                $channelOrders[$index]->instruction = DTO\ChannelOrder::INSTRUCTION_EMPTY;
+                continue;
+            }
+            if ($order->state == $state) {
                 $channelOrders[$index]->instruction = DTO\ChannelOrder::INSTRUCTION_ADD_ORDER;
             }
         }

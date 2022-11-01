@@ -13,71 +13,34 @@ class TransformOrders
      * @param Order[] $demoOrders
      * @return DTO\ChannelOrder[]
      */
-    public static function getChannelOrders(array $demoOrders): array
+    public static function getChannelOrders(array $demoOrders, ?string $template): array
     {
         $channelOrders = [];
         foreach ($demoOrders as $do) {
-            $co = new DTO\ChannelOrder([
-                'channel_order_code' => $do->line_items[0]->sku,
-                'total_discount'     => $do->discount_amount,
-                'billing_address'    => [
-                    'address1'      => $do->billing_address->street,
-                    'city'          => $do->billing_address->city,
-                    'country_code'  => $do->billing_address->country_id,
-                    'first_name'    => $do->billing_address->firstname,
-                    'last_name'     => $do->billing_address->lastname,
-                    'phone'         => $do->billing_address->telephone,
-                    'province'      => $do->billing_address->region,
-                    'province_code' => $do->billing_address->region_id,
-                    'zip'           => $do->billing_address->postcode,
-                ],
-                'customer'           => [
-                    'accepts_marketing' => false,
-                    'email'             => $do->customer->email ?? null,
-                    'first_name'        => $do->customer->firstname ?? null,
-                    'last_name'         => $do->customer->lastname ?? null,
-                ],
-                'line_items'         => [],
-                'meta'               => [],
-                'shipping_address'   => [
-                    'address1'      => $do->shipping_address->street,
-                    'city'          => $do->shipping_address->city,
-                    'country_code'  => $do->shipping_address->country_id,
-                    'first_name'    => $do->shipping_address->firstname,
-                    'last_name'     => $do->shipping_address->lastname,
-                    'phone'         => $do->shipping_address->telephone,
-                    'province'      => $do->shipping_address->region,
-                    'province_code' => $do->shipping_address->region_id,
-                    'zip'           => $do->shipping_address->postcode,
-                ],
-                'shipping_lines'     => [
-                    [
-                        'price'     => $do->base_total_paid - $do->base_shipping_amount,
-                        'title'     => $do->line_items[0]->name,
-                        'tax_lines' => [
-                            [
-                                'price' => $do->base_shipping_amount,
-                                'title' => $do->line_items[0]->name,
-                                'rate'  => $do->tax_amount,
-                            ]
-                        ]
-                    ]
-                ]
-            ]);
+            $co = null;
 
+            if ($template == null) {
+                // if no template is provided we can just assign the values
+                $co = self::getChannelOrder($do);
+            } else {
+                // if a template is provided we should use mustache to render the ChannelOrder
+                $co = self::getChannelOrdersTemplate($template, $do);
+            }
+
+            // set line items
             foreach ($do->line_items as $doli) {
                 $co->line_items[] = new DTO\ChannelOrderLineItem([
                     'channel_variant_code' => $doli->id,
                     'barcode'              => null,
                     'grams'                => $do->weight,
-                    'price'                => $doli->price_with_tax - $doli->total_tax - $doli->total_discount,
+                    'price'                => $doli->price - $doli->total_discount,
                     'qty'                  => $doli->qty,
                     'sku'                  => $doli->sku,
                     'title'                => $doli->name,
                     'total_discount'       => $doli->total_discount,
                     'tax_lines'            => [
                         [
-                            'price' => $doli->price,
+                            'price' => $doli->price_with_tax + $doli->total_discount,
                             'title' => $doli->name,
                             'rate'  => $doli->tax_rate
                         ]
@@ -90,33 +53,65 @@ class TransformOrders
         return $channelOrders;
     }
 
-    /**
-     * @return DTO\ChannelOrder[]
-     */
-    public static function getChannelOrdersTemplate(string $template, array $demoOrder): array
+    private static function getChannelOrder(DemoAPI\Order $order): DTO\ChannelOrder
     {
-        $channelOrders = [];
-
-        // apply template to each order and add resulting ChannelOrder to the return variable
-        foreach ($demoOrder as $order) {
-            // get order as an associative array
-            $orderArr = json_decode(json_encode($order), true);
-            $render   = Utils::render($template, $orderArr);
-
-            // get render as an associative array
-            $renderArr       = json_decode($render, true);
-            $channelOrders[] = new DTO\ChannelOrder($renderArr);
-        }
-
-        return $channelOrders;
+        return new DTO\ChannelOrder([
+            'channel_order_code' => $order->line_items[0]->sku,
+            'total_discount'     => $order->discount_amount,
+            'billing_address'    => [
+                'address1'      => $order->billing_address->street,
+                'city'          => $order->billing_address->city,
+                'country_code'  => $order->billing_address->country_id,
+                'first_name'    => $order->billing_address->firstname,
+                'last_name'     => $order->billing_address->lastname,
+                'phone'         => $order->billing_address->telephone,
+                'province'      => $order->billing_address->region,
+                'province_code' => $order->billing_address->region_id,
+                'zip'           => $order->billing_address->postcode,
+            ],
+            'customer'           => [
+                'accepts_marketing' => false,
+                'email'             => $order->customer->email ?? null,
+                'first_name'        => $order->customer->firstname ?? null,
+                'last_name'         => $order->customer->lastname ?? null,
+            ],
+            'line_items'         => [],
+            'meta'               => [],
+            'shipping_address'   => [
+                'address1'      => $order->shipping_address->street,
+                'city'          => $order->shipping_address->city,
+                'country_code'  => $order->shipping_address->country_id,
+                'first_name'    => $order->shipping_address->firstname,
+                'last_name'     => $order->shipping_address->lastname,
+                'phone'         => $order->shipping_address->telephone,
+                'province'      => $order->shipping_address->region,
+                'province_code' => $order->shipping_address->region_id,
+                'zip'           => $order->shipping_address->postcode,
+            ],
+            'shipping_lines'     => [
+                [
+                    'price'     => $order->base_total_paid - $order->base_shipping_amount,
+                    'title'     => $order->shipping_description,
+                    'tax_lines' => [
+                        [
+                            'price' => $order->base_shipping_amount,
+                            'title' => $order->line_items[0]->name,
+                            'rate'  => $order->tax_amount,
+                        ]
+                    ]
+                ]
+            ]
+        ]);
     }
 
-    public static function getChannelOrdersLineItems(string $template, array $lineItem): DTO\ChannelOrderLineItem
+    public static function getChannelOrdersTemplate(string $template, DemoAPI\Order $demoOrder): DTO\ChannelOrder
     {
-        $render = Utils::render($template, $lineItem);
+        // get order as an associative array
+        $orderArr = json_decode(json_encode($demoOrder), true);
+        $render   = Utils::render($template, $orderArr);
 
         // get render as an associative array
-        $renderArr = json_decode($render, true);
-        return new DTO\ChannelOrderLineItem($renderArr);
+        $renderArr       = json_decode($render, true);
+        return new DTO\ChannelOrder($renderArr);
     }
 }

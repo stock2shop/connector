@@ -23,19 +23,25 @@ final class ChannelOrderTest extends Base
     public function testDefaultTransform()
     {
         // create two webhooks for test run
-        $wh1 = new DTO\ChannelOrderWebhook([
+        $wh1   = new DTO\ChannelOrderWebhook([
             'storage_code' => __DIR__ . '/../data/order1.json',
             'payload'      => file_get_contents(__DIR__ . '/../data/order1.json')
         ]);
-        $wh2 = new DTO\ChannelOrderWebhook([
+        $wh2   = new DTO\ChannelOrderWebhook([
             'storage_code' => __DIR__ . '/../data/order2.json',
             'payload'      => file_get_contents(__DIR__ . '/../data/order2.json')
         ]);
         $hooks = [$wh1, $wh2];
 
-        $co      = new ChannelOrders();
-        $channel = new DTO\Channel($this->getTestDataChannel());
-        $orders  = $co->transform($hooks, $channel);
+        $co              = new ChannelOrders();
+        $channel         = new DTO\Channel($this->getTestDataChannel());
+        $channel->meta[] = new DTO\Meta(
+            [
+                'key'   => Meta::ORDER_STATUS,
+                'value' => "processing"
+            ]
+        );
+        $orders          = $co->transform($hooks, $channel);
 
         $this->assertCount(2, $orders);
         foreach ($orders as $index => $order) {
@@ -74,33 +80,32 @@ final class ChannelOrderTest extends Base
     public function testCustomTransform()
     {
         // create two webhooks for test run
-        $wh1 = new DTO\ChannelOrderWebhook([
+        $wh1   = new DTO\ChannelOrderWebhook([
             'storage_code' => __DIR__ . '/../data/order1.json',
             'payload'      => file_get_contents(__DIR__ . '/../data/order1.json')
         ]);
-        $wh2 = new DTO\ChannelOrderWebhook([
+        $wh2   = new DTO\ChannelOrderWebhook([
             'storage_code' => __DIR__ . '/../data/order2.json',
             'payload'      => file_get_contents(__DIR__ . '/../data/order2.json')
         ]);
         $hooks = [$wh1, $wh2];
 
-        $co               = new ChannelOrders();
-        $channel          = new DTO\Channel($this->getTestDataChannel());
-        $baseTemplate     = file_get_contents(__DIR__ . '/../data/channelOrderTemplate.json');
-        $lineItemTemplate = file_get_contents(__DIR__ . '/../data/channelOrderLineItemTemplate.json');
-        $channel->meta    = DTO\Meta::createArray(
+        $co            = new ChannelOrders();
+        $channel       = new DTO\Channel($this->getTestDataChannel());
+        $baseTemplate  = file_get_contents(__DIR__ . '/../data/channelOrderTemplate.json');
+        $channel->meta = DTO\Meta::createArray(
             [
                 [
                     'key'   => Meta::CHANNEL_ORDER_TEMPLATE,
                     'value' => $baseTemplate
                 ],
                 [
-                    'key'   => Meta::CHANNEL_ORDER_LINE_ITEM_TEMPLATE,
-                    'value' => $lineItemTemplate
+                    'key'   => Meta::ORDER_STATUS,
+                    'value' => "processing"
                 ]
             ]
         );
-        $orders           = $co->transform([$wh1, $wh2], $channel);
+        $orders        = $co->transform([$wh1, $wh2], $channel);
 
         $this->assertCount(2, $orders);
         foreach ($orders as $index => $order) {
