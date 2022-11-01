@@ -9,36 +9,46 @@ use Stock2Shop\Share;
 
 class ChannelOrders implements Share\Channel\ChannelOrdersInterface
 {
-    private const CUSTOM_TRANSFORM_PREFIX = 'order_transform_';
-
     /**
      * @param DTO\ChannelOrderWebhook[] $channelOrderWebhooks
      * @return DTO\ChannelOrder[]
      */
     public function transform(array $channelOrderWebhooks, DTO\Channel $channel): array
     {
-        $demoOrders = TransformOrders::getDemoOrders($channelOrderWebhooks);
-        if ($demoOrders == []) {
-            Logger::LogOrderTransformFailed(null, "unable to read order data", $channel);
+        $payload = [];
+        foreach ($channelOrderWebhooks as $webhook) {
+            $payload[] = json_decode($webhook->payload, true);
         }
-        $channelOrders = TransformOrders::getChannelOrders($demoOrders);
+        $orders = DemoAPI\Order::createArray($payload);
 
-        foreach ($channel->meta as $cm) {
-            if (str_contains($cm->key, self::CUSTOM_TRANSFORM_PREFIX)) {
-                // we need to do a custom transform
-                foreach ($channelOrders as $index => $co) {
-                    // get field that needs a custom value to be set
-                    $field                 = substr($cm->key, strlen(self::CUSTOM_TRANSFORM_PREFIX));
-                    $data                  = (array)$co;
-                    $data[$field]          = $cm->value;
-                    $orderAsArray          = json_decode(json_encode($demoOrders[$index]), true);
-                    $transform             = TransformOrders::getChannelOrdersTemplate(json_encode($data), $orderAsArray);
-                    $channelOrders[$index] = new DTO\ChannelOrder(json_decode($transform, true));
+        // fetch meta
+        $meta = new Meta($channel);
+        $map  = $meta->get(Meta::CHANNEL_ORDER_TEMPLATE);
+
+        if ($map) {
+            // get base order
+            $channelOrders = TransformOrders::getChannelOrdersTemplate($map, $orders);
+
+            // get line items with separate map
+            $orderArr = json_decode(json_encode($orders), true);
+            foreach ($orderArr as $index => $order) {
+                foreach ($order['line_items'] as $line_item) {
+                    $map                                 = $meta->get(Meta::CHANNEL_ORDER_LINE_ITEM_TEMPLATE);
+                    $channelOrders[$index]->line_items[] = TransformOrders::getChannelOrdersLineItems($map, $line_item);
                 }
             }
+        } else {
+            $channelOrders = TransformOrders::getChannelOrders($orders);
         }
 
-        Logger::LogOrderTransform($channelOrders, $channel);
+        // todo - set prices, - tax that is
+
+        // set instruction, add_order if processing or null if anything else
+        foreach ($orders as $index => $order) {
+            if ($order->state == DTO\ChannelOrder::ORDER_STATE_PROCESSING) {
+                $channelOrders[$index]->instruction = DTO\ChannelOrder::INSTRUCTION_ADD_ORDER;
+            }
+        }
         return $channelOrders;
     }
 }

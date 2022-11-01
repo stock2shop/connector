@@ -1,0 +1,15 @@
+{
+  "channel_product_code": "{{ id }}",
+  "channel_variant_code": "{{ id }}",
+  "price": "{{ price }}",
+  "qty": "{{ qty }}",
+  "sku": "{{ sku }}",
+  "title": "{{ name }}",
+  "tax_lines": [
+    {
+      "rate": "{{ tax_rate }}",
+      "title": "{{ name }}",
+      "price": "{{ price_with_discount_and_tax }}"
+    }
+  ]
+}

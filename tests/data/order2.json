@@ -92,7 +92,7 @@
     "address_type": "shipping"
   },
   "entity_id": "2222",
-  "state": "processing",
+  "state": "waiting_payment",
   "protect_code": "22222222222222222222222222222222",
   "shipping_description": "Parcel Ninja - Courier",
   "base_shipping_amount": "50",

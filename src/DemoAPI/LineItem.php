@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Stock2Shop\Connector\DemoOrder;
+namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
