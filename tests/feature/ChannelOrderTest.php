@@ -120,6 +120,7 @@ final class ChannelOrderTest extends Base
             foreach ($order->line_items as $li) {
                 $this->assertNotEmpty($li->channel_variant_code);
                 $this->assertIsArray($li->tax_lines);
+                $this->assertNotEmpty($li->price);
                 foreach ($li->tax_lines as $tl) {
                     $this->assertNotEmpty($tl->price);
                 }

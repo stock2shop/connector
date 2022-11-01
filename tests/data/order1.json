@@ -42,12 +42,12 @@
       "image": "https://somehost/image.jpg",
       "name": "111_111111",
       "price": 200,
-      "price_with_discount": 200,
-      "price_with_discount_and_tax": 200,
-      "price_with_tax": 200,
+      "total_discount": 0,
+      "total_tax": 30,
+      "price_with_tax": 230,
       "qty": 1,
       "sku": "111111111",
-      "tax_rate": 0,
+      "tax_rate": 15,
       "url": "https://localhost:8080/mens-briefs-111111"
     },
     {
@@ -55,12 +55,12 @@
       "image": "https://localhost:8080/image1.jpg",
       "name": "222_222222",
       "price": 300,
-      "price_with_discount": 300,
-      "price_with_discount_and_tax": 300,
-      "price_with_tax": 300,
+      "total_discount": 30,
+      "total_tax": 45,
+      "price_with_tax": 315,
       "qty": 2,
       "sku": "222222222",
-      "tax_rate": 0,
+      "tax_rate": 15,
       "url": "https://localhost:8080/mens-briefs-222222"
     }
   ],
@@ -68,7 +68,7 @@
     "entity_id": "1111",
     "parent_id": "1111",
     "shipping_captured": 50,
-    "base_amount_paid": 350,
+    "base_amount_paid": 595,
     "method": "payumea_creditcard",
     "additional_information": {
       "method_title": "Credit Card (payu) ",
@@ -97,8 +97,8 @@
   "shipping_description": "Parcel Ninja - Courier",
   "base_shipping_amount": "50",
   "discount_amount": 0,
-  "base_total_paid": 350,
-  "tax_amount": "20",
+  "base_total_paid": 565,
+  "tax_amount": "75",
   "weight": "1.0000",
   "increment_id": "111111111"
 }

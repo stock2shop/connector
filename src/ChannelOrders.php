@@ -32,7 +32,7 @@ class ChannelOrders implements Share\Channel\ChannelOrdersInterface
             // get line items with separate map
             $orderArr = json_decode(json_encode($orders), true);
             foreach ($orderArr as $index => $order) {
-                foreach ($order['line_items'] as $line_item) {
+                foreach ($order['line_items'] as &$line_item) {
                     $map                                 = $meta->get(Meta::CHANNEL_ORDER_LINE_ITEM_TEMPLATE);
                     $channelOrders[$index]->line_items[] = TransformOrders::getChannelOrdersLineItems($map, $line_item);
                 }
@@ -40,8 +40,6 @@ class ChannelOrders implements Share\Channel\ChannelOrdersInterface
         } else {
             $channelOrders = TransformOrders::getChannelOrders($orders);
         }
-
-        // todo - set prices, - tax that is
 
         // set instruction, add_order if processing or null if anything else
         foreach ($orders as $index => $order) {

@@ -1,7 +1,7 @@
 {
   "channel_product_code": "{{ id }}",
   "channel_variant_code": "{{ id }}",
-  "price": "{{ price }}",
+  "price": "{{# getPriceWithoutDiscount}}{{price_with_tax}}-{{total_tax}}-{{total_discount}}{{/ getPriceWithoutDiscount}}",
   "qty": "{{ qty }}",
   "sku": "{{ sku }}",
   "title": "{{ name }}",
@@ -9,7 +9,7 @@
     {
       "rate": "{{ tax_rate }}",
       "title": "{{ name }}",
-      "price": "{{ price_with_discount_and_tax }}"
+      "price": "{{# getPriceWithoutTax}} {{price}} - ({{ price }} * ({{tax_rate}} / 100)) {{/ getPriceWithoutTax}}"
     }
   ]
 }

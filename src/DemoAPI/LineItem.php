@@ -12,8 +12,8 @@ class LineItem extends Base
     public ?string $image;
     public ?string $name;
     public ?int $price;
-    public ?int $price_with_discount;
-    public ?int $price_with_discount_and_tax;
+    public ?int $total_discount;
+    public ?int $total_tax;
     public ?int $price_with_tax;
     public ?int $qty;
     public ?string $sku;
@@ -22,17 +22,17 @@ class LineItem extends Base
 
     public function __construct(array $data)
     {
-        $this->id                          = self::intFrom($data, 'id');
-        $this->image                       = self::stringFrom($data, 'image');
-        $this->name                        = self::stringFrom($data, 'name');
-        $this->price                       = self::intFrom($data, 'price');
-        $this->price_with_discount         = self::intFrom($data, 'price_with_discount');
-        $this->price_with_discount_and_tax = self::intFrom($data, 'price_with_discount_and_tax');
-        $this->price_with_tax              = self::intFrom($data, 'price_with_tax');
-        $this->qty                         = self::intFrom($data, 'qty');
-        $this->sku                         = self::stringFrom($data, 'sku');
-        $this->tax_rate                    = self::intFrom($data, 'tax_rate');
-        $this->url                         = self::stringFrom($data, 'url');
+        $this->id             = self::intFrom($data, 'id');
+        $this->image          = self::stringFrom($data, 'image');
+        $this->name           = self::stringFrom($data, 'name');
+        $this->price          = self::intFrom($data, 'price');
+        $this->total_discount = self::intFrom($data, 'total_discount');
+        $this->total_tax      = self::intFrom($data, 'total_tax');
+        $this->price_with_tax = self::intFrom($data, 'price_with_tax');
+        $this->qty            = self::intFrom($data, 'qty');
+        $this->sku            = self::stringFrom($data, 'sku');
+        $this->tax_rate       = self::intFrom($data, 'tax_rate');
+        $this->url            = self::stringFrom($data, 'url');
     }
 
     /**

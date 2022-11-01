@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Stock2Shop\Connector;
 
-use Mustache_Engine;
 use Stock2Shop\Connector\DemoAPI\Order;
 use Stock2Shop\Share\DTO;
 
@@ -71,11 +70,11 @@ class TransformOrders
                     'channel_variant_code' => $doli->id,
                     'barcode'              => null,
                     'grams'                => $do->weight,
-                    'price'                => $doli->price_with_discount_and_tax,
+                    'price'                => $doli->price_with_tax - $doli->total_tax - $doli->total_discount,
                     'qty'                  => $doli->qty,
                     'sku'                  => $doli->sku,
                     'title'                => $doli->name,
-                    'total_discount'       => $doli->price - $doli->price_with_discount,
+                    'total_discount'       => $doli->total_discount,
                     'tax_lines'            => [
                         [
                             'price' => $doli->price,
@@ -98,17 +97,14 @@ class TransformOrders
     {
         $channelOrders = [];
 
-        // create mustache engine to parse template
-        $m = new Mustache_Engine();
-
         // apply template to each order and add resulting ChannelOrder to the return variable
         foreach ($demoOrder as $order) {
             // get order as an associative array
             $orderArr = json_decode(json_encode($order), true);
-            $render = $m->render($template, $orderArr);
+            $render   = Utils::render($template, $orderArr);
 
             // get render as an associative array
-            $renderArr = json_decode($render, true);
+            $renderArr       = json_decode($render, true);
             $channelOrders[] = new DTO\ChannelOrder($renderArr);
         }
 
@@ -117,10 +113,7 @@ class TransformOrders
 
     public static function getChannelOrdersLineItems(string $template, array $lineItem): DTO\ChannelOrderLineItem
     {
-        // create mustache engine to parse template
-        $m = new Mustache_Engine();
-
-        $render = $m->render($template, $lineItem);
+        $render = Utils::render($template, $lineItem);
 
         // get render as an associative array
         $renderArr = json_decode($render, true);
