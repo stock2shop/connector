@@ -37,7 +37,7 @@ final class ChannelOrderTest extends Base
         $channel         = new DTO\Channel($this->getTestDataChannel());
         $channel->meta[] = new DTO\Meta(
             [
-                'key'   => Meta::ORDER_STATUS,
+                'key'   => Meta::ADD_ORDER_STATUS,
                 'value' => "processing"
             ]
         );
@@ -100,7 +100,7 @@ final class ChannelOrderTest extends Base
                     'value' => $baseTemplate
                 ],
                 [
-                    'key'   => Meta::ORDER_STATUS,
+                    'key'   => Meta::ADD_ORDER_STATUS,
                     'value' => "processing"
                 ]
             ]

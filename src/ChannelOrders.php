@@ -31,7 +31,7 @@ class ChannelOrders implements Share\Channel\ChannelOrdersInterface
         $channelOrders = TransformOrders::getChannelOrders($orders, $map);
 
         // set instruction, add_order if processing or null if anything else
-        $state  = $meta->get(Meta::ORDER_STATUS);
+        $state  = $meta->get(Meta::ADD_ORDER_STATUS);
         foreach ($orders as $index => $order) {
             if (!$state) {
                 $channelOrders[$index]->instruction = DTO\ChannelOrder::INSTRUCTION_EMPTY;
