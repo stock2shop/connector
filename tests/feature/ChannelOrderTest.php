@@ -61,7 +61,7 @@ final class ChannelOrderTest extends Base
 
             // check that instruction has been set correctly
             $arr = json_decode($hooks[$index]->payload, true);
-            if ($arr['state'] == DTO\ChannelOrder::ORDER_STATE_PROCESSING) {
+            if ($arr['state'] == "processing") {
                 $this->assertEquals(DTO\ChannelOrder::INSTRUCTION_ADD_ORDER, $order->instruction);
             } else {
                 $this->assertEmpty($order->instruction);
@@ -125,7 +125,7 @@ final class ChannelOrderTest extends Base
 
             // check that instruction has been set correctly
             $arr = json_decode($hooks[$index]->payload, true);
-            if ($arr['state'] == DTO\ChannelOrder::ORDER_STATE_PROCESSING) {
+            if ($arr['state'] == "processing") {
                 $this->assertEquals(DTO\ChannelOrder::INSTRUCTION_ADD_ORDER, $order->instruction);
             } else {
                 $this->assertEmpty($order->instruction);
