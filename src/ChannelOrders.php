@@ -6,6 +6,7 @@ namespace Stock2Shop\Connector;
 
 use Stock2Shop\Share\DTO;
 use Stock2Shop\Share;
+use function PHPUnit\Framework\isFalse;
 
 class ChannelOrders implements Share\Channel\ChannelOrdersInterface
 {

@@ -24,7 +24,7 @@ class TransformOrders
                 $co = self::getChannelOrder($do);
             } else {
                 // if a template is provided we should use mustache to render the ChannelOrder
-                $co = self::getChannelOrdersTemplate($template, $do);
+                $co = self::getChannelOrderTemplate($template, $do);
             }
 
             // set line items
@@ -104,7 +104,7 @@ class TransformOrders
         ]);
     }
 
-    public static function getChannelOrdersTemplate(string $template, DemoAPI\Order $demoOrder): DTO\ChannelOrder
+    public static function getChannelOrderTemplate(string $template, DemoAPI\Order $demoOrder): DTO\ChannelOrder
     {
         // get order as an associative array
         $orderArr = json_decode(json_encode($demoOrder), true);
