@@ -6,7 +6,6 @@ namespace Stock2Shop\Connector;
 
 use Stock2Shop\Share\DTO;
 use Stock2Shop\Share;
-use function PHPUnit\Framework\isFalse;
 
 class ChannelOrders implements Share\Channel\ChannelOrdersInterface
 {
@@ -23,15 +22,11 @@ class ChannelOrders implements Share\Channel\ChannelOrdersInterface
         $orders = DemoAPI\Order::createArray($payload);
 
         // fetch meta
-        $meta = new Meta($channel);
-        $map  = $meta->get(Meta::CHANNEL_ORDER_TEMPLATE);
-        if (!$map) {
-            $map = null;
-        }
-        $channelOrders = TransformOrders::getChannelOrders($orders, $map);
+        $meta          = new Meta($channel);
+        $channelOrders = TransformOrders::getChannelOrders($orders, $meta->get(Meta::CHANNEL_ORDER_TEMPLATE));
 
         // set instruction, add_order if processing or null if anything else
-        $state  = $meta->get(Meta::ADD_ORDER_STATUS);
+        $state = $meta->get(Meta::ADD_ORDER_STATUS);
         foreach ($orders as $index => $order) {
             if (!$state) {
                 $channelOrders[$index]->instruction = DTO\ChannelOrder::INSTRUCTION_EMPTY;

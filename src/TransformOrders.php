@@ -13,13 +13,13 @@ class TransformOrders
      * @param Order[] $demoOrders
      * @return DTO\ChannelOrder[]
      */
-    public static function getChannelOrders(array $demoOrders, ?string $template): array
+    public static function getChannelOrders(array $demoOrders, string|false $template): array
     {
         $channelOrders = [];
         foreach ($demoOrders as $do) {
             $co = null;
 
-            if ($template == null) {
+            if ($template == false) {
                 // if no template is provided we can just assign the values
                 $co = self::getChannelOrder($do);
             } else {
@@ -106,9 +106,10 @@ class TransformOrders
 
     public static function getChannelOrderTemplate(string $template, DemoAPI\Order $demoOrder): DTO\ChannelOrder
     {
+        $mustache = new \Mustache_Engine();
         // get order as an associative array
         $orderArr = json_decode(json_encode($demoOrder), true);
-        $render   = Utils::render($template, $orderArr);
+        $render   = $mustache->render($template, $orderArr);
 
         // get render as an associative array
         $renderArr       = json_decode($render, true);
