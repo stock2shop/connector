@@ -4,18 +4,10 @@ declare(strict_types=1);
 
 namespace Stock2Shop\Tests\Connector\feature;
 
-use GuzzleHttp\Client;
-use Mustache_Engine;
-use Stock2Shop\Connector\ChannelCreator;
 use Stock2Shop\Connector\ChannelOrders;
-use Stock2Shop\Connector\Config\Environment;
-use Stock2Shop\Connector\Config\LoaderArray;
-use Stock2Shop\Connector\DemoAPI\Payment;
+use Stock2Shop\Connector\DemoAPI;
 use Stock2Shop\Connector\Meta;
-use Stock2Shop\Connector\TransformOrders;
-use Stock2Shop\Share\Channel\ChannelProductsInterface;
 use Stock2Shop\Share\DTO;
-use Stock2Shop\Share\DTO\ChannelOrderAddress;
 use Stock2Shop\Tests\Connector\Base;
 
 final class ChannelOrderTest extends Base
@@ -137,6 +129,33 @@ final class ChannelOrderTest extends Base
                 $this->assertEquals(DTO\ChannelOrder::INSTRUCTION_ADD_ORDER, $order->instruction);
             } else {
                 $this->assertEmpty($order->instruction);
+            }
+        }
+    }
+
+    public function testPriceCalculation()
+    {
+        // create two webhooks for test run
+        $wh1   = new DTO\ChannelOrderWebhook([
+            'storage_code' => __DIR__ . '/../data/order1.json',
+            'payload'      => file_get_contents(__DIR__ . '/../data/order1.json')
+        ]);
+
+        $co            = new ChannelOrders();
+        $channel       = new DTO\Channel($this->getTestDataChannel());
+        $orders        = $co->transform([$wh1], $channel);
+
+        $demoOrder = new DemoAPI\Order(json_decode($wh1->payload, true));
+
+        $this->assertCount(1, $orders);
+        foreach ($orders[0]->line_items as $index => $li) {
+            // line item price is the DemoOrder price less total_discount
+            $price = $demoOrder->line_items[$index]->price - $demoOrder->line_items[$index]->total_discount;
+            $this->assertEquals($price, $li->price);
+            foreach ($li->tax_lines as $tl) {
+                // tax line price is price_with_tax + total_discount
+                $price = $demoOrder->line_items[$index]->price_with_tax + $demoOrder->line_items[$index]->total_discount;
+                $this->assertEquals($price, $tl->price);
             }
         }
     }
