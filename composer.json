@@ -20,8 +20,8 @@
   ],
   "repositories": [
     {
-      "type": "path",
-      "url": "/Users/arata/workspace/github.com/stock2shop/share"
+      "type": "vcs",
+      "url": "https://github.com/stock2shop/share"
     }
   ],
   "require": {
