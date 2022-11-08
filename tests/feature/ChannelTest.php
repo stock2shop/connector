@@ -28,6 +28,7 @@ final class ChannelTest extends Base
     {
         Env::set(
             new LoaderArray([
+                'LOG_FS_ENABLED'   => 'true',
                 'LOG_CHANNEL'      => 'Share',
                 'LOG_FS_DIR'       => sprintf('%s/../output/', __DIR__),
                 'LOG_FS_FILE_NAME' => 'system.log'
@@ -102,6 +103,8 @@ final class ChannelTest extends Base
     {
         Env::set(
             new LoaderArray([
+                // logger name
+                'LOG_FS_ENABLED'   => 'true',
                 'LOG_CHANNEL'      => 'Share',
                 'LOG_FS_DIR'       => sprintf('%s/../output/', __DIR__),
                 'LOG_FS_FILE_NAME' => 'system.log'
@@ -155,8 +158,8 @@ final class ChannelTest extends Base
     private function assertFailedSyncProductsLogsWritten(DTO\ChannelProducts $channelProducts)
     {
         $syncCount = 1;
-        $logs  = file_get_contents(Env::get(EnvKey::LOG_FS_DIR) . Env::get(EnvKey::LOG_FS_FILE_NAME));
-        $parts = explode("\n", $logs);
+        $logs      = file_get_contents(Env::get(EnvKey::LOG_FS_DIR) . Env::get(EnvKey::LOG_FS_FILE_NAME));
+        $parts     = explode("\n", $logs);
         // extra line at end of logs
         $this->assertCount($syncCount + 1, $parts);
         $this->assertEquals('', $parts[$syncCount]);
