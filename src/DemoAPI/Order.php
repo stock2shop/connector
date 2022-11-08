@@ -6,6 +6,29 @@ namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
+/**
+ * @psalm-import-type AddressData from Address
+ * @psalm-import-type CustomerData from Customer
+ * @psalm-import-type LineItemData from LineItem
+ * @psalm-import-type PaymentData from Payment
+ * @psalm-type OrderData = array{
+ *     billing_address: AddressData,
+ *     customer: CustomerData,
+ *     line_items: LineItemData[],
+ *     payment: PaymentData,
+ *     shipping_address: AddressData,
+ *     entity_id: ?string,
+ *     state: ?string,
+ *     protect_code: ?string,
+ *     shipping_description: ?string,
+ *     base_shipping_amount: ?string,
+ *     base_total_paid: ?float,
+ *     discount_amount: ?float,
+ *     tax_amount: ?string,
+ *     weight: ?string,
+ *     increment_id: ?string
+ * }
+ */
 class Order extends Base
 {
     public Address $billing_address;
@@ -25,6 +48,7 @@ class Order extends Base
     public ?string $weight;
     public ?string $increment_id;
 
+    /** @param OrderData $data */
     public function __construct(array $data)
     {
         $this->billing_address      = new Address(self::arrayFrom($data, 'billing_address'));
@@ -46,6 +70,7 @@ class Order extends Base
     }
 
     /**
+     * @param OrderData[] $data
      * @return Order[]
      */
     public static function createArray(array $data): array

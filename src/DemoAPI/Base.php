@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Stock2Shop\Connector\DemoAPI;
 
+use InvalidArgumentException;
 use Stock2Shop\Share;
-use http\Exception\InvalidArgumentException;
 
 abstract class Base
 {

@@ -6,6 +6,21 @@ namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
+/**
+ * @psalm-type LineItemData = array{
+ * id: ?int,
+ * image: ?string,
+ * name: ?string,
+ * price: ?int,
+ * total_discount: ?int,
+ * total_tax: ?int,
+ * price_with_tax: ?int,
+ * qty: ?int,
+ * sku: ?string,
+ * tax_rate: ?int,
+ * url: ?string,
+ * }
+ */
 class LineItem extends Base
 {
     public ?int $id;
@@ -20,6 +35,7 @@ class LineItem extends Base
     public ?int $tax_rate;
     public ?string $url;
 
+    /** @param LineItemData $data */
     public function __construct(array $data)
     {
         $this->id             = self::intFrom($data, 'id');
@@ -36,6 +52,7 @@ class LineItem extends Base
     }
 
     /**
+     * @param LineItemData[] $data
      * @return LineItem[]
      */
     public static function createArray(array $data): array

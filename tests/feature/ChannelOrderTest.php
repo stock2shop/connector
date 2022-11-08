@@ -37,23 +37,18 @@ final class ChannelOrderTest extends Base
 
         $this->assertCount(2, $orders);
         foreach ($orders as $index => $order) {
-            $this->assertIsArray($order->meta);
-            $this->assertIsArray($order->line_items);
-            $this->assertIsArray($order->shipping_lines);
             $this->assertNotEmpty($order->channel_order_code);
             $this->assertNotEmpty($order->billing_address->address1);
             $this->assertFalse($order->customer->accepts_marketing);
             $this->assertNotEmpty($order->shipping_address->address1);
             foreach ($order->shipping_lines as $sl) {
                 $this->assertNotEmpty($sl->title);
-                $this->assertIsArray($sl->tax_lines);
                 foreach ($sl->tax_lines as $tl) {
                     $this->assertNotEmpty($tl->price);
                 }
             }
             foreach ($order->line_items as $li) {
                 $this->assertNotEmpty($li->channel_variant_code);
-                $this->assertIsArray($li->tax_lines);
                 foreach ($li->tax_lines as $tl) {
                     $this->assertNotEmpty($tl->price);
                 }
@@ -101,22 +96,17 @@ final class ChannelOrderTest extends Base
 
         $this->assertCount(2, $orders);
         foreach ($orders as $index => $order) {
-            $this->assertIsArray($order->meta);
-            $this->assertIsArray($order->line_items);
-            $this->assertIsArray($order->shipping_lines);
             $this->assertNotEmpty($order->billing_address->address1);
             $this->assertFalse($order->customer->accepts_marketing);
             $this->assertNotEmpty($order->shipping_address->address1);
             foreach ($order->shipping_lines as $sl) {
                 $this->assertNotEmpty($sl->title);
-                $this->assertIsArray($sl->tax_lines);
                 foreach ($sl->tax_lines as $tl) {
                     $this->assertNotEmpty($tl->price);
                 }
             }
             foreach ($order->line_items as $li) {
                 $this->assertNotEmpty($li->channel_variant_code);
-                $this->assertIsArray($li->tax_lines);
                 $this->assertNotEmpty($li->price);
                 foreach ($li->tax_lines as $tl) {
                     $this->assertNotEmpty($tl->price);

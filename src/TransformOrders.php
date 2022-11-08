@@ -90,7 +90,7 @@ class TransformOrders
             ],
             'shipping_lines'     => [
                 [
-                    'price'     => $order->base_total_paid - $order->base_shipping_amount,
+                    'price'     => $order->base_total_paid - (int)$order->base_shipping_amount,
                     'title'     => $order->shipping_description,
                     'tax_lines' => [
                         [

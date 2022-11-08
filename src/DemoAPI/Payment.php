@@ -6,6 +6,16 @@ namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
+/**
+ * @psalm-import-type PaymentInfo from AdditionalPaymentInfo
+ * @psalm-type PaymentData = array{
+ *     entity_id: ?string,
+ *     parent_id: ?string,
+ *     shipping_captured: ?int,
+ *     method: ?string,
+ *     additional_information: PaymentInfo
+ * }
+ */
 class Payment extends Base
 {
     public ?string $entity_id;
@@ -14,6 +24,7 @@ class Payment extends Base
     public ?string $method;
     public AdditionalPaymentInfo $additional_information;
 
+    /** @param PaymentData $data */
     public function __construct(array $data)
     {
         $this->entity_id              = self::stringFrom($data, 'entity_id');
@@ -24,6 +35,7 @@ class Payment extends Base
     }
 
     /**
+     * @param PaymentData[] $data
      * @return Payment[]
      */
     public static function createArray(array $data): array

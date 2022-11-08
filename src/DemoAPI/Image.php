@@ -6,11 +6,17 @@ namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
+/** @psalm-type ImageData = array{
+ *     id: ?string,
+ *     url: string
+ * }
+ */
 class Image extends Base
 {
-    public string $url;
     public ?string $id;
+    public string $url;
 
+    /** @param ImageData $data */
     public function __construct(array $data)
     {
         $this->id  = self::stringFrom($data, 'id');
@@ -18,6 +24,7 @@ class Image extends Base
     }
 
     /**
+     * @param ImageData[] $data
      * @return Image[]
      */
     public static function createArray(array $data): array

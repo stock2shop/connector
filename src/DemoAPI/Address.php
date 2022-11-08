@@ -6,6 +6,22 @@ namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
+/** @psalm-type AddressData = array{address_type: string,
+ *     city: ?string,
+ *     country_id: ?string,
+ *     email: ?string,
+ *     entity_id: ?string,
+ *     firstname: ?string,
+ *     lastname: ?string,
+ *     parent_id: ?string,
+ *     postcode: ?string,
+ *     quote_address_id: ?string,
+ *     region: ?string,
+ *     region_id: ?string,
+ *     street: ?string,
+ *     telephone: ?string
+ * }
+ */
 class Address extends Base
 {
     public ?string $address_type;
@@ -23,6 +39,7 @@ class Address extends Base
     public ?string $street;
     public ?string $telephone;
 
+    /** @param AddressData $data */
     public function __construct(array $data)
     {
         $this->address_type     = self::stringFrom($data, 'address_type');
@@ -42,6 +59,7 @@ class Address extends Base
     }
 
     /**
+     * @param AddressData[] $data
      * @return Address[]
      */
     public static function createArray(array $data): array

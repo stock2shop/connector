@@ -6,6 +6,28 @@ namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
+/** @psalm-type CustomerData = array{
+ *     entity_id: ?string,
+ *     website_id: ?string,
+ *     email: ?string,
+ *     group_id: ?string,
+ *     store_id: ?string,
+ *     created_at: ?string,
+ *     updated_at: ?string,
+ *     is_active: ?string,
+ *     disable_auto_group_change: ?string,
+ *     created_in: ?string,
+ *     firstname: ?string,
+ *     lastname: ?string,
+ *     rp_token: ?string,
+ *     rp_token_created_at: ?string,
+ *     default_billing: ?string,
+ *     default_shipping: ?string,
+ *     taxvat: ?string,
+ *     failures_num: ?string,
+ *     first_failure: ?string,
+ * }
+ */
 class Customer extends Base
 {
     public ?string $entity_id;
@@ -28,6 +50,7 @@ class Customer extends Base
     public ?string $failures_num;
     public ?string $first_failure;
 
+    /** @param CustomerData $data */
     public function __construct(array $data)
     {
         $this->entity_id                 = self::stringFrom($data, 'entity_id');
@@ -52,6 +75,7 @@ class Customer extends Base
     }
 
     /**
+     * @param CustomerData[] $data
      * @return Customer[]
      */
     public static function createArray(array $data): array

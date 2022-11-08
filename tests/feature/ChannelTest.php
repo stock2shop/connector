@@ -24,7 +24,7 @@ final class ChannelTest extends Base
      *
      * @return void
      */
-    public function testSync()
+    public function testSync(): void
     {
         Env::set(
             new LoaderArray([
@@ -132,7 +132,7 @@ final class ChannelTest extends Base
         $this->assertFalse($cps->channel_products[1]->images[1]->success);
         $this->assertEmpty($cps->channel_products[1]->images[0]->channel_image_code);
         $this->assertEmpty($cps->channel_products[1]->images[1]->channel_image_code);
-        $this->assertFailedSyncProductsLogsWritten(1, $channelProducts);
+        $this->assertFailedSyncProductsLogsWritten($channelProducts);
     }
 
     private function assertSyncProductsLogsWritten(int $syncCount)
@@ -152,8 +152,9 @@ final class ChannelTest extends Base
         }
     }
 
-    private function assertFailedSyncProductsLogsWritten(int $syncCount, DTO\ChannelProducts $channelProducts)
+    private function assertFailedSyncProductsLogsWritten(DTO\ChannelProducts $channelProducts)
     {
+        $syncCount = 1;
         $logs  = file_get_contents(Env::get(EnvKey::LOG_FS_DIR) . Env::get(EnvKey::LOG_FS_FILE_NAME));
         $parts = explode("\n", $logs);
         // extra line at end of logs
@@ -174,8 +175,7 @@ final class ChannelTest extends Base
         ChannelProductsInterface $con,
         DTO\Channel              $channel,
         DTO\ChannelProducts      $channelProducts
-    )
-    {
+    ) {
         $active = [];
         foreach ($channelProducts->channel_products as $cp) {
             if (!$cp->delete) {
@@ -214,8 +214,7 @@ final class ChannelTest extends Base
         ChannelProductsInterface $con,
         DTO\Channel              $channel,
         DTO\ChannelProducts      $existingProducts
-    )
-    {
+    ) {
         usort($existingProducts->channel_products, function (DTO\ChannelProduct $a, DTO\ChannelProduct $b) {
             return $a->channel_product_code <=> $b->channel_product_code;
         });

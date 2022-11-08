@@ -6,11 +6,17 @@ namespace Stock2Shop\Connector\DemoAPI;
 
 use Stock2Shop\Share;
 
+/** @psalm-type PaymentInfo = array{
+ *     method_title: ?string,
+ *      payUReference: ?string
+ * }
+ */
 class AdditionalPaymentInfo extends Base
 {
     public ?string $method_title;
     public ?string $payUReference;
 
+    /** @param PaymentInfo $data */
     public function __construct(array $data)
     {
         $this->method_title  = self::stringFrom($data, 'method_title');
@@ -18,6 +24,7 @@ class AdditionalPaymentInfo extends Base
     }
 
     /**
+     * @param PaymentInfo[] $data
      * @return AdditionalPaymentInfo[]
      */
     public static function createArray(array $data): array
