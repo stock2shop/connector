@@ -49,7 +49,6 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         $meta = new Meta($channel);
         $url  = $meta->get(Meta::CHANNEL_META_URL_KEY);
         if (!$url) {
-            // todo - add to logging library?
             Logger\Custom::log([
                 'message'    => 'Invalid URL',
                 'level'      => Logger\Domain\Log::LOG_LEVEL_ERROR,
