@@ -35,7 +35,7 @@
   "require": {
     "php": ">=8.1",
     "stock2shop/share": "^0.2",
-    "stock2shop/logger": "0.1.1",
+    "stock2shop/logger": "^0.1.1",
     "stock2shop/environment": "^0.2",
     "vlucas/phpdotenv": "^5.4",
     "monolog/monolog": "^2.8.0",
