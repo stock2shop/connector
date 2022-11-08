@@ -5,20 +5,22 @@ declare(strict_types=1);
 namespace Stock2Shop\Connector;
 
 use GuzzleHttp\Exception\GuzzleException;
+use Stock2Shop\Environment\Env;
 use Stock2Shop\Share\DTO;
 use Stock2Shop\Share;
+use Stock2Shop\Logger;
 
 class ChannelProducts implements Share\Channel\ChannelProductsInterface
 {
     public function sync(
         Share\DTO\ChannelProducts $channelProducts,
-        Share\DTO\Channel $channel
+        Share\DTO\Channel         $channel
     ): Share\DTO\ChannelProducts {
         $meta = new Meta($channel);
         $url  = $meta->get(Meta::CHANNEL_META_URL_KEY);
         if (!$url) {
             SyncResults::setFailed($channelProducts->channel_products);
-            Logger::LogProductSyncFailed($channelProducts->channel_products, 'Invalid URL', $channel);
+            Logger\ChannelProductsFail::log($channelProducts->channel_products);
             return $channelProducts;
         }
 
@@ -35,23 +37,30 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         $api = new DemoAPI\API($url);
         Sync::touchProducts($api, $toTouch, $channel);
         Sync::deleteProducts($api, $toDelete, $channel);
-        Logger::LogProductSync(array_merge($toDelete, $toTouch), $channel);
+        Logger\ChannelProductsSuccess::log((array_merge($toDelete, $toTouch)));
         return $channelProducts;
     }
 
     public function get(
-        string $channel_product_code,
-        int $limit,
+        string      $channel_product_code,
+        int         $limit,
         DTO\Channel $channel
     ): DTO\ChannelProducts {
         $meta = new Meta($channel);
         $url  = $meta->get(Meta::CHANNEL_META_URL_KEY);
         if (!$url) {
-            Logger::LogProductGet(
-                DTO\Log::LOG_LEVEL_ERROR,
-                'Invalid URL',
-                $channel
-            );
+            // todo - add to logging library?
+            Logger\Custom::log([
+                'message'    => 'Invalid URL',
+                'level'      => Logger\Domain\Log::LOG_LEVEL_ERROR,
+                'origin'     => Env::get(EnvKey::LOG_CHANNEL),
+                'channel_id' => $channel->id,
+                'client_id'  => $channel->client_id,
+                'log_to_es'  => true,
+                'tags'       => [
+                    'get_channel_products'
+                ]
+            ]);
             return new DTO\ChannelProducts([]);
         }
 
@@ -69,16 +78,22 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
 
     public function getByCode(
         DTO\ChannelProducts $channelProducts,
-        DTO\Channel $channel
+        DTO\Channel         $channel
     ): DTO\ChannelProducts {
         $meta = new Meta($channel);
         $url  = $meta->get(Meta::CHANNEL_META_URL_KEY);
         if (!$url) {
-            Logger::LogProductGet(
-                DTO\Log::LOG_LEVEL_ERROR,
-                'Invalid URL',
-                $channel
-            );
+            Logger\Custom::log([
+                'message'    => 'Invalid URL',
+                'level'      => Logger\Domain\Log::LOG_LEVEL_ERROR,
+                'origin'     => Env::get(EnvKey::LOG_CHANNEL),
+                'channel_id' => $channel->id,
+                'client_id'  => $channel->client_id,
+                'log_to_es'  => true,
+                'tags'       => [
+                    'get_channel_products'
+                ]
+            ]);
             return new DTO\ChannelProducts([]);
         }
 

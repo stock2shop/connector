@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "379c08a1c2211357c40276da742ea142",
+    "content-hash": "64048de7b9f96889d4a054abf36632a2",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -58,16 +58,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.240.7",
+            "version": "3.240.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "afad16e102229de8da15f07cc48436955811ef7f"
+                "reference": "4ab7d004ca11298bf400f3291f144d820fb97cd6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/afad16e102229de8da15f07cc48436955811ef7f",
-                "reference": "afad16e102229de8da15f07cc48436955811ef7f",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/4ab7d004ca11298bf400f3291f144d820fb97cd6",
+                "reference": "4ab7d004ca11298bf400f3291f144d820fb97cd6",
                 "shasum": ""
             },
             "require": {
@@ -146,9 +146,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.240.7"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.240.11"
             },
-            "time": "2022-11-01T18:23:34+00:00"
+            "time": "2022-11-07T19:23:11+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -545,21 +545,21 @@
         },
         {
             "name": "maxbanton/cwh",
-            "version": "v2.0.2",
+            "version": "v2.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/maxbanton/cwh.git",
-                "reference": "55445da8e6cb62f3ce7cb186c23c848b270134ca"
+                "reference": "916f24458b86673b5ed88f40b12bcc6ac5e3b47f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/maxbanton/cwh/zipball/55445da8e6cb62f3ce7cb186c23c848b270134ca",
-                "reference": "55445da8e6cb62f3ce7cb186c23c848b270134ca",
+                "url": "https://api.github.com/repos/maxbanton/cwh/zipball/916f24458b86673b5ed88f40b12bcc6ac5e3b47f",
+                "reference": "916f24458b86673b5ed88f40b12bcc6ac5e3b47f",
                 "shasum": ""
             },
             "require": {
                 "aws/aws-sdk-php": "^3.18",
-                "monolog/monolog": "^2.0",
+                "monolog/monolog": "^2.0 || ^3.0",
                 "php": "^7.2 || ^8"
             },
             "require-dev": {
@@ -597,7 +597,7 @@
                 "issues": "https://github.com/maxbanton/cwh/issues",
                 "source": "https://github.com/maxbanton/cwh"
             },
-            "time": "2020-11-17T15:34:20+00:00"
+            "time": "2022-11-07T12:55:13+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -1142,8 +1142,107 @@
             "time": "2019-03-08T08:55:37+00:00"
         },
         {
+            "name": "stock2shop/environment",
+            "version": "v0.2.0",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:stock2shop/environment.git",
+                "reference": "b8832dae99ea9d6ba290427b4b0d59fd90b6271a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stock2shop/environment/zipball/b8832dae99ea9d6ba290427b4b0d59fd90b6271a",
+                "reference": "b8832dae99ea9d6ba290427b4b0d59fd90b6271a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1",
+                "vlucas/phpdotenv": "^5.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.12",
+                "phpunit/phpunit": "^9",
+                "vimeo/psalm": "^4.29"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Stock2Shop\\Environment\\": "src/"
+                },
+                "autoload-dev": {
+                    "psr-4": {
+                        "Stock2Shop\\Tests\\Environment\\": "tests"
+                    }
+                }
+            },
+            "authors": [
+                {
+                    "name": "Stock2Shop",
+                    "email": "support@stock2shop.com"
+                }
+            ],
+            "support": {
+                "source": "https://github.com/stock2shop/environment/tree/v0.2.0",
+                "issues": "https://github.com/stock2shop/environment/issues"
+            },
+            "time": "2022-11-05T13:33:55+00:00"
+        },
+        {
+            "name": "stock2shop/logger",
+            "version": "v0.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/stock2shop/logger.git",
+                "reference": "e9ddacb9c6e94c74ddbdd35544cdf0b8e68cf90a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stock2shop/logger/zipball/e9ddacb9c6e94c74ddbdd35544cdf0b8e68cf90a",
+                "reference": "e9ddacb9c6e94c74ddbdd35544cdf0b8e68cf90a",
+                "shasum": ""
+            },
+            "require": {
+                "aws/aws-sdk-php": "^3.238",
+                "ext-json": "*",
+                "maxbanton/cwh": "^2.0.2",
+                "monolog/monolog": "^2.8.0",
+                "php": ">=8.1",
+                "stock2shop/environment": "^0.2",
+                "stock2shop/share": "^0.2",
+                "vlucas/phpdotenv": "^5.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.12",
+                "phpunit/phpunit": "^9",
+                "vimeo/psalm": "^4.29"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Stock2Shop\\Logger\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Stock2Shop\\Tests\\Logger\\": "tests/"
+                }
+            },
+            "authors": [
+                {
+                    "name": "Stock2Shop PTY (Ltd)",
+                    "email": "support@stock2shop.com"
+                }
+            ],
+            "description": "Stock2Shop Logging",
+            "support": {
+                "source": "https://github.com/stock2shop/logger/tree/v0.1.1",
+                "issues": "https://github.com/stock2shop/logger/issues"
+            },
+            "time": "2022-11-08T07:32:49+00:00"
+        },
+        {
             "name": "stock2shop/share",
-            "version": "dev-master",
+            "version": "v0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stock2shop/share.git",
@@ -1163,7 +1262,6 @@
                 "friendsofphp/php-cs-fixer": "^3.12",
                 "phpunit/phpunit": "^9"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -1591,16 +1689,16 @@
     "packages-dev": [
         {
             "name": "composer/pcre",
-            "version": "3.0.0",
+            "version": "3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/pcre.git",
-                "reference": "e300eb6c535192decd27a85bc72a9290f0d6b3bd"
+                "reference": "4482b6409ca6bfc2af043a5711cd21ac3e7a8dfb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/pcre/zipball/e300eb6c535192decd27a85bc72a9290f0d6b3bd",
-                "reference": "e300eb6c535192decd27a85bc72a9290f0d6b3bd",
+                "url": "https://api.github.com/repos/composer/pcre/zipball/4482b6409ca6bfc2af043a5711cd21ac3e7a8dfb",
+                "reference": "4482b6409ca6bfc2af043a5711cd21ac3e7a8dfb",
                 "shasum": ""
             },
             "require": {
@@ -1642,7 +1740,7 @@
             ],
             "support": {
                 "issues": "https://github.com/composer/pcre/issues",
-                "source": "https://github.com/composer/pcre/tree/3.0.0"
+                "source": "https://github.com/composer/pcre/tree/3.0.2"
             },
             "funding": [
                 {
@@ -1658,7 +1756,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-02-25T20:21:48+00:00"
+            "time": "2022-11-03T20:24:16+00:00"
         },
         {
             "name": "composer/semver",
@@ -4919,9 +5017,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "stock2shop/share": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

@@ -19,7 +19,7 @@ class TransformOrders
         foreach ($demoOrders as $do) {
             $co = null;
 
-            if ($template == false) {
+            if (!$template) {
                 // if no template is provided we can just assign the values
                 $co = self::getChannelOrder($do);
             } else {

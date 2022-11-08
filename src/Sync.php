@@ -6,6 +6,7 @@ namespace Stock2Shop\Connector;
 
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
+use Stock2Shop\Logger;
 use Stock2Shop\Share\DTO;
 use Stock2Shop\Share;
 
@@ -25,7 +26,7 @@ class Sync
             $body = TransformProducts::getDemoProducts($channelProducts);
         } catch (Exception) {
             SyncResults::setFailed($channelProducts);
-            Logger::LogProductSyncFailed($channelProducts, 'Invalid Transform', $channel);
+            Logger\ChannelProductsFail::log($channelProducts);
             return;
         }
 
@@ -34,7 +35,11 @@ class Sync
             $dps = $api->postProducts($body);
         } catch (GuzzleException $e) {
             SyncResults::setFailed($channelProducts);
-            Logger::LogProductSyncFailed($channelProducts, $e->getMessage(), $channel);
+            Logger\Exception::log($e, [
+                'channel_id' => $channel->id,
+                'client_id'  => $channel->client_id,
+                'log_to_es'  => true,
+            ]);
             return;
         }
         SyncResults::setSuccess($channelProducts, $dps);
@@ -54,7 +59,7 @@ class Sync
             $body = TransformProducts::getDemoProductIDS($channelProducts);
         } catch (Exception) {
             SyncResults::setFailed($channelProducts);
-            Logger::LogProductSyncFailed($channelProducts, 'Invalid Transform', $channel);
+            Logger\ChannelProductsFail::log($channelProducts);
             return;
         }
 
@@ -63,7 +68,11 @@ class Sync
             $api->deleteProducts($body);
         } catch (GuzzleException $e) {
             SyncResults::setFailed($channelProducts);
-            Logger::LogProductSyncFailed($channelProducts, $e->getMessage(), $channel);
+            Logger\Exception::log($e, [
+                'channel_id' => $channel->id,
+                'client_id'  => $channel->client_id,
+                'log_to_es'  => true,
+            ]);
             return;
         }
         SyncResults::setDeleteSuccess($channelProducts);

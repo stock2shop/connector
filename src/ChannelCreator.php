@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Stock2Shop\Connector;
 
-use Stock2Shop\Connector\Config\Environment;
-use Stock2Shop\Connector\Config\LoaderDotenv;
+use Stock2Shop\Environment\LoaderDotenv;
+use Stock2Shop\Environment\Env;
 use Stock2Shop\Share;
 use Stock2Shop\Share\Channel\ChannelOrdersInterface;
 
@@ -14,7 +14,7 @@ class ChannelCreator extends Share\Channel\ChannelCreator
     public function __construct()
     {
         $loader = new LoaderDotenv(__DIR__ . '/../');
-        Environment::set($loader);
+        Env::set($loader);
     }
 
     public function createChannelProducts(): Share\Channel\ChannelProductsInterface

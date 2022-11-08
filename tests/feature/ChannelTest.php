@@ -6,9 +6,10 @@ namespace Stock2Shop\Tests\Connector\feature;
 
 use GuzzleHttp\Client;
 use Stock2Shop\Connector\ChannelCreator;
-use Stock2Shop\Connector\Config\Environment;
-use Stock2Shop\Connector\Config\LoaderArray;
+use Stock2Shop\Connector\EnvKey;
 use Stock2Shop\Connector\Meta;
+use Stock2Shop\Environment\Env;
+use Stock2Shop\Environment\LoaderArray;
 use Stock2Shop\Share\Channel\ChannelProductsInterface;
 use Stock2Shop\Share\DTO;
 use Stock2Shop\Tests\Connector\Base;
@@ -25,7 +26,7 @@ final class ChannelTest extends Base
      */
     public function testSync()
     {
-        Environment::set(
+        Env::set(
             new LoaderArray([
                 'LOG_CHANNEL'      => 'Share',
                 'LOG_FS_DIR'       => sprintf('%s/../output/', __DIR__),
@@ -99,7 +100,7 @@ final class ChannelTest extends Base
 
     public function testFailedSync()
     {
-        Environment::set(
+        Env::set(
             new LoaderArray([
                 'LOG_CHANNEL'      => 'Share',
                 'LOG_FS_DIR'       => sprintf('%s/../output/', __DIR__),
@@ -136,7 +137,7 @@ final class ChannelTest extends Base
 
     private function assertSyncProductsLogsWritten(int $syncCount)
     {
-        $logs  = file_get_contents(Environment::getLogFSDIR() . Environment::getLogFSFileName());
+        $logs  = file_get_contents(Env::get(EnvKey::LOG_FS_DIR) . Env::get(EnvKey::LOG_FS_FILE_NAME));
         $parts = explode("\n", $logs);
         // extra line at end of logs
         $this->assertCount($syncCount + 1, $parts);
@@ -153,7 +154,7 @@ final class ChannelTest extends Base
 
     private function assertFailedSyncProductsLogsWritten(int $syncCount, DTO\ChannelProducts $channelProducts)
     {
-        $logs  = file_get_contents(Environment::getLogFSDIR() . Environment::getLogFSFileName());
+        $logs  = file_get_contents(Env::get(EnvKey::LOG_FS_DIR) . Env::get(EnvKey::LOG_FS_FILE_NAME));
         $parts = explode("\n", $logs);
         // extra line at end of logs
         $this->assertCount($syncCount + 1, $parts);
@@ -171,9 +172,10 @@ final class ChannelTest extends Base
 
     private function assertCodesExistOnChannel(
         ChannelProductsInterface $con,
-        DTO\Channel $channel,
-        DTO\ChannelProducts $channelProducts
-    ) {
+        DTO\Channel              $channel,
+        DTO\ChannelProducts      $channelProducts
+    )
+    {
         $active = [];
         foreach ($channelProducts->channel_products as $cp) {
             if (!$cp->delete) {
@@ -210,9 +212,10 @@ final class ChannelTest extends Base
      */
     private function assertPagingThroughChannel(
         ChannelProductsInterface $con,
-        DTO\Channel $channel,
-        DTO\ChannelProducts $existingProducts
-    ) {
+        DTO\Channel              $channel,
+        DTO\ChannelProducts      $existingProducts
+    )
+    {
         usort($existingProducts->channel_products, function (DTO\ChannelProduct $a, DTO\ChannelProduct $b) {
             return $a->channel_product_code <=> $b->channel_product_code;
         });
@@ -241,7 +244,7 @@ final class ChannelTest extends Base
         $client->request('DELETE', '/clean');
 
         // clear logs
-        $logsPath = Environment::getLogFSDIR() . Environment::getLogFSFileName();
+        $logsPath = Env::get(EnvKey::LOG_FS_DIR) . Env::get(EnvKey::LOG_FS_FILE_NAME);
         if (file_exists($logsPath)) {
             unlink($logsPath);
         }
