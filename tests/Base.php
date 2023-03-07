@@ -15,8 +15,6 @@ use Stock2Shop\Share;
 class Base extends TestCase
 {
 
-    public string $logPath;
-
     public function setUp(): void
     {
         parent::setUp();
