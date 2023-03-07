@@ -78,6 +78,7 @@
     {
       "id": 62713,
       "channel_id": 1,
+      "client_id": 21,
       "channel_product_code": null,
       "delete": false,
       "success": true,

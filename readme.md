@@ -42,7 +42,7 @@ The API uses the file system to store information, it has no database.
 Run your tests
 
 ```
-vendor/bin/phpunit
+./vendor/bin/phpunit
 ```
 
 Your tests should pass.

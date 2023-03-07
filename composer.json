@@ -22,11 +22,21 @@
     {
       "type": "vcs",
       "url": "https://github.com/stock2shop/share"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/stock2shop/logger"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/stock2shop/environment"
     }
   ],
   "require": {
     "php": ">=8.1",
-    "stock2shop/share": "dev-master",
+    "stock2shop/share": "^0",
+    "stock2shop/logger": "^0",
+    "stock2shop/environment": "^0",
     "vlucas/phpdotenv": "^5.4",
     "monolog/monolog": "^2.8.0",
     "maxbanton/cwh": "^2.0.2",
