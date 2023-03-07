@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Stock2Shop\Connector;
 
 use GuzzleHttp\Exception\GuzzleException;
-use Stock2Shop\Share\DTO;
+use InvalidArgumentException;
 use Stock2Shop\Share;
 
 class ChannelProducts implements Share\Channel\ChannelProductsInterface
@@ -18,13 +18,15 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         $url  = $meta->get(Meta::CHANNEL_META_URL_KEY);
         if (!$url) {
             SyncResults::setFailed($channelProducts->channel_products);
-            Logger::LogProductSyncFailed($channelProducts->channel_products, 'Invalid URL', $channel);
+            Log::syncChannelProductsFailed($channelProducts->channel_products);
             return $channelProducts;
         }
 
         // batch updates and deletes
+        /** @var Share\DTO\ChannelProduct[] $toDelete */
         $toDelete = [];
-        $toTouch  = [];
+        /** @var Share\DTO\ChannelProduct[] $toTouch */
+        $toTouch = [];
         foreach ($channelProducts->channel_products as $product) {
             if ($product->delete) {
                 $toDelete[] = $product;
@@ -35,32 +37,33 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         $api = new DemoAPI\API($url);
         Sync::touchProducts($api, $toTouch, $channel);
         Sync::deleteProducts($api, $toDelete, $channel);
-        Logger::LogProductSync(array_merge($toDelete, $toTouch), $channel);
+        Log::syncChannelProductsSuccess(array_merge($toDelete, $toTouch));
         return $channelProducts;
     }
 
     public function get(
         string $channel_product_code,
         int $limit,
-        DTO\Channel $channel
-    ): DTO\ChannelProducts {
+        Share\DTO\Channel $channel
+    ): Share\DTO\ChannelProducts {
         $meta = new Meta($channel);
         $url  = $meta->get(Meta::CHANNEL_META_URL_KEY);
         if (!$url) {
-            Logger::LogProductGet(
-                DTO\Log::LOG_LEVEL_ERROR,
-                'Invalid URL',
-                $channel
+            Log::channelException(
+                new InvalidArgumentException(sprintf('Missing Meta %s', Meta::CHANNEL_META_URL_KEY)),
+                $channel->id,
+                $channel->client_id
             );
-            return new DTO\ChannelProducts([]);
+            return new Share\DTO\ChannelProducts([]);
         }
 
         // Get product data from the channel specified
         $api = new DemoAPI\API($url);
         try {
             $products = $api->getProducts($channel_product_code, $limit);
-        } catch (GuzzleException) {
-            return new DTO\ChannelProducts([]);
+        } catch (GuzzleException $e) {
+            Log::channelException($e, $channel->id, $channel->client_id);
+            return new Share\DTO\ChannelProducts([]);
         }
 
         // Transform DemoProduct data into ChannelProducts
@@ -68,18 +71,18 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
     }
 
     public function getByCode(
-        DTO\ChannelProducts $channelProducts,
-        DTO\Channel $channel
-    ): DTO\ChannelProducts {
+        Share\DTO\ChannelProducts $channelProducts,
+        Share\DTO\Channel $channel
+    ): Share\DTO\ChannelProducts {
         $meta = new Meta($channel);
         $url  = $meta->get(Meta::CHANNEL_META_URL_KEY);
         if (!$url) {
-            Logger::LogProductGet(
-                DTO\Log::LOG_LEVEL_ERROR,
-                'Invalid URL',
-                $channel
+            Log::channelException(
+                new InvalidArgumentException(sprintf('Missing Meta %s', Meta::CHANNEL_META_URL_KEY)),
+                $channel->id,
+                $channel->client_id
             );
-            return new DTO\ChannelProducts([]);
+            return new Share\DTO\ChannelProducts([]);
         }
 
         // Demo API fetches products by ID
@@ -88,7 +91,8 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
         try {
             $products = $api->getProductsByIDS($ids);
         } catch (GuzzleException $e) {
-            return new DTO\ChannelProducts([]);
+            Log::channelException($e, $channel->id, $channel->client_id);
+            return new Share\DTO\ChannelProducts([]);
         }
 
         // Transform DemoProduct data into ChannelProducts

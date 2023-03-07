@@ -2,13 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Stock2Shop\Tests\Connector\feature;
+namespace Stock2Shop\Tests\Connector\integration;
 
-use GuzzleHttp\Client;
 use Stock2Shop\Connector\ChannelCreator;
-use Stock2Shop\Connector\Config\Environment;
-use Stock2Shop\Connector\Config\LoaderArray;
-use Stock2Shop\Connector\Meta;
 use Stock2Shop\Share\Channel\ChannelProductsInterface;
 use Stock2Shop\Share\DTO;
 use Stock2Shop\Tests\Connector\Base;
@@ -16,24 +12,13 @@ use Stock2Shop\Tests\Connector\Base;
 final class ChannelTest extends Base
 {
     /**
-     * Feature test
+     * Integration test
      * Syncs product data to channel.
      * Uses get and getBy to ensure products exist on channel
      * Then runs same again with update and delete
-     *
-     * @return void
      */
-    public function testSync()
+    public function testSync(): void
     {
-        Environment::set(
-            new LoaderArray([
-                'LOG_CHANNEL'      => 'Share',
-                'LOG_FS_DIR'       => sprintf('%s/../output/', __DIR__),
-                'LOG_FS_FILE_NAME' => 'system.log'
-            ])
-        );
-        self::cleanup();
-
         $creator         = new ChannelCreator();
         $con             = $creator->createChannelProducts();
         $channel         = new DTO\Channel($this->getTestDataChannel());
@@ -99,15 +84,6 @@ final class ChannelTest extends Base
 
     public function testFailedSync()
     {
-        Environment::set(
-            new LoaderArray([
-                'LOG_CHANNEL'      => 'Share',
-                'LOG_FS_DIR'       => sprintf('%s/../output/', __DIR__),
-                'LOG_FS_FILE_NAME' => 'system.log'
-            ])
-        );
-        self::cleanup();
-
         // create channel without correct meta
         $creator         = new ChannelCreator();
         $con             = $creator->createChannelProducts();
@@ -136,16 +112,10 @@ final class ChannelTest extends Base
 
     private function assertSyncProductsLogsWritten(int $syncCount)
     {
-        $logs  = file_get_contents(Environment::getLogFSDIR() . Environment::getLogFSFileName());
-        $parts = explode("\n", $logs);
-        // extra line at end of logs
-        $this->assertCount($syncCount + 1, $parts);
-        $this->assertEquals('', $parts[$syncCount]);
-        foreach ($parts as $part) {
-            if ($part === '') {
-                break;
-            }
-            $obj = json_decode($part, true);
+        $logs = $this->getLogs();
+        $this->assertCount($syncCount, $logs);
+        foreach ($logs as $log) {
+            $obj = json_decode($log, true);
             $this->assertEquals(DTO\Log::LOG_LEVEL_INFO, $obj['level']);
             $this->assertEquals(21, $obj['client_id']);
         }
@@ -153,16 +123,10 @@ final class ChannelTest extends Base
 
     private function assertFailedSyncProductsLogsWritten(int $syncCount, DTO\ChannelProducts $channelProducts)
     {
-        $logs  = file_get_contents(Environment::getLogFSDIR() . Environment::getLogFSFileName());
-        $parts = explode("\n", $logs);
-        // extra line at end of logs
-        $this->assertCount($syncCount + 1, $parts);
-        $this->assertEquals('', $parts[$syncCount]);
-        foreach ($parts as $part) {
-            if ($part === '') {
-                break;
-            }
-            $obj = json_decode($part, true);
+        $logs = $this->getLogs();
+        $this->assertCount($syncCount, $logs);
+        foreach ($logs as $log) {
+            $obj = json_decode($log, true);
             $this->assertEquals(DTO\Log::LOG_LEVEL_ERROR, $obj['level']);
             $this->assertEquals(count($channelProducts->channel_products), $obj['metric']);
             $this->assertEquals(21, $obj['client_id']);
@@ -230,20 +194,4 @@ final class ChannelTest extends Base
         $this->assertCount(0, $result->channel_products);
     }
 
-    private function cleanup()
-    {
-        // Delete products from channel
-        $channel = new DTO\Channel($this->getTestDataChannel());
-        $meta    = new Meta($channel);
-        $client  = new Client([
-            'base_uri' => $meta->get(Meta::CHANNEL_META_URL_KEY)
-        ]);
-        $client->request('DELETE', '/clean');
-
-        // clear logs
-        $logsPath = Environment::getLogFSDIR() . Environment::getLogFSFileName();
-        if (file_exists($logsPath)) {
-            unlink($logsPath);
-        }
-    }
 }
