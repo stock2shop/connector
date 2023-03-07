@@ -22,22 +22,9 @@ class ChannelProducts implements Share\Channel\ChannelProductsInterface
             return $channelProducts;
         }
 
-        // batch updates and deletes
-        /** @var Share\DTO\ChannelProduct[] $toDelete */
-        $toDelete = [];
-        /** @var Share\DTO\ChannelProduct[] $toTouch */
-        $toTouch = [];
-        foreach ($channelProducts->channel_products as $product) {
-            if ($product->delete) {
-                $toDelete[] = $product;
-            } else {
-                $toTouch[] = $product;
-            }
-        }
         $api = new DemoAPI\API($url);
-        Sync::touchProducts($api, $toTouch, $channel);
-        Sync::deleteProducts($api, $toDelete, $channel);
-        Log::syncChannelProductsSuccess(array_merge($toDelete, $toTouch));
+        Sync::touchProducts($api, $channelProducts->channel_products, $channel);
+        Log::syncChannelProductsResults($channelProducts->channel_products);
         return $channelProducts;
     }
 

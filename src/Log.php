@@ -11,6 +11,32 @@ use Throwable;
 class Log
 {
     /**
+     * Log failed and successful
+     * @param ChannelProduct[] $channelProducts
+     */
+    public static function syncChannelProductsResults(array $channelProducts): void
+    {
+        /** @var ChannelProduct[] $failed */
+        $failed = [];
+        /** @var ChannelProduct[] $successful */
+        $successful = [];
+        foreach ($channelProducts as $channelProduct) {
+            if ($channelProduct->success) {
+                $successful[] = $channelProduct;
+            } else {
+                $failed[] = $channelProduct;
+            }
+        }
+        if (!empty($failed)) {
+            Logger\ChannelProductsFail::log($failed);
+        }
+        if (!empty($successful)) {
+            Logger\ChannelProductsSuccess::log($channelProducts);
+        }
+    }
+
+
+    /**
      * @param ChannelProduct[] $channelProducts
      */
     public static function syncChannelProductsFailed(array $channelProducts): void

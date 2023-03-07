@@ -14,47 +14,56 @@ class Sync
     /**
      * @param DTO\ChannelProduct[] $channelProducts
      */
-    public static function touchProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): void
+    public static function touchProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): array
     {
-        if (empty($channelProducts)) {
-            return;
+        SyncResults::setFailed($channelProducts);
+
+        /** @var Share\DTO\ChannelProduct[] $delete */
+        $delete = [];
+        /** @var Share\DTO\ChannelProduct[] $touch */
+        $touch = [];
+        foreach ($channelProducts as $product) {
+            if ($product->delete) {
+                $delete[] = $product;
+            } else {
+                $touch[] = $product;
+            }
+        }
+        if (!empty($delete)) {
+            self::deleteProducts($api, $delete, $channel);
         }
 
-        // transform
-        try {
-            $body = Transform::getDemoProducts($channelProducts);
-        } catch (Exception) {
-            SyncResults::setFailed($channelProducts);
-            Logger::LogProductSyncFailed($channelProducts, 'Invalid Transform', $channel);
-            return;
-        }
+        if (!empty($touch)) {
+            // transform
+            try {
+                $body = Transform::getDemoProducts($touch);
+            } catch (Exception $e) {
+                Log::channelException($e, $channel->id, $channel->client_id);
+                return array_merge($delete, $touch);
+            }
 
-        // Post to Demo API
-        try {
-            $dps = $api->postProducts($body);
-        } catch (GuzzleException $e) {
-            SyncResults::setFailed($channelProducts);
-            Logger::LogProductSyncFailed($channelProducts, $e->getMessage(), $channel);
-            return;
+            // Post to Demo API
+            try {
+                $dps = $api->postProducts($body);
+            } catch (GuzzleException $e) {
+                Log::channelException($e, $channel->id, $channel->client_id);
+                return array_merge($delete, $touch);
+            }
+            SyncResults::setSuccess($channelProducts, $dps);
         }
-        SyncResults::setSuccess($channelProducts, $dps);
+        return array_merge($touch, $delete);
     }
 
     /**
      * @param DTO\ChannelProduct[] $channelProducts
      */
-    public static function deleteProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): void
+    private static function deleteProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): void
     {
-        if (empty($channelProducts)) {
-            return;
-        }
-
         // transform
         try {
             $body = Transform::getDemoProductIDS($channelProducts);
-        } catch (Exception) {
-            SyncResults::setFailed($channelProducts);
-            Logger::LogProductSyncFailed($channelProducts, 'Invalid Transform', $channel);
+        } catch (Exception $e) {
+            Log::channelException($e, $channel->id, $channel->client_id);
             return;
         }
 
@@ -62,8 +71,7 @@ class Sync
         try {
             $api->deleteProducts($body);
         } catch (GuzzleException $e) {
-            SyncResults::setFailed($channelProducts);
-            Logger::LogProductSyncFailed($channelProducts, $e->getMessage(), $channel);
+            Log::channelException($e, $channel->id, $channel->client_id);
             return;
         }
         SyncResults::setDeleteSuccess($channelProducts);

@@ -15,6 +15,6 @@ class ChannelCreator extends Share\Channel\ChannelCreator
 
     public function createChannelOrders(): Share\Channel\ChannelOrdersInterface
     {
-        // TODO: Implement createChannelOrders() method.
+        return new ChannelOrders();
     }
 }
