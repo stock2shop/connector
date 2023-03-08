@@ -86,7 +86,7 @@ final class SyncResultsTest extends Base
         ]
     ];
 
-    public function testSetSuccess()
+    public function testSetSuccess(): void
     {
         $cps = DTO\ChannelProduct::createArray($this->channelProducts);
         $dps = DemoAPI\Product::createArray($this->demoProducts);
