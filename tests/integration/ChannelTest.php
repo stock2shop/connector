@@ -82,7 +82,7 @@ final class ChannelTest extends Base
         $this->assertSyncProductsLogsWritten(3);
     }
 
-    public function testFailedSync()
+    public function testFailedSync(): void
     {
         // create channel without correct meta
         $creator         = new ChannelCreator();
@@ -110,7 +110,7 @@ final class ChannelTest extends Base
         $this->assertFailedSyncProductsLogsWritten(1, $channelProducts);
     }
 
-    private function assertSyncProductsLogsWritten(int $syncCount)
+    private function assertSyncProductsLogsWritten(int $syncCount): void
     {
         $logs = $this->getLogs();
         $this->assertCount($syncCount, $logs);
@@ -121,7 +121,7 @@ final class ChannelTest extends Base
         }
     }
 
-    private function assertFailedSyncProductsLogsWritten(int $syncCount, DTO\ChannelProducts $channelProducts)
+    private function assertFailedSyncProductsLogsWritten(int $syncCount, DTO\ChannelProducts $channelProducts): void
     {
         $logs = $this->getLogs();
         $this->assertCount($syncCount, $logs);
@@ -137,7 +137,7 @@ final class ChannelTest extends Base
         ChannelProductsInterface $con,
         DTO\Channel $channel,
         DTO\ChannelProducts $channelProducts
-    ) {
+    ): void {
         $active = [];
         foreach ($channelProducts->channel_products as $cp) {
             if (!$cp->delete) {
@@ -176,7 +176,8 @@ final class ChannelTest extends Base
         ChannelProductsInterface $con,
         DTO\Channel $channel,
         DTO\ChannelProducts $existingProducts
-    ) {
+    ): void {
+        $this->assertGreaterThan(0, count($existingProducts->channel_products));
         usort($existingProducts->channel_products, function (DTO\ChannelProduct $a, DTO\ChannelProduct $b) {
             return $a->channel_product_code <=> $b->channel_product_code;
         });

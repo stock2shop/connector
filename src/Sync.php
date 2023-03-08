@@ -12,12 +12,17 @@ use Stock2Shop\Share;
 class Sync
 {
     /**
+     * Runs updates to channel.
+     * Mutates $channelProducts with success results
+     *
      * @param DTO\ChannelProduct[] $channelProducts
      */
-    public static function touchProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): array
+    public static function touchProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): void
     {
+        // make sure all success flags are set to false
         SyncResults::setFailed($channelProducts);
 
+        // create reference to items which are for delete and for update
         /** @var Share\DTO\ChannelProduct[] $delete */
         $delete = [];
         /** @var Share\DTO\ChannelProduct[] $touch */
@@ -29,29 +34,28 @@ class Sync
                 $touch[] = $product;
             }
         }
+
+        // run deletes
         if (!empty($delete)) {
             self::deleteProducts($api, $delete, $channel);
         }
 
+        // run updates
         if (!empty($touch)) {
-            // transform
             try {
                 $body = Transform::getDemoProducts($touch);
             } catch (Exception $e) {
                 Log::channelException($e, $channel->id, $channel->client_id);
-                return array_merge($delete, $touch);
+                return;
             }
-
-            // Post to Demo API
             try {
                 $dps = $api->postProducts($body);
             } catch (GuzzleException $e) {
                 Log::channelException($e, $channel->id, $channel->client_id);
-                return array_merge($delete, $touch);
+                return;
             }
-            SyncResults::setSuccess($channelProducts, $dps);
+            SyncResults::setSuccess($touch, $dps);
         }
-        return array_merge($touch, $delete);
     }
 
     /**
