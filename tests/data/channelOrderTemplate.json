@@ -41,5 +41,9 @@
     "type": "{{ shipping_address.type }}",
     "zip": "{{ shipping_address.postcode }}"
   },
-  "shipping_lines": []
+  "shipping_lines": [
+    {
+
+    }
+  ]
 }

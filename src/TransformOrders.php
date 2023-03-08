@@ -29,7 +29,7 @@ class TransformOrders
 
             // set line items
             foreach ($do->line_items as $doli) {
-                $co->line_items[] = new DTO\ChannelOrderLineItem([
+                $co->line_items[] = new DTO\ChannelOrderItem([
                     'channel_variant_code' => $doli->id,
                     'barcode'              => null,
                     'grams'                => $do->weight,
@@ -49,6 +49,7 @@ class TransformOrders
             }
             $channelOrders[] = $co;
         }
+        $sv= json_encode($channelOrders);
 
         return $channelOrders;
     }

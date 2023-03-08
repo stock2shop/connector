@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Stock2Shop\Connector;
 
 use Stock2Shop\Share;
-use Stock2Shop\Share\Channel\ChannelOrdersInterface;
 
 class ChannelCreator extends Share\Channel\ChannelCreator
 {
@@ -14,7 +13,7 @@ class ChannelCreator extends Share\Channel\ChannelCreator
         return new ChannelProducts();
     }
 
-    public function createChannelOrders(): ChannelOrdersInterface
+    public function createChannelOrders(): Share\Channel\ChannelOrdersInterface
     {
         return new ChannelOrders();
     }

@@ -1,0 +1,90 @@
+{
+  "channel_id": null,
+  "channel_order_code": "111111111",
+  "notes": "",
+  "total_discount": null,
+  "state": null,
+  "billing_address": {
+    "address1": "11 Street Name Suburb",
+    "address2": "",
+    "city": "Cape Town",
+    "company": "",
+    "country": "ZA",
+    "country_code": "ZA",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "1111111111",
+    "province": "Western Cape",
+    "province_code": "region_id_1",
+    "type": "",
+    "zip": "1111"
+  },
+  "customer": {
+    "accepts_marketing": false,
+    "email": "johndoe@test.co.za",
+    "first_name": "John",
+    "last_name": "Doe",
+    "channel_customer_code": null
+  },
+  "instruction": "",
+  "line_items": [
+    {
+      "barcode": null,
+      "grams": 1,
+      "price": 200,
+      "qty": 1,
+      "sku": "111111111",
+      "title": "111_111111",
+      "total_discount": 0,
+      "tax_lines": [
+        {
+          "code": null,
+          "price": 230,
+          "title": "111_111111",
+          "rate": 15
+        }
+      ]
+    },
+    {
+      "barcode": null,
+      "grams": 1,
+      "price": 270,
+      "qty": 2,
+      "sku": "222222222",
+      "title": "222_222222",
+      "total_discount": 30,
+      "tax_lines": [
+        {
+          "code": null,
+          "price": 345,
+          "title": "222_222222",
+          "rate": 15
+        }
+      ]
+    }
+  ],
+  "meta": [],
+  "params": [],
+  "shipping_address": {
+    "address1": "11 Street Name Suburb",
+    "address2": "",
+    "city": "Cape Town",
+    "company": "",
+    "country": "ZA",
+    "country_code": "ZA",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "1111111111",
+    "province": "Western Cape",
+    "province_code": "111",
+    "type": "",
+    "zip": "1111"
+  },
+  "shipping_lines": [
+    {
+      "price": null,
+      "title": null,
+      "tax_lines": []
+    }
+  ]
+}
