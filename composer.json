@@ -37,11 +37,8 @@
     "stock2shop/share": "^0",
     "stock2shop/logger": "^0",
     "stock2shop/environment": "^0",
-    "vlucas/phpdotenv": "^5.4",
-    "monolog/monolog": "^2.8.0",
-    "maxbanton/cwh": "^2.0.2",
-    "aws/aws-sdk-php": "^3.238",
-    "guzzlehttp/guzzle": "^7.0"
+    "guzzlehttp/guzzle": "^7.0",
+    "mustache/mustache": "~2.5"
   },
   "require-dev": {
     "phpunit/phpunit": "^9",

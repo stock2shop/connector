@@ -1,0 +1,49 @@
+{
+  "channel_order_code": "{{ increment_id }}",
+  "notes": "{{ notes }}",
+  "total_discount": "{{ total_discount }}",
+  "billing_address": {
+    "address1": "{{ billing_address.street }}",
+    "address2": "{{ billing_address.address2 }}",
+    "city": "{{ billing_address.city }}",
+    "company": "{{ billing_address.company }}",
+    "country": "{{ billing_address.country_id }}",
+    "country_code": "{{ billing_address.country_id }}",
+    "first_name": "{{ billing_address.firstname }}",
+    "last_name": "{{ billing_address.lastname }}",
+    "phone": "{{ billing_address.telephone }}",
+    "province": "{{ billing_address.region }}",
+    "province_code": "{{ billing_address.region_id }}",
+    "type": "{{ billing_address.type }}",
+    "zip": "{{ billing_address.postcode }}"
+  },
+  "customer": {
+    "accepts_marketing": "{{ customer.accepts_marketing }}",
+    "email": "{{ customer.email }}",
+    "first_name": "{{ customer.firstname }}",
+    "last_name": "{{ customer.lastname }}"
+  },
+  "instruction": "{{ instruction }}",
+  "line_items": [],
+  "meta": [],
+  "shipping_address": {
+    "address1": "{{ shipping_address.street }}",
+    "address2": "{{ shipping_address.address2 }}",
+    "city": "{{ shipping_address.city }}",
+    "company": "{{ shipping_address.company }}",
+    "country": "{{ shipping_address.country_id }}",
+    "country_code": "{{ shipping_address.country_id }}",
+    "first_name": "{{ shipping_address.firstname }}",
+    "last_name": "{{ shipping_address.lastname }}",
+    "phone": "{{ shipping_address.telephone }}",
+    "province": "{{ shipping_address.region }}",
+    "province_code": "{{ shipping_address.region_id }}",
+    "type": "{{ shipping_address.type }}",
+    "zip": "{{ shipping_address.postcode }}"
+  },
+  "shipping_lines": [
+    {
+
+    }
+  ]
+}

@@ -6,68 +6,60 @@ namespace Stock2Shop\Connector;
 
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
+use Stock2Shop\Logger;
 use Stock2Shop\Share\DTO;
 use Stock2Shop\Share;
 
 class Sync
 {
     /**
-     * Runs updates to channel.
-     * Mutates $channelProducts with success results
-     *
      * @param DTO\ChannelProduct[] $channelProducts
      */
     public static function touchProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): void
     {
-        // make sure all success flags are set to false
-        SyncResults::setFailed($channelProducts);
-
-        // create reference to items which are for delete and for update
-        /** @var Share\DTO\ChannelProduct[] $delete */
-        $delete = [];
-        /** @var Share\DTO\ChannelProduct[] $touch */
-        $touch = [];
-        foreach ($channelProducts as $product) {
-            if ($product->delete) {
-                $delete[] = $product;
-            } else {
-                $touch[] = $product;
-            }
+        if (empty($channelProducts)) {
+            return;
         }
 
-        // run deletes
-        if (!empty($delete)) {
-            self::deleteProducts($api, $delete, $channel);
+        // transform
+        try {
+            $body = TransformProducts::getDemoProducts($channelProducts);
+        } catch (Exception) {
+            SyncResults::setFailed($channelProducts);
+            Logger\ChannelProductsFail::log($channelProducts);
+            return;
         }
 
-        // run updates
-        if (!empty($touch)) {
-            try {
-                $body = Transform::getDemoProducts($touch);
-            } catch (Exception $e) {
-                Log::channelException($e, $channel->id, $channel->client_id);
-                return;
-            }
-            try {
-                $dps = $api->postProducts($body);
-            } catch (GuzzleException $e) {
-                Log::channelException($e, $channel->id, $channel->client_id);
-                return;
-            }
-            SyncResults::setSuccess($touch, $dps);
+        // Post to Demo API
+        try {
+            $dps = $api->postProducts($body);
+        } catch (GuzzleException $e) {
+            SyncResults::setFailed($channelProducts);
+            Logger\Exception::log($e, [
+                'channel_id' => $channel->id,
+                'client_id'  => $channel->client_id,
+                'log_to_es'  => true,
+            ]);
+            return;
         }
+        SyncResults::setSuccess($channelProducts, $dps);
     }
 
     /**
      * @param DTO\ChannelProduct[] $channelProducts
      */
-    private static function deleteProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): void
+    public static function deleteProducts(DemoAPI\API $api, array $channelProducts, DTO\Channel $channel): void
     {
+        if (empty($channelProducts)) {
+            return;
+        }
+
         // transform
         try {
-            $body = Transform::getDemoProductIDS($channelProducts);
-        } catch (Exception $e) {
-            Log::channelException($e, $channel->id, $channel->client_id);
+            $body = TransformProducts::getDemoProductIDS($channelProducts);
+        } catch (Exception) {
+            SyncResults::setFailed($channelProducts);
+            Logger\ChannelProductsFail::log($channelProducts);
             return;
         }
 
@@ -75,7 +67,12 @@ class Sync
         try {
             $api->deleteProducts($body);
         } catch (GuzzleException $e) {
-            Log::channelException($e, $channel->id, $channel->client_id);
+            SyncResults::setFailed($channelProducts);
+            Logger\Exception::log($e, [
+                'channel_id' => $channel->id,
+                'client_id'  => $channel->client_id,
+                'log_to_es'  => true,
+            ]);
             return;
         }
         SyncResults::setDeleteSuccess($channelProducts);

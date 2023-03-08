@@ -1,0 +1,105 @@
+{
+  "billing_address": {
+    "entity_id": "entity_id_1",
+    "parent_id": "parent_id_1",
+    "quote_address_id": "quote_address_id_1",
+    "region_id": "region_id_1",
+    "region": "Western Cape",
+    "postcode": "1111",
+    "lastname": "Doe",
+    "street": "11 Street Name Suburb",
+    "city": "Cape Town",
+    "email": "johndoe@test.co.za",
+    "telephone": "1111111111",
+    "country_id": "ZA",
+    "firstname": "John",
+    "address_type": "billing"
+  },
+  "customer": {
+    "entity_id": "1111",
+    "website_id": "1",
+    "email": "johndoe@test.co.za",
+    "group_id": "1",
+    "store_id": "1",
+    "created_at": "2022-06-01 10:36:22",
+    "updated_at": "2022-06-06 10:15:07",
+    "is_active": "1",
+    "disable_auto_group_change": "0",
+    "created_in": "Default Store View",
+    "firstname": "John",
+    "lastname": "Doe",
+    "rp_token": "PzNEXCYyId90d8D4XjZDWNmpCnJ5M1dl",
+    "rp_token_created_at": "2022-06-01 10:36:23",
+    "default_billing": "11",
+    "default_shipping": "11",
+    "taxvat": "111111111",
+    "failures_num": "1",
+    "first_failure": "2022-06-06 10:14:17"
+  },
+  "line_items": [
+    {
+      "id": "1",
+      "image": "https://somehost/image.jpg",
+      "name": "111_111111",
+      "price": 200,
+      "total_discount": 0,
+      "total_tax": 30,
+      "price_with_tax": 230,
+      "qty": 1,
+      "sku": "111111111",
+      "tax_rate": 15,
+      "url": "https://localhost:8080/mens-briefs-111111"
+    },
+    {
+      "id": "277",
+      "image": "https://localhost:8080/image1.jpg",
+      "name": "222_222222",
+      "price": 300,
+      "total_discount": 30,
+      "total_tax": 45,
+      "price_with_tax": 315,
+      "qty": 2,
+      "sku": "222222222",
+      "tax_rate": 15,
+      "url": "https://localhost:8080/mens-briefs-222222"
+    }
+  ],
+  "payment": {
+    "entity_id": "1111",
+    "parent_id": "1111",
+    "shipping_captured": 50,
+    "base_amount_paid": 595,
+    "method": "payumea_creditcard",
+    "additional_information": {
+      "method_title": "Credit Card (payu) ",
+      "payUReference": "00000000000000"
+    }
+  },
+  "shipping_address": {
+    "entity_id": "1111",
+    "parent_id": "1111",
+    "quote_address_id": "1111",
+    "region_id": "111",
+    "region": "Western Cape",
+    "postcode": "1111",
+    "lastname": "Doe",
+    "street": "11 Street Name Suburb",
+    "city": "Cape Town",
+    "email": "johndoe@test.co.za",
+    "telephone": "1111111111",
+    "country_id": "ZA",
+    "firstname": "John",
+    "address_type": "shipping"
+  },
+  "entity_id": "1111",
+  "state": "processing",
+  "protect_code": "11111111111111111111111111111111",
+  "shipping_description": "Parcel Ninja - Courier",
+  "base_shipping_amount": "50",
+  "discount_amount": 0,
+  "base_total_paid": 565,
+  "tax_amount": "75",
+  "weight": "1.0000",
+  "increment_id": "111111111"
+}
+

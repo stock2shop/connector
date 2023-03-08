@@ -65,9 +65,45 @@ class Base extends TestCase
         return $this->loadJSON('channelProducts.json');
     }
 
+    protected function getTestDataOrderWebhook1(): array
+    {
+        return $this->loadJSON('orderWebhook1.json');
+    }
+
+    protected function getTestDataOrderWebhook2(): array
+    {
+        return $this->loadJSON('orderWebhook2.json');
+    }
+
+    protected function getTestDataOrderDTO1(): array
+    {
+        return $this->loadJSON('orderDTO1.json');
+    }
+
+    protected function getTestDataOrderDTO1WithTemplate(): array
+    {
+        return $this->loadJSON('orderDTO1_template.json');
+    }
+
+    protected function getTestDataOrderDTO2(): array
+    {
+        return $this->loadJSON('orderDTO2.json');
+    }
+
+    protected function getTestChannelOrderTemplate(): string
+    {
+        return $this->loadJString('channelOrderTemplate.json');
+    }
+
     private function loadJSON(string $filename): array
     {
         $path = __DIR__ . '/data/' . $filename;
         return json_decode(file_get_contents($path), true);
+    }
+
+    private function loadJString(string $filename): string
+    {
+        $path = __DIR__ . '/data/' . $filename;
+        return file_get_contents($path);
     }
 }

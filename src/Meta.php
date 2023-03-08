@@ -10,8 +10,12 @@ use Stock2Shop\Share;
 class Meta
 {
     public const CHANNEL_META_URL_KEY = 'api_url';
+    public const CHANNEL_ORDER_TEMPLATE = 'template';
+    public const ADD_ORDER_STATUS = 'add_order_status';
     public const ALLOWED_CHANNEL_META = [
-        self::CHANNEL_META_URL_KEY
+        self::CHANNEL_META_URL_KEY,
+        self::CHANNEL_ORDER_TEMPLATE,
+        self::ADD_ORDER_STATUS
     ];
 
     public array $map = [];

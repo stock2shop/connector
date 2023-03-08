@@ -8,6 +8,10 @@
     {
       "key": "api_url",
       "value": "http://localhost:8080"
+    },
+    {
+      "key": "add_order_status",
+      "value": "processing"
     }
   ],
   "modified": "2022-02-11 06:56:05",
